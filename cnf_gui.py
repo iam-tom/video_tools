@@ -82,6 +82,7 @@ class MainWindow(wx.Frame):
 	self.s_path = iwx.iStaticText(self.panel12,-1,"Path:",(7,50))
 	self.s_name = iwx.iStaticText(self.panel12,-1,"Name:",(7,110))
 	self.s_desc = iwx.iStaticText(self.panel12,-1,"Description:",(7,170))
+        self.s_config = iwx.iStaticText(self.panel12,-1,"Video Configuration:",(7,230))
 
 
         self.console.out( "Path is not defined. Use the path menu entry")
@@ -109,6 +110,7 @@ class MainWindow(wx.Frame):
         b_browse=wx.Button(self.panel12,wx.ID_ANY,"Browse",(7,70),(70,30),wx.BU_EXACTFIT)
         b_name=wx.Button(self.panel12,wx.ID_ANY,"Edit",(7,130),(70,30),wx.BU_EXACTFIT)
         b_desc=wx.Button(self.panel12,wx.ID_ANY,"Edit",(7,190),(70,30),wx.BU_EXACTFIT)
+        b_config=wx.Button(self.panel12,wx.ID_ANY,"Edit",(7,250),(70,30),wx.BU_EXACTFIT)
 
 #events
         # Set events.
@@ -121,6 +123,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnOpen,b_browse)
         self.Bind(wx.EVT_BUTTON, self.OnEditName,b_name)
         self.Bind(wx.EVT_BUTTON, self.OnEditDesc,b_desc)
+        self.Bind(wx.EVT_BUTTON, self.OnConfigList,b_config)
 
         self.Show(True)
 
@@ -169,7 +172,7 @@ class MainWindow(wx.Frame):
             tempname=self.path+"/"+self.name
 
             self.console.out( "Processing..." )
-            self.CreateConfigList()           
+
             manager= wdm_module.wdm(tempname,self.config_list)
             manager.CreateWD()
             self.console.out( "...done" )
@@ -201,13 +204,18 @@ class MainWindow(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.desc = dlg.GetValue()
 	    self.s_desc.AddString("set")
-            self.console.out("Descrition added","good")
+            self.console.out("Descrition added","good")	
         dlg.Destroy()
-
-            
-    def CreateConfigList(self):
         
-        self.config_list =[self.name , "08/08/08","iam.tom","2","24","1280x720"]
+            
+    
+    def OnConfigList(self,e):
+        import v_cfg_gui
+        config_dlg=v_cfg_gui.GUI(self,"VCF")
+        self.config_list = config_dlg.GetConfigWhenOK()
+        self.console.out("Configuration File available","good")
+        
+        
 
         
 

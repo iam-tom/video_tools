@@ -6,7 +6,7 @@ import iwx
 
 
 
-#Configure GUI - to set up working directory (wd) creation
+#Configure GUI - to control avconv
 #__________________________________________________________
 #Member Variables:
 #	name............... project name
@@ -16,7 +16,7 @@ import iwx
 #	OnOpen()...........
 
 
-class GUI(wx.Frame):
+class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(300,500))
 
@@ -55,11 +55,9 @@ class GUI(wx.Frame):
 	b_fps_c=wx.Button(self,wx.ID_ANY,"Clear",(67,310),(50,25),wx.BU_EXACTFIT)
 	b_res_c=wx.Button(self,wx.ID_ANY,"Clear",(67,370),(50,25),wx.BU_EXACTFIT)
 
-	b_reset=wx.Button(self,wx.ID_ANY,"Reset",(147,420),(50,25),wx.BU_EXACTFIT)
+	b_reset=wx.Button(self,wx.ID_ANY,"Reset",(7,410),(50,25),wx.BU_EXACTFIT)
 
-	b_accept=wx.Button(self,wx.ID_ANY,"Accept",(217,420),(50,25),wx.BU_EXACTFIT)
-
-
+	b_accept=wx.Button(self,wx.ID_ANY,"Accept",(67,410),(50,25),wx.BU_EXACTFIT)
 
 #static text
         s_dummy1 = wx.StaticText(self,-1,"Video Configuration:",(7,20))
@@ -92,7 +90,6 @@ class GUI(wx.Frame):
 
 	b_reset.Bind(wx.EVT_BUTTON,  self.OnReset )
 	b_accept.Bind(wx.EVT_BUTTON,  self.OnAccept )
-
 
 
 	#self.Bind(wx.EVT_BUTTON, self.OnProcess,b_process)
@@ -151,29 +148,13 @@ class GUI(wx.Frame):
         self.config_list.insert(3,self.s_scenes.getValue())
         self.config_list.insert(4,self.s_fps.getValue())
         self.config_list.insert(5,self.s_res.getValue())
-	self.eventLoop.Exit()
-       
-        
-#ShowModal() 
-    def GetConfigWhenOK(self):
-        self.MakeModal()
-        self.Show()
-        self.eventLoop = wx.EventLoop()
-        self.eventLoop.Run()
-        self.Close()
-        self.MakeModal(False)
-        return self.config_list
-
-
-
-
-
+	print self.config_list
 
         
 
         
 
 
-#app = wx.App(False)
-#frame = v_cfg_gui(None, "Video Configuration GUI")
-#app.MainLoop()
+app = wx.App(False)
+frame = MainWindow(None, "Video Configuration GUI")
+app.MainLoop()

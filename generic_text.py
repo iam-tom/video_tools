@@ -17,7 +17,7 @@ def readme(path,config_list):
     fid.write("fps........................... %s\n" % config_list[4])
     fid.write("Resolution.................... %s\n\n" % config_list[5])
 
-    fid.write("Layout_____________________________________\n\n")
+    fid.write("Project tree_____________________________________\n\n")
 
     fid.write("raw........................... Raw files directly from camera\n")
     fid.write("conv.......................... converted files\n")
