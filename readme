@@ -1,0 +1,29 @@
+
+fid.write("–––––––––––WORKING DIRECTORY––––––––––––––\n\n")
+
+fid.write("This working directory was automatically\n")
+fid.write("created by WorkingDirectoryManager v1.0.\n\n")
+
+
+
+fid.write("Project Overview–––––––––––––––––––––––––\n\n")
+
+fid.write("Project Name..................\n")
+fid.write("Creation Date.................\n")
+fid.write("Author........................\n")
+fid.write("# of scenes...................\n")
+fid.write("fps...........................\n")
+fid.write("Resolution....................\n")
+
+
+
+
+
+fid.write("Layout–––––––––––––––––––––––––––––––––––––\n\n")
+
+fid.write("raw........................... Raw files directly from camera\n")
+fid.write("conv.......................... converted files\n")
+fid.write("seq........................... rendered image sequences\n")
+fid.write("render........................ rendered videos\n")
+
+
