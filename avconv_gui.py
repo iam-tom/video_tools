@@ -22,6 +22,9 @@ class MainWindow(wx.Frame):
 
 
 # default settings
+        self.fps_preset=["24","25","50"]
+        self.format_preset=[".png",".jpg",".tiff"]
+        self.zeros_preset =["0" , "1" , "2", "3", "4" ,"5" ,"6" ,"7" ,"8"]
 
 
 #status bar
@@ -41,54 +44,43 @@ class MainWindow(wx.Frame):
         self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
 
 #buttons
-        b_name=wx.Button(self,wx.ID_ANY,"Edit",(7,70),(50,25),wx.BU_EXACTFIT)
-        b_date=wx.Button(self,wx.ID_ANY,"Edit",(7,130),(50,25),wx.BU_EXACTFIT)
-        b_author=wx.Button(self,wx.ID_ANY,"Edit",(7,190),(50,25),wx.BU_EXACTFIT)
-	b_scenes=wx.Button(self,wx.ID_ANY,"Edit",(7,250),(50,25),wx.BU_EXACTFIT)
-	b_fps=wx.Button(self,wx.ID_ANY,"Edit",(7,310),(50,25),wx.BU_EXACTFIT)
-	b_res=wx.Button(self,wx.ID_ANY,"Edit",(7,370),(50,25),wx.BU_EXACTFIT)
+#---input
+        b_i_file=wx.Button(self,wx.ID_ANY,"Browse",(7,70),(70,25),wx.BU_EXACTFIT)
+	self.b_i_format=wx.Choice(self,wx.ID_ANY,(7,130),(70,30),self.format_preset)
+	self.b_zeros=wx.Choice(self,wx.ID_ANY,(7,190),(50,30),self.zeros_preset)
 
-        b_name_c=wx.Button(self,wx.ID_ANY,"Clear",(67,70),(50,25),wx.BU_EXACTFIT)
-        b_date_c=wx.Button(self,wx.ID_ANY,"Clear",(67,130),(50,25),wx.BU_EXACTFIT)
-        b_author_c=wx.Button(self,wx.ID_ANY,"Clear",(67,190),(50,25),wx.BU_EXACTFIT)
-	b_scenes_c=wx.Button(self,wx.ID_ANY,"Clear",(67,250),(50,25),wx.BU_EXACTFIT)
-	b_fps_c=wx.Button(self,wx.ID_ANY,"Clear",(67,310),(50,25),wx.BU_EXACTFIT)
-	b_res_c=wx.Button(self,wx.ID_ANY,"Clear",(67,370),(50,25),wx.BU_EXACTFIT)
+#--output
+        b_o_dir=wx.Button(self,wx.ID_ANY,"Browse",(7,250),(70,25),wx.BU_EXACTFIT)
+        b_o_file=wx.Button(self,wx.ID_ANY,"Edit",(7,310),(50,25),wx.BU_EXACTFIT)
+	self.b_fps=wx.Choice(self,wx.ID_ANY,(7,370),(50,30),self.fps_preset)
 
-	b_reset=wx.Button(self,wx.ID_ANY,"Reset",(7,410),(50,25),wx.BU_EXACTFIT)
-
-	b_accept=wx.Button(self,wx.ID_ANY,"Accept",(67,410),(50,25),wx.BU_EXACTFIT)
+	b_accept=wx.Button(self,wx.ID_ANY,"Accept",(67,410),(70,25),wx.BU_EXACTFIT)
 
 #static text
         s_dummy1 = wx.StaticText(self,-1,"Video Configuration:",(7,20))
 
-	self.s_name = iwx.iStaticText(self,-1,"Name:",(7,50))
-	self.s_date = iwx.iStaticText(self,-1,"Creation Date:",(7,110))
-	self.s_author = iwx.iStaticText(self,-1,"Author:",(7,170))
-	self.s_scenes = iwx.iStaticText(self,-1,"# of scenes:",(7,230))
-	self.s_fps = iwx.iStaticText(self,-1,"fps:",(7,290))
-	self.s_res = iwx.iStaticText(self,-1,"Resolution:",(7,350))
+	self.s_i_file = iwx.iStaticText(self,-1,"Input Files:",(7,50))
+	self.s_o_dir = iwx.iStaticText(self,-1,"Output Directory:",(7,230))
+	self.s_o_file = iwx.iStaticText(self,-1,"Output Filename:",(7,290))
+	self.s_zeros = iwx.iStaticText(self,-1,"Leading Zeros:",(7,170))
+	self.s_format = iwx.iStaticText(self,-1,"Input File Format:",(7,110))	
+	self.s_fps = iwx.iStaticText(self,-1,"Frame Rate [fps]:",(7,350))
+	
 #events
         # Set events.
         self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 
-        b_name.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_name: self.OnEdit(evt, string) )
-        b_author.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_author: self.OnEdit(evt, string) )
-	b_date.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_date: self.OnEdit(evt, string) )
-	b_scenes.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_scenes: self.OnEdit(evt, string) )
-	b_fps.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_fps: self.OnEdit(evt, string) )
-	b_res.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_res: self.OnEdit(evt, string) )
-
-	b_name_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_name: self.OnClear(evt, string) )
-	b_author_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_author: self.OnClear(evt, string) )
-	b_date_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_date: self.OnClear(evt, string) )
-	b_scenes_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_scenes: self.OnClear(evt, string) )
-	b_fps_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_fps: self.OnClear(evt, string) )
-	b_res_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_res: self.OnClear(evt, string) )
+	b_o_dir.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_o_dir: self.OnBrowseDir(evt, string) )
+	b_o_file.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_o_file: self.OnEdit(evt, string) )
+	b_i_file.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_i_file: self.OnBrowseFile(evt, string) )
 
 
-	b_reset.Bind(wx.EVT_BUTTON,  self.OnReset )
+	
+
+
+
+
 	b_accept.Bind(wx.EVT_BUTTON,  self.OnAccept )
 
 
@@ -96,6 +88,25 @@ class MainWindow(wx.Frame):
 
 
         self.Show(True)
+
+#OnBrowseDir()
+    def OnBrowseDir(self,e,string):
+        dir_dlg = wx.DirDialog(self, "\Choose a directory:", style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
+
+        if dir_dlg.ShowModal() == wx.ID_OK:
+           self.o_dir  = dir_dlg.GetPath()           
+	   string.AddString("%s" % self.o_dir)
+        dir_dlg.Destroy()
+#OnBrowseDir()
+    def OnBrowseFile(self,e,string):
+        dir_dlg = wx.FileDialog(self, "\Choose a directory:", style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
+
+        if dir_dlg.ShowModal() == wx.ID_OK:
+           self.o_dir  = dir_dlg.GetPath()           
+	   string.AddString("%s" % self.o_dir)
+        dir_dlg.Destroy()
+
+
 
 
 # OnAbout()
@@ -116,8 +127,8 @@ class MainWindow(wx.Frame):
 
 #OnEdit()
     def OnEdit(self,e,string):
-        dlg = wx.TextEntryDialog(self, 'Enter Project Name','Name')
-        #dlg.SetValue("%s" % self.name)
+        dlg = wx.TextEntryDialog(self, 'Edit Value','Name')
+        dlg.SetValue("%s" % string.GetValue())
         if dlg.ShowModal() == wx.ID_OK:
             value = dlg.GetValue()
             string.Clear()
@@ -132,23 +143,40 @@ class MainWindow(wx.Frame):
 
 #OnReset()
     def OnReset(self,e):
-        self.s_name.Clear()
-        self.s_author.Clear()
-        self.s_date.Clear()
-        self.s_fps.Clear()
-        self.s_scenes.Clear()
-        self.s_res.Clear()
+        self.s_i_file.Clear()
+	self.s_o_dir.Clear() 
+	self.s_o_file.Clear()
+	self.s_fps.Clear()
+	
 
 #OnAccept()
     def OnAccept(self,e):
-	self.config_list = list()
-	self.config_list.insert(0,self.s_name.getValue())
-        self.config_list.insert(1,self.s_date.getValue())
-        self.config_list.insert(2,self.s_author.getValue())
-        self.config_list.insert(3,self.s_scenes.getValue())
-        self.config_list.insert(4,self.s_fps.getValue())
-        self.config_list.insert(5,self.s_res.getValue())
-	print self.config_list
+        fps = self.fps_preset[self.b_fps.GetCurrentSelection()]
+        i_format = self.format_preset[self.b_i_format.GetSelection()]
+        zeros = self.zeros_preset[self.b_zeros.GetCurrentSelection()]
+        i_file=self.s_i_file.GetValue()
+        o_dir=self.s_o_dir.GetValue()
+        o_file=self.s_o_file.GetValue()
+
+        if i_format != "tiff":
+            num_zeros = int(zeros)
+            offset = len(i_file) -4 - num_zeros
+            i_fileXXX = i_file[:offset]+"%"+zeros+"d"+i_format 
+        else:           
+            num_zeros = int(zeros)
+            offset = len(i_file) -5 - num_zeros
+            i_fileXXX = i_file[:offset]+"%"+zeros+"d"+i_format
+
+        if os.name=="posix":
+             process_string = "avconv " + " -r "+fps +" -i " + i_fileXXX +" "+ o_dir +"/"+ o_file
+             os.system(process_string)
+        if os.name=="nt":
+             process_string = "avconv " + " -r "+fps +" -i " + i_fileXXX +" "+ o_dir +"\\"+ o_file
+             os.system("cd C:\MEDIA\videography\ffmpeg\bin")
+	     os.system(process_string)
+        
+	
+	
 
         
 

@@ -14,7 +14,7 @@ class iStaticText(wx.StaticText):
 	new_string= self.string+ " "+ new_string
         self.SetLabel(new_string)
 
-    def getValue(self):
+    def GetValue(self):
         is_set =1
         try:
             self.value

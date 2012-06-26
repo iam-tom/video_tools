@@ -55,9 +55,9 @@ class GUI(wx.Frame):
 	b_fps_c=wx.Button(self,wx.ID_ANY,"Clear",(67,310),(50,25),wx.BU_EXACTFIT)
 	b_res_c=wx.Button(self,wx.ID_ANY,"Clear",(67,370),(50,25),wx.BU_EXACTFIT)
 
-	b_reset=wx.Button(self,wx.ID_ANY,"Reset",(117,410),(50,25),wx.BU_EXACTFIT)
+	b_reset=wx.Button(self,wx.ID_ANY,"Reset",(147,420),(50,25),wx.BU_EXACTFIT)
 
-	b_accept=wx.Button(self,wx.ID_ANY,"Accept",(177,410),(50,25),wx.BU_EXACTFIT)
+	b_accept=wx.Button(self,wx.ID_ANY,"Accept",(217,420),(50,25),wx.BU_EXACTFIT)
 
 
 
