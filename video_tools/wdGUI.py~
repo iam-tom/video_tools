@@ -171,8 +171,8 @@ class GUI(wx.Frame):
             self.project_name = self.name
             self.console.out( "Processing..." )
             self.CreateProjectConfig()           
-            manager=wdManager.Project_Creator(self.project_config)
-            manager.CreateNewProject()
+            #manager=wdManager.Project_Creator(self.project_config)
+            #manager.CreateNewProject()
             self.console.out( "...done" )
             #self.Destroy()
 

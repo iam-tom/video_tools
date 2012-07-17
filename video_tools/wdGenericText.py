@@ -10,12 +10,12 @@ def readme(path,config_list):
 
     fid.write("Project Overview_________________________\n\n")
 
-    fid.write("Project Name.................. %s\n" % config_list[0])
-    fid.write("Creation Date................. %s\n" % config_list[1])
-    fid.write("Author........................ %s\n" % config_list[2])
-    fid.write("# of scenes................... %s\n" % config_list[3])
-    fid.write("fps........................... %s\n" % config_list[4])
-    fid.write("Resolution.................... %s\n\n" % config_list[5])
+    fid.write("Project Name.................. %s\n" % config_list.name)
+    fid.write("Creation Date................. %s\n" % config_list.date)
+    fid.write("Author........................ %s\n" % config_list.author)
+    fid.write("# of scenes................... %s\n" % config_list.scenes)
+    fid.write("fps........................... %s\n" % config_list.fps)
+    fid.write("Resolution.................... %s\n\n" % config_list.res)
 
     fid.write("Layout_____________________________________\n\n")
 
@@ -45,3 +45,19 @@ def readme(path,config_list):
     fid.write("post/render/video ................... rendered videos\n")
     fid.write("post/render/audio ................... rendered audio files\n")
     fid.close()
+
+def wdfile(path,config_list):
+    
+    fid=open(path,"w")
+    fid.write("\n")
+
+
+    fid.write("$name %s\n" % config_list.name)
+    fid.write("$date %s\n" % config_list.date)
+    fid.write("$scenes %s\n" % config_list.scenes)
+    fid.write("$author %s\n" % config_list.author)
+    fid.write("$fps %s\n" % config_list.fps)
+    fid.write("$res %s\n" % config_list.res)
+ 
+    fid.close()
+

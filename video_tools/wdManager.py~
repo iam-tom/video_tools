@@ -86,7 +86,6 @@ class wd_cfg:
 class vid_cfg:
     def __init__(self):
         self.basepath=""
-        self.date   = ""
         self.name   =""
         self.author = ""
         self.scenes = ""
