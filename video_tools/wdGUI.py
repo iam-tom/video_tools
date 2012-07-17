@@ -1,6 +1,7 @@
 import os
 import wx
-import wdm_module
+import wdManager 
+
 
 import iwx
 
@@ -40,7 +41,7 @@ import iwx
 #	OnProcess()........ Interface to wdm_module
 #	CreateConfigList... Create list, containing project configuration
 
-class wdGUI(wx.Frame):
+class Project_GUI(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(700,400))
 
@@ -166,13 +167,16 @@ class wdGUI(wx.Frame):
            self.console.out( "Path still needs to be set!" ,"error")
 
         else:
-            tempname=self.path+"/"+self.name
-
+            self.project_path=self.path+"/"+self.name
+            self.project_name = self.name
             self.console.out( "Processing..." )
-            self.CreateConfigList()           
-            manager= wdm_module.iProject(tempname,self.config_list)
+            self.CreateProjectConfig()           
+            manager=wdManager.Project_Creator(self.project_config)
             manager.CreateNewProject()
             self.console.out( "...done" )
+           # self.Destroy()
+
+
 
 
 # OnReset()
@@ -197,26 +201,36 @@ class wdGUI(wx.Frame):
 
 #OnEditDesc()
     def OnEditDesc(self,e):
-        dlg = wx.TextEntryDialog(self,"Project Description","Project Description")
-        dlg.SetValue("%s" % self.desc )
-        if dlg.ShowModal() == wx.ID_OK:
-            self.desc = dlg.GetValue()
-	    self.s_desc.AddString("set")
-            self.console.out("Descrition added","good")
-        dlg.Destroy()
-
+#        dlg = wx.TextEntryDialog(self,"Project Description","Project Description")
+ #       dlg.SetValue("%s" % self.desc )
+  #      if dlg.ShowModal() == wx.ID_OK:
+   #         self.desc = dlg.GetValue()
+#	    self.s_desc.AddString("set")
+ #           self.console.out("Descrition added","good")
+  #      dlg.Destroy()
+        import vdescGUI
+        vdescGUI.GUI(self,"Video Configureation")
             
-    def CreateConfigList(self):
+    def CreateProjectConfig(self):
         
-        self.config_list =[self.name , "08/08/08","iam.tom","2","24","1280x720"]
+        self.project_config =[self.project_path,self.project_name , "08/08/08","iam.tom","2","24","1280x720"]
 
 #GetPath()
     def GetPath(self,e):
         return self.path
 
-        
+
+#GetConfig()
+    def GetConfig():
+        return self.project_config
+
 
 
 app = wx.App(False)
-frame =wdGUI( None, "Configuration GUI")
+frame = Project_GUI(None, "Configuration GUI")
 app.MainLoop()
+
+        
+
+
+

@@ -1,6 +1,6 @@
 import os
 import wx
-import wdm_module
+import wdManager
 
 import iwx
 
@@ -19,8 +19,12 @@ import iwx
 class GUI(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(300,500))
-
-
+        self.name = ""
+        self.author = ""
+        self.date = ""
+        self.fps = ""
+        self.res = ""
+        self.scenes = ""
 # default settings
 
 
@@ -55,11 +59,9 @@ class GUI(wx.Frame):
 	b_fps_c=wx.Button(self,wx.ID_ANY,"Clear",(67,310),(50,25),wx.BU_EXACTFIT)
 	b_res_c=wx.Button(self,wx.ID_ANY,"Clear",(67,370),(50,25),wx.BU_EXACTFIT)
 
-	b_reset=wx.Button(self,wx.ID_ANY,"Reset",(147,420),(50,25),wx.BU_EXACTFIT)
+	b_reset=wx.Button(self,wx.ID_ANY,"Reset",(7,410),(50,25),wx.BU_EXACTFIT)
 
-	b_accept=wx.Button(self,wx.ID_ANY,"Accept",(217,420),(50,25),wx.BU_EXACTFIT)
-
-
+	b_accept=wx.Button(self,wx.ID_ANY,"Accept",(67,410),(50,25),wx.BU_EXACTFIT)
 
 #static text
         s_dummy1 = wx.StaticText(self,-1,"Video Configuration:",(7,20))
@@ -75,24 +77,16 @@ class GUI(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 
-        b_name.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_name: self.OnEdit(evt, string) )
+        b_name.Bind(wx.EVT_BUTTON, lambda evt,self.name, string=self.s_name: self.OnEdit(evt, string) )
         b_author.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_author: self.OnEdit(evt, string) )
 	b_date.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_date: self.OnEdit(evt, string) )
 	b_scenes.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_scenes: self.OnEdit(evt, string) )
 	b_fps.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_fps: self.OnEdit(evt, string) )
 	b_res.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_res: self.OnEdit(evt, string) )
-
 	b_name_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_name: self.OnClear(evt, string) )
-	b_author_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_author: self.OnClear(evt, string) )
-	b_date_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_date: self.OnClear(evt, string) )
-	b_scenes_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_scenes: self.OnClear(evt, string) )
-	b_fps_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_fps: self.OnClear(evt, string) )
-	b_res_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_res: self.OnClear(evt, string) )
-
 
 	b_reset.Bind(wx.EVT_BUTTON,  self.OnReset )
 	b_accept.Bind(wx.EVT_BUTTON,  self.OnAccept )
-
 
 
 	#self.Bind(wx.EVT_BUTTON, self.OnProcess,b_process)
@@ -115,7 +109,6 @@ class GUI(wx.Frame):
 
 # OnExit()
     def OnExit(self,e):
-        self.MakeModal(False)
         self.Close(True)  # Close the frame.
 
 #OnEdit()
@@ -126,13 +119,12 @@ class GUI(wx.Frame):
             value = dlg.GetValue()
             string.Clear()
 	    string.AddString("%s" % value )
-
+        
         dlg.Destroy()
 
 #OnClear()
     def OnClear(self,e,string):
-
-        string.Clear()
+            self.s_name.Clear()
 
 #OnReset()
     def OnReset(self,e):
@@ -143,38 +135,15 @@ class GUI(wx.Frame):
         self.s_scenes.Clear()
         self.s_res.Clear()
 
-#OnAccept()
     def OnAccept(self,e):
-	self.config_list = list()
-	self.config_list.insert(0,self.s_name.GetValue())
-        self.config_list.insert(1,self.s_date.GetValue())
-        self.config_list.insert(2,self.s_author.GetValue())
-        self.config_list.insert(3,self.s_scenes.GetValue())
-        self.config_list.insert(4,self.s_fps.GetValue())
-        self.config_list.insert(5,self.s_res.GetValue())
-	self.eventLoop.Exit()
-       
-        
-#ShowModal() 
-    def GetConfigWhenOK(self):
-        self.MakeModal()
-        self.Show()
-        self.eventLoop = wx.EventLoop()
-        self.eventLoop.Run()
-        self.Close()
-        self.MakeModal(False)
-        return self.config_list
-
-
-
-
+        desc_list = [self.s_name.GetValue(),self.s_author.GetValue(),self.s_date.GetValue(),self.s_fps.GetValue(),self.s_scenes.GetValue(),self.s_res.GetValue()]
+        print desc_list
+        print self.s_name.GetValue()
 
 
         
 
-        
 
-
-#app = wx.App(False)
-#frame = v_cfg_gui(None, "Video Configuration GUI")
-#app.MainLoop()
+app = wx.App(False)
+frame = GUI(None, "Video Configuration GUI")
+app.MainLoop()

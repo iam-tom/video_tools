@@ -145,12 +145,12 @@ class GUI(wx.Frame):
 #OnAccept()
     def OnAccept(self,e):
 	self.config_list = list()
-	self.config_list.insert(0,self.s_name.getValue())
-        self.config_list.insert(1,self.s_date.getValue())
-        self.config_list.insert(2,self.s_author.getValue())
-        self.config_list.insert(3,self.s_scenes.getValue())
-        self.config_list.insert(4,self.s_fps.getValue())
-        self.config_list.insert(5,self.s_res.getValue())
+	self.config_list.insert(0,self.s_name.GetValue())
+        self.config_list.insert(1,self.s_date.GetValue())
+        self.config_list.insert(2,self.s_author.GetValue())
+        self.config_list.insert(3,self.s_scenes.GetValue())
+        self.config_list.insert(4,self.s_fps.GetValue())
+        self.config_list.insert(5,self.s_res.GetValue())
 	self.eventLoop.Exit()
        
         
