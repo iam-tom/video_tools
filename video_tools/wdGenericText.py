@@ -1,7 +1,8 @@
 #! /usr/bin/env python
+import os
 def readme(WD):
-
-    fid=open(WD.basepath,"w")
+    os.chdir(WD.basepath)
+    fid=open("README","w")
     fid.write("___________WORKING DIRECTORY______________\n\n")
 
     fid.write("This working directory was automatically\n")
@@ -47,17 +48,17 @@ def readme(WD):
     fid.close()
 
 def wdfile(WD):
-    
-    fid=open(WD.basepath,"w")
+    os.chdir(WD.basepath)
+    fid=open(".wd","w")
     fid.write("\n")
 
 
-    fid.write("$name %s\n" % WD.name)
-    fid.write("$date %s\n" % WD.date)
-    fid.write("$scenes %s\n" % WD.scenes)
-    fid.write("$author %s\n" % WD.author)
-    fid.write("$fps %s\n" % WD.fps)
-    fid.write("$res %s\n" % WD.res)
+    fid.write("$name \n%s\n" % WD.name)
+    fid.write("$date \n%s\n" % WD.date)
+    fid.write("$scenes \n%s\n" % WD.scenes)
+    fid.write("$author \n%s\n" % WD.author)
+    fid.write("$fps \n%s\n" % WD.fps)
+    fid.write("$res \n%s\n" % WD.res)
  
     fid.close()
 

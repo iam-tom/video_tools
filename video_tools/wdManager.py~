@@ -18,8 +18,8 @@ class Project_Creator:
 #						:
 #						*
 #
-	def __init__(self,WD):
-            self.WD=WD
+	def __init__(self):
+            print "[DBG] still useful ?"
             #self.wd = wdManager.wd_cfg() 
             #self.wd.basepath=cfg_list.basepath
             #self.wd.name    =cfg_list.name
@@ -33,15 +33,15 @@ class Project_Creator:
             #self.vcfg.desc       = vcfg_list.desc
 
 	    
-	def NewDir(self,WD):
-	    os.mkdir(WD.name)
+	def NewDir(self,dirname):
+	    os.mkdir(dirname)
 
 
 	def CreateReadme(self,WD):
-	    wdGenericText.readme("README",WD)
+	    wdGenericText.readme(WD)
 
         def CreateWDFile(self,WD):
-            wdGenericText.wdfile(".wd",WD)	
+            wdGenericText.wdfile(WD)	
 
         def ReadWDFile(self,WD):
             fid = open(".wd")
@@ -59,41 +59,59 @@ class Project_Creator:
 
 	def CreateNewProject(self,WD): 	    
 	    #check if old WD
-            if WD.old_wd ==True && WD.name in WD.basepath == False
+                cwd = os.getcwd()
+            if  WD.old_wd == True and WD.name in WD.basepath:
+                print "old wd accepted" 
+            elif WD.old_wd ==True and  not WD.name in WD.basepath :
+                print "renaming.."
                 os.chdir(WD.basepath)
                 os.chdir("../")
-                os.rename(WD.basepath WD.name)
-            else
+                os.rename(WD.basepath, WD.name)
+            # make WD consistent
+                a= WD.basepath
+                counter = 0
+                while a.find("/") <> -1:
+                    b=a.find("/")
+                    a=a[b+1:len(a)]
+                    counter = counter+(b+1)
+                WD.basepath = WD.basepath[0:counter]+WD.name
+            # write updated .wd file
+                self.CreateWDFile(WD)
+
+            elif WD.old_wd == False :
+                print "creating new wd"
                 
-	    # establish new working directory
-	    self.NewDir(self.WD.basepath)
+	        # establish new working directory
+	        self.NewDir(WD.basepath)
 
-	    # enter working directory
-	    os.chdir(self.WD.basepath)
+                # enter working directory
+	        os.chdir(WD.basepath)
 
-	    # make working tree 
-	    self.NewDir("files")
-            self.NewDir("post")
-            os.chdir("files")
-	    self.NewDir("video")
-            self.NewDir("audio")
-            self.NewDir("misc")
-            os.chdir("video")
-	    self.NewDir('conv')
-	    self.NewDir('raw')
-            os.chdir("../../post")
-            self.NewDir("org")
-	    self.NewDir('render')
-            os.chdir("render")
-	    self.NewDir('seq')
-            self.NewDir("video")
-            self.NewDir("audio")
-	    os.chdir(self.wd.basepath)
+	        # make working tree 
+	        self.NewDir("files")
+                self.NewDir("post")
+                os.chdir("files")
+	        self.NewDir("video")
+                self.NewDir("audio")
+                self.NewDir("misc")
+                os.chdir("video")
+	        self.NewDir('conv')
+	        self.NewDir('raw')
+                os.chdir("../../post")
+                self.NewDir("org")
+	        self.NewDir('render')
+                os.chdir("render")
+	        self.NewDir('seq')
+                self.NewDir("video")
+                self.NewDir("audio")
+	        os.chdir(WD.basepath)
 
-	    # create Readme file
-	    self.CreateReadme(self.WD)
-            self.CreateWDFile(self.WD)
-
+	        # create Readme file
+	        self.CreateReadme(WD)
+                self.CreateWDFile(WD)
+                
+                # return to original path
+                os.chdir(cwd)
 
 	#import modules
 class wd_cfg:
@@ -107,6 +125,7 @@ class wd_cfg:
         self.res    = ""
         self.desc   = ""
         self.old_wd = False
+        self.done   = False
     def set_attribute(self,att,val):
         if "name" in att:
             print "name set"

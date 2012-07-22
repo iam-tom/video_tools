@@ -22,6 +22,8 @@ import iwx
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
 
+        
+
 
 #----presets
 
@@ -151,7 +153,7 @@ class MainWindow(wx.Frame):
 	   self.wd_s_path.AddString("%s" % self.WD.basepath)
         dir_dlg.Destroy()
         os.chdir(self.WD.basepath)
-        self.project = wdManager.Project_Creator(self.WD)
+        self.project = wdManager.Project_Creator()
         if os.path.isfile(".wd") == True:
             
             self.project.ReadWDFile(self.WD)
@@ -216,14 +218,18 @@ class MainWindow(wx.Frame):
         
 
 # OnProcess()
-    def OnProcess(self,e):
-	self.console.out("creating new WD")
-        self.project.CreateNewProject(self.WD)
-	self.console.out("done","good")
+    def OnProcess(self,e):        
         do_convert = False
+        if self.WD.done == False:
+	    self.console.out("creating new WD")
+            self.project.CreateNewProject(self.WD)
+	    self.console.out("done","good")
+            self.WD.done = True
+
 
         list_paths=self.LC.GetPaths()
         list_names=self.LC.GetNames()
+
         if len(list_paths) == 0:
             self.console.out("No files chosen. Import not possible","error")
 

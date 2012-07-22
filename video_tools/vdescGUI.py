@@ -96,6 +96,14 @@ class GUI(wx.Dialog):
 
 
 	#self.Bind(wx.EVT_BUTTON, self.OnProcess,b_process)
+	self.s_name.AddString(self.WD.name)
+	self.s_date.AddString(self.WD.date)
+	self.s_author.AddString(self.WD.author)
+	self.s_scenes.AddString(self.WD.scenes)
+	self.s_fps.AddString(self.WD.fps)
+	self.s_res.AddString(self.WD.res)
+
+
 
 
         self.Show(True)
