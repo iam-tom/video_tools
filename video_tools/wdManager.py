@@ -57,8 +57,14 @@ class Project_Creator:
                     
                     
 
-	def CreateNewProject(self,WD):
- 	    print "creating wd"
+	def CreateNewProject(self,WD): 	    
+	    #check if old WD
+            if WD.old_wd ==True && WD.name in WD.basepath == False:
+                os.chdir(WD.basepath)
+                os.chdir("../")
+                os.rename(WD.basepath WD.name)
+            else:
+                
 	    # establish new working directory
 	    self.NewDir(self.WD.basepath)
 
