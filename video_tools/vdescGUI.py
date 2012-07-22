@@ -16,20 +16,18 @@ import iwx
 #	OnOpen()...........
 
 
-class GUI(wx.Frame):
-    def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title=title, size=(300,500))
-        self.name = ""
-        self.author = ""
-        self.date = ""
-        self.fps = ""
-        self.res = ""
-        self.scenes = ""
+class GUI(wx.Dialog):
+    def __init__(self, parent, WD):
+        self.WD = WD
+        self.cont = False
+       # wx.Frame.__init__(self, parent, title="Project Details", size=(300,500))
+        wx.Dialog.__init__(self, parent, title="Project Details", size=(300,500))
+
 # default settings
 
 
 #status bar
-        self.CreateStatusBar() # A StatusBar in the bottom of the window
+        #self.CreateStatusBar() # A StatusBar in the bottom of the window
 #menu
 
         filemenu= wx.Menu()
@@ -42,7 +40,7 @@ class GUI(wx.Frame):
 
         menuBar = wx.MenuBar()
         menuBar.Append(filemenu,"&File") # Adding the "filemenu" to the MenuBar
-        self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
+       # self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
 
 #buttons
         b_name=wx.Button(self,wx.ID_ANY,"Edit",(7,70),(50,25),wx.BU_EXACTFIT)
@@ -61,7 +59,7 @@ class GUI(wx.Frame):
 
 	b_reset=wx.Button(self,wx.ID_ANY,"Reset",(7,410),(50,25),wx.BU_EXACTFIT)
 
-	b_accept=wx.Button(self,wx.ID_ANY,"Accept",(67,410),(50,25),wx.BU_EXACTFIT)
+	b_accept=wx.Button(self,5,"Accept",(67,410),(50,25),wx.BU_EXACTFIT)
 
 #static text
         s_dummy1 = wx.StaticText(self,-1,"Video Configuration:",(7,20))
@@ -77,13 +75,21 @@ class GUI(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 
-        b_name.Bind(wx.EVT_BUTTON, lambda evt,self.name, string=self.s_name: self.OnEdit(evt, string) )
-        b_author.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_author: self.OnEdit(evt, string) )
-	b_date.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_date: self.OnEdit(evt, string) )
-	b_scenes.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_scenes: self.OnEdit(evt, string) )
-	b_fps.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_fps: self.OnEdit(evt, string) )
-	b_res.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_res: self.OnEdit(evt, string) )
+        b_name.Bind(wx.EVT_BUTTON, lambda evt,string=self.s_name,att="name": self.OnEdit(evt, string,att) )
+        b_author.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_author,att="author": self.OnEdit(evt, string,att) )
+	b_date.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_date,att="date": self.OnEdit(evt, string,att) )
+	b_scenes.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_scenes,att="scenes": self.OnEdit(evt, string,att) )
+	b_fps.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_fps,att="fps": self.OnEdit(evt, string,att) )
+	b_res.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_res,att="res": self.OnEdit(evt, string,att) )
+
 	b_name_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_name: self.OnClear(evt, string) )
+	b_author_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_author: self.OnClear(evt, string) )
+	b_date_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_date: self.OnClear(evt, string) )
+	b_scenes_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_scenes: self.OnClear(evt, string) )
+	b_scenes_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_scenes: self.OnClear(evt, string) )
+	b_fps_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_fps: self.OnClear(evt, string) )
+	b_res_c.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_res: self.OnClear(evt, string) )
+
 
 	b_reset.Bind(wx.EVT_BUTTON,  self.OnReset )
 	b_accept.Bind(wx.EVT_BUTTON,  self.OnAccept )
@@ -109,22 +115,25 @@ class GUI(wx.Frame):
 
 # OnExit()
     def OnExit(self,e):
+
         self.Close(True)  # Close the frame.
+        
 
 #OnEdit()
-    def OnEdit(self,e,string):
+    def OnEdit(self,e,string,att):
         dlg = wx.TextEntryDialog(self, 'Enter Project Name','Name')
         #dlg.SetValue("%s" % self.name)
         if dlg.ShowModal() == wx.ID_OK:
             value = dlg.GetValue()
             string.Clear()
-	    string.AddString("%s" % value )
-        
+	    string.AddString("%s" % value )        
         dlg.Destroy()
+        self.WD.set_attribute(att,value)
+        
 
 #OnClear()
     def OnClear(self,e,string):
-            self.s_name.Clear()
+            string.Clear()
 
 #OnReset()
     def OnReset(self,e):
@@ -136,14 +145,11 @@ class GUI(wx.Frame):
         self.s_res.Clear()
 
     def OnAccept(self,e):
-        desc_list = [self.s_name.GetValue(),self.s_author.GetValue(),self.s_date.GetValue(),self.s_fps.GetValue(),self.s_scenes.GetValue(),self.s_res.GetValue()]
-        print desc_list
-        print self.s_name.GetValue()
-
-
         
+        self.MakeModal(False)
+        self.cont = True
+   
+        self.Close()
 
 
-app = wx.App(False)
-frame = GUI(None, "Video Configuration GUI")
-app.MainLoop()
+

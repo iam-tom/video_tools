@@ -13,6 +13,7 @@ class iStaticText(wx.StaticText):
         self.string = self.GetLabel()
 	new_string= self.string+ " "+ new_string
         self.SetLabel(new_string)
+
         
 
     def Clear(self):

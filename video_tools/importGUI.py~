@@ -3,6 +3,7 @@ import wx
 import wdManager
 
 
+
 import iwx
 
 
@@ -29,7 +30,7 @@ class MainWindow(wx.Frame):
         #self.vid_settings=list(6)
         
         self.WD = wdManager.wd_cfg()
-        self.VCFG = wdManager.vid_cfg()
+
 
 
 
@@ -122,15 +123,19 @@ class MainWindow(wx.Frame):
 	wd_dummy1 = wx.StaticText(panel22,-1,"__________",(7,50))
 	self.wd_s_path = iwx.iStaticText(panel22,-1,"Path:",(7,110))
 	self.wd_s_name = iwx.iStaticText(panel22,-1,"Name:",(7,170))
-	self.wd_s_desc = iwx.iStaticText(panel22,-1,"Description:",(7,230))
+	self.wd_s_desc = iwx.iStaticText(panel22,-1,"Details:",(7,230))
+	wd_dummy1 = wx.StaticText(panel22,-1,"__________",(7,245))       
 
         wd_b_browse=wx.Button(panel22,wx.ID_ANY,"Browse",(150,60),(70,30),wx.BU_EXACTFIT)
+        wd_b_desc=wx.Button(panel22,wx.ID_ANY,"View / Edit",(7,270),(100,30),wx.BU_EXACTFIT)
 
         self.Show(True)
 
         self.Bind(wx.EVT_BUTTON, self.OnResetWD,wd_b_reset)
         self.Bind(wx.EVT_BUTTON, self.OnBrowseWD,wd_b_browse)
         self.Bind(wx.EVT_BUTTON, self.OnProcess, b_process)
+        self.Bind(wx.EVT_BUTTON, self.OnEditDesc, wd_b_desc)
+        
 
 
 
@@ -146,15 +151,31 @@ class MainWindow(wx.Frame):
 	   self.wd_s_path.AddString("%s" % self.WD.basepath)
         dir_dlg.Destroy()
         os.chdir(self.WD.basepath)
-        
+        self.project = wdManager.Project_Creator(self.WD)
         if os.path.isfile(".wd") == True:
+            
+            self.project.ReadWDFile(self.WD)
             self.console.out("WD detected","good")
-            # read in .wd file and setup wd_settings
+            self.WD.old_wd = True
+            
         else:
             self.console.out("setting up new WD","good")
-            self.OnEditNameWD()
+            dlg = wx.TextEntryDialog(self, 'Enter Project Name','Name')
+            dlg.SetValue("%s" % self.WD.name)
+            if dlg.ShowModal() == wx.ID_OK:
+                self.WD.name = dlg.GetValue()
+                self.WD.basepath = self.WD.basepath +"/" +self.WD.name
+	        self.console.out("Name set to: %s " % self.WD.name,"good")
+                dlg.Destroy()
+        self.setGUItoWD(self.WD)
+        
 
-
+    def setGUItoWD(self,WD):
+        self.wd_s_path.Clear()
+        self.wd_s_name.Clear()
+        self.wd_s_desc.Clear()
+        self.wd_s_path.AddString(WD.basepath)
+        self.wd_s_name.AddString(WD.name)  
 
 
 # OnReset()
@@ -163,19 +184,7 @@ class MainWindow(wx.Frame):
 	self.wd_s_name.Clear()
         self.WD.path = ""
 	self.WD.name = ""
-	self.console.out("Project settings cleared","bad")
-	
-
-#OnEditNameWD()
-    def OnEditNameWD(self):
-        dlg = wx.TextEntryDialog(self, 'Enter Project Name','Name')
-        dlg.SetValue("%s" % self.WD.name)
-        if dlg.ShowModal() == wx.ID_OK:
-            self.WD.name = dlg.GetValue()
-            self.WD.basepath = self.WD.basepath +"/" +self.WD.name
-	    self.wd_s_name.AddString("%s" % self.WD.name)
-            self.console.out("Name set to: %s " % self.WD.name,"good")
-        dlg.Destroy()      
+	self.console.out("Project settings cleared","bad")    
 
 
             
@@ -195,22 +204,21 @@ class MainWindow(wx.Frame):
         dlg.ShowModal() 
         dlg.Destroy() 
 
+# OnEditDesc()
+    def OnEditDesc(self,e):
+        import vdescGUI
 
-# OnWDNew
-    def OnWDNew(self,e):
-        print "to be implemented"
-# OnWDOld
-    def OnWDOld(self,e):
-        print "to be implemented"
+        vdesc = vdescGUI.GUI(self,self.WD)
+        if vdesc.ShowModal() == 5:            
+           dumbass=0
+        self.setGUItoWD(self.WD)
         
-
-
+        
 
 # OnProcess()
     def OnProcess(self,e):
 	self.console.out("creating new WD")
-        proj = wdManager.Project_Creator(self.WD,self.VCFG)
-        proj.CreateNewProject()
+        self.project.CreateNewProject()
 	self.console.out("done","good")
         do_convert = False
 
@@ -233,7 +241,7 @@ class MainWindow(wx.Frame):
         for i in list_paths:
             input_name= list_names[k]
             input_file = i
-            cp_string=self.CpString(input_name,i,self.WD)
+            cp_string=self.CpString(input_name,i,self.WD.basepath)
             os.system(cp_string)
             k=k+1
         self.console.out("Done Importing","good")

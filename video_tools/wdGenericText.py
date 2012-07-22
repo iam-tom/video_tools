@@ -1,7 +1,7 @@
 #! /usr/bin/env python
-def readme(path,config_list):
+def readme(WD):
 
-    fid=open(path,"w")
+    fid=open(WD.basepath,"w")
     fid.write("___________WORKING DIRECTORY______________\n\n")
 
     fid.write("This working directory was automatically\n")
@@ -10,16 +10,16 @@ def readme(path,config_list):
 
     fid.write("Project Overview_________________________\n\n")
 
-    fid.write("Project Name.................. %s\n" % config_list.name)
-    fid.write("Creation Date................. %s\n" % config_list.date)
-    fid.write("Author........................ %s\n" % config_list.author)
-    fid.write("# of scenes................... %s\n" % config_list.scenes)
-    fid.write("fps........................... %s\n" % config_list.fps)
-    fid.write("Resolution.................... %s\n\n" % config_list.res)
+    fid.write("Project Name.................. %s\n" % WD.name)
+    fid.write("Creation Date................. %s\n" % WD.date)
+    fid.write("Author........................ %s\n" % WD.author)
+    fid.write("# of scenes................... %s\n" % WD.scenes)
+    fid.write("fps........................... %s\n" % WD.fps)
+    fid.write("Resolution.................... %s\n\n" % WD.res)
 
     fid.write("Layout_____________________________________\n\n")
 
-# " Layout for Project %s:\n\n" % config_list[0])
+# " Layout for Project %s:\n\n" % WD[0])
 
 
     fid.write("\t\t________________iProject_________\n")
@@ -46,18 +46,18 @@ def readme(path,config_list):
     fid.write("post/render/audio ................... rendered audio files\n")
     fid.close()
 
-def wdfile(path,config_list):
+def wdfile(WD):
     
-    fid=open(path,"w")
+    fid=open(WD.basepath,"w")
     fid.write("\n")
 
 
-    fid.write("$name %s\n" % config_list.name)
-    fid.write("$date %s\n" % config_list.date)
-    fid.write("$scenes %s\n" % config_list.scenes)
-    fid.write("$author %s\n" % config_list.author)
-    fid.write("$fps %s\n" % config_list.fps)
-    fid.write("$res %s\n" % config_list.res)
+    fid.write("$name %s\n" % WD.name)
+    fid.write("$date %s\n" % WD.date)
+    fid.write("$scenes %s\n" % WD.scenes)
+    fid.write("$author %s\n" % WD.author)
+    fid.write("$fps %s\n" % WD.fps)
+    fid.write("$res %s\n" % WD.res)
  
     fid.close()
 

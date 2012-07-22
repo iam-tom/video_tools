@@ -18,34 +18,46 @@ class Project_Creator:
 #						:
 #						*
 #
-	def __init__(self,cfg_list,vcfg_list):
-            self.wd = wdManager.wd_cfg() 
-            self.wd.basepath=cfg_list.basepath
-            self.wd.name    =cfg_list.name
+	def __init__(self,WD):
+            self.WD=WD
+            #self.wd = wdManager.wd_cfg() 
+            #self.wd.basepath=cfg_list.basepath
+            #self.wd.name    =cfg_list.name
 
-            self.vcfg = wdManager.vid_cfg()
-            self.vcfg.basepath = vcfg_list.basepath
-            self.vcfg.name       = vcfg_list.name
-            self.vcfg.author     = vcfg_list.author
-            self.vcfg.res        = vcfg_list.res
-            self.vcfg.fps        = vcfg_list.fps
-            self.vcfg.desc       = vcfg_list.desc
+            #self.vcfg = wdManager.vid_cfg()
+            #self.vcfg.basepath = vcfg_list.basepath
+            #self.vcfg.name       = vcfg_list.name
+            #self.vcfg.author     = vcfg_list.author
+            #self.vcfg.res        = vcfg_list.res
+            #self.vcfg.fps        = vcfg_list.fps
+            #self.vcfg.desc       = vcfg_list.desc
 
 	    
-	def NewDir(self,name):
-	    os.mkdir(name)
+	def NewDir(self,WD):
+	    os.mkdir(WD.name)
 
 
-	def CreateReadme(self,name,config_list):
+	def CreateReadme(self,WD):
+	    wdGenericText.readme("README",WD)
 
+        def CreateWDFile(self,WD):
+            wdGenericText.wdfile(".wd",WD)	
 
-	    wdGenericText.readme("README",config_list)
+        def ReadWDFile(self,WD):
+            fid = open(".wd")
+            tag = ""
+            for line in fid:
+                if "$" in line:	
+                    tag =line[1:len(line)]
+                    continue
+                else:                        
+                    WD.set_attribute(tag,line)
+            
+                    
+                    
+                    
 
-        def CreateWDFile(self,config_list):
-            wdGenericText.wdfile(".wd",config_list)	
- 
-
-	def CreateNewProject(self):
+	def CreateNewProject(self,WD):
  	    print "creating wd"
 	    # establish new working directory
 	    self.NewDir(self.wd.basepath)
@@ -73,25 +85,55 @@ class Project_Creator:
 	    os.chdir(self.wd.basepath)
 
 	    # create Readme file
-	    self.CreateReadme(self.wd.basepath,self.vcfg)
-            self.CreateWDFile(self.vcfg)
+	    self.CreateReadme(self.WD)
+            self.CreateWDFile(self.WD)
 
 
 	#import modules
 class wd_cfg:
     def __init__(self):
-        self.basepath= ""
-        self.name = ""
-
-class vid_cfg:
-    def __init__(self):
         self.basepath=""
+        self.date   = ""
         self.name   =""
         self.author = ""
         self.scenes = ""
         self.fps    =""
         self.res    = ""
         self.desc   = ""
+        self.old_wd = False
+    def set_attribute(self,att,val):
+        if "name" in att:
+            print "name set"
+            self.name = val
+
+        elif "date" in att:
+            print "date set"
+            self.date = val
+
+        elif "author" in att:
+            print "author set"
+            self.author = val
+
+        elif "basepath" in att:
+            print "basepath set"
+            self.basepath = val
+
+        elif "res" in att:
+            print "res set"
+            self.res = val
+
+        elif "scenes" in att:
+            print "scenes set"
+            self.scenes = val
+        elif "fps" in att:
+            print "fps set"
+            self.fps = val
+
+
+        else:
+            print "tag %s not implemented" % att
+
+
  
 
 # for system calls
