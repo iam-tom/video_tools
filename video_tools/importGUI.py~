@@ -21,7 +21,7 @@ import iwx
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
-        self.cwd = os.getcwd()
+
         
 
 
