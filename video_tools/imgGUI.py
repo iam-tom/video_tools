@@ -31,7 +31,7 @@ class GUI(wx.Panel):
 
 
     def OnLeftClick(self, e):
-        print "*click*"
+
 
         pos = e.GetPosition()
         dc = wx.MemoryDC()
@@ -58,7 +58,7 @@ class GUI(wx.Panel):
         wx.StaticBitmap(self, -1, self.bmp)
         
     def OnRightClick(self, e):
-        print "*click*"
+
 
         wx.StaticBitmap(self, -1, self.bmp_orig)
 #        reset PULLUTE VERSION to CLEAN VERSION
