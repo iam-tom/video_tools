@@ -1,6 +1,6 @@
 import os
 import wx
-import wdm_module
+
 
 import iwx
 
@@ -16,10 +16,10 @@ import iwx
 #	OnOpen()...........
 
 
-class MainWindow(wx.Frame):
-    def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title=title, size=(300,500))
+class GUI(wx.Panel):
+    def __init__(self, parent):
 
+        wx.Panel.__init__(self, parent,size=(300,500))
 
 # default settings
         self.fps_preset=["24","25","50"]
@@ -27,21 +27,6 @@ class MainWindow(wx.Frame):
         self.zeros_preset =["0" , "1" , "2", "3", "4" ,"5" ,"6" ,"7" ,"8"]
 
 
-#status bar
-        self.CreateStatusBar() # A StatusBar in the bottom of the window
-#menu
-
-        filemenu= wx.Menu()
-
-
-        menuAbout = filemenu.Append(wx.ID_ABOUT, "&About"," Information about this program")
-        menuExit = filemenu.Append(wx.ID_EXIT,"&Exit"," Terminate the program")
-
-
-
-        menuBar = wx.MenuBar()
-        menuBar.Append(filemenu,"&File") # Adding the "filemenu" to the MenuBar
-        self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
 
 #buttons
 #---input
@@ -67,9 +52,7 @@ class MainWindow(wx.Frame):
 	self.s_fps = iwx.iStaticText(self,-1,"Frame Rate [fps]:",(7,350))
 	
 #events
-        # Set events.
-        self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
-        self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
+
 
 	b_o_dir.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_o_dir: self.OnBrowseDir(evt, string) )
 	b_o_file.Bind(wx.EVT_BUTTON, lambda evt, string=self.s_o_file: self.OnEdit(evt, string) )
@@ -176,13 +159,4 @@ class MainWindow(wx.Frame):
 	     os.system(process_string)
         
 	
-	
 
-        
-
-        
-
-
-app = wx.App(False)
-frame = MainWindow(None, "Video Configuration GUI")
-app.MainLoop()

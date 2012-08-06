@@ -2,32 +2,78 @@ import sys
 import wx
 import cStringIO
 from PIL import Image
-
+from wx.lib.pubsub import Publisher
 
 
 class GUI(wx.Panel):
-    def __init__(self, parent,size,in_path):    
-        self.positions = list()
-        wx.Panel.__init__(self, parent,size=size)
+    def __init__(self, parent,config):
+    
+#//////////////// allocations /////////////////
 
-#        CLEAN VERISION
-        imageFile = in_path
-        data_orig = open(imageFile, "rb").read()
-        # convert to a data stream
-        stream_orig = cStringIO.StringIO(data_orig)
-        # convert to a bitmap
-        self.bmp_orig = wx.BitmapFromImage( wx.ImageFromStream( stream_orig ))
+        self.positions = list()
+    
+        self.in_path = config["i_file"]
+        self.size = config["size"]
         
-#        PULLUTE VERSION
+        self.init_img = ".data/tlm_init.png"
+        
+#//////////////// graphical elements /////////        
+        p_size=(self.size[0],self.size[1]+30)
+
+        wx.Panel.__init__(self, parent,size=p_size)
+#        button panel
+        b_accept=wx.Button(self,wx.ID_OK,"OK",(0,self.size[1]),(70,30),wx.BU_EXACTFIT)
+        b_accept.Bind(wx.EVT_BUTTON,lambda  evt , config = config: self.OnAccept(evt,config))
+
+        
+        
+        self.setInitState()        
+
+    def setNewState(self,in_path):
+        
+#     wipe canvas   
+            
+            
+
+    #        CLEAN VERISION
+            imageFile = in_path
+            data_orig = open(imageFile, "rb").read()
+            # convert to a data stream
+            stream_orig = cStringIO.StringIO(data_orig)
+            # convert to a bitmap
+            self.bmp_orig = wx.BitmapFromImage( wx.ImageFromStream( stream_orig ))
+            
+    #        PULLUTE VERSION
+            data = open(imageFile, "rb").read()
+            # convert to a data stream
+            stream = cStringIO.StringIO(data)
+            # convert to a bitmap
+            bmp = wx.BitmapFromImage( wx.ImageFromStream( stream ))
+            # show the bitmap, (5, 5) are upper left corner coordinates
+           #self.canvas =wx.StaticBitmap(self, -1, bmp, (0, 0))
+            self.canvas.SetBitmap(bmp)
+            self.canvas.Bind(wx.EVT_LEFT_DOWN,self.OnLeftClick)
+            self.canvas.Bind(wx.EVT_RIGHT_DOWN,self.OnRightClick)            
+
+        
+
+       
+    def setInitState(self):
+        imageFile = self.init_img    
+        
+
         data = open(imageFile, "rb").read()
         # convert to a data stream
         stream = cStringIO.StringIO(data)
         # convert to a bitmap
-        self.bmp = wx.BitmapFromImage( wx.ImageFromStream( stream ))
+        bmp = wx.BitmapFromImage( wx.ImageFromStream( stream ))
         # show the bitmap, (5, 5) are upper left corner coordinates
-        self.img =wx.StaticBitmap(self, -1, self.bmp, (0, 0))
-        self.img.Bind(wx.EVT_LEFT_DOWN,self.OnLeftClick)
-        self.img.Bind(wx.EVT_RIGHT_DOWN,self.OnRightClick)
+        self.canvas =wx.StaticBitmap(self, -1, bmp, (0, 0))
+    
+        
+    def OnAccept(self,e, config):
+   
+        Publisher().sendMessage(("imgGUI.positions"), self.positions)    
 
 
     def OnLeftClick(self, e):
@@ -65,7 +111,7 @@ class GUI(wx.Panel):
         self.bmp = self.bmp_orig
         self.positions[:] =[]
         
-    def GetBoxes(self):
-        return self.positions      
+
+              
 
 
