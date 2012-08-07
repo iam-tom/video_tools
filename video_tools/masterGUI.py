@@ -4,6 +4,7 @@ import avconvGUI
 import TimeLapseTools
 from wx.lib.pubsub import Publisher
 import subprocess
+import iwx
 
 class GUI (wx.Frame):
 
@@ -33,17 +34,22 @@ class GUI (wx.Frame):
 
         
                
-        
+        config["size"] = (sw/2,sh)
         page1 = imgGUI.GUI(self.nb,config)
         page2 = avconvGUI.GUI(self.nb)
         self.nb.AddPage(page1, "TLM")
         self.nb.AddPage(page2, "AVCONV")
         sizer = wx.BoxSizer()
         sizer.Add(self.nb, 1, wx.EXPAND)
+        iList = iwx.iList(self.p2,(200,500),(0,0),{"name"})
+        
+        
         self.p1.SetSizer(sizer)
+        self.p2.SetSizer(sizer)
         
 
-        #page1.setNewState(config["i_file"])
+
+#        page1.setNewState(config["i_file"])
         
                 
     def spawn_imgGUI(self,size,in_file,in_path,out_path):
@@ -77,6 +83,7 @@ if __name__ == '__main__':
     size2=(1280,720)
     in_path = "/host/MEDIA/photography/2012-04-20 SPAIN/sunrise/lapse0/"
     in_file = "/host/MEDIA/photography/2012-04-20 SPAIN/sunrise/lapse0/lapse0_002.jpg"
+#    in_file = "/home/tom/Pictures/Lebron-james_streetclothes.jpg"
     out_path = "/home/tom/lapse1"
     config = {"i_path": in_path, "i_file": in_file, "o_path": out_path , "size": size2 }        
     master = GUI(title,config)
