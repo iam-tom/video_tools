@@ -18,16 +18,32 @@ class GUI(wx.Panel):
         self.init_img = ".data/tlm_init.bmp"
         
 #//////////////// graphical elements /////////        
-        p_size=(self.size[0],self.size[1]+30)
+        p_size=(self.size[0],self.size[1])
 
         wx.Panel.__init__(self, parent,size=p_size)
 #        button panel
         b_accept=wx.Button(self,wx.ID_OK,"OK",(0,(self.size[1]*4)/5),(70,30),wx.BU_EXACTFIT)
         b_accept.Bind(wx.EVT_BUTTON,lambda  evt , config = config: self.OnAccept(evt,config))
+        
+       
 
         
+        self.setInitState()
         
-        self.setInitState()        
+        
+#//////////////// PUBSUB /////////
+ 
+        Publisher().subscribe(self.OnFilesMsg,"master.filesmsg") 
+ 
+ 
+ 
+ 
+ 
+#///////////CALLBACKS /////////////
+
+    def OnFilesMsg(self,msg):
+        self.setNewState(msg.data[0]) 
+                        
 
     def setNewState(self,in_path):
         
@@ -122,7 +138,8 @@ class GUI(wx.Panel):
 
 
         pos = e.GetPosition()
-        dc = wx.MemoryDC()
+
+        dc = wx.MemoryDC() 
         dc.SelectObject(self.bmp_work)
         self.positions.append(pos)
         
@@ -134,9 +151,10 @@ class GUI(wx.Panel):
             dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
             dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
             dc.EndDrawing()
-        elif len(self.positions) == 4:
+        elif len(self.positions) == 3:
+            dim_box1=(self.positions[1][0]- self.positions[0][0],self.positions[1][1]- self.positions[0][1])
             ul = self.positions[2]
-            dr = self.positions[3]
+            dr = (self.positions[2][0]+dim_box1[0],self.positions[2][1]+dim_box1[1])
             dc.BeginDrawing()
             dc.SetPen(wx.Pen("blue",style=wx.SOLID))
             dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))

@@ -41,25 +41,35 @@ class GUI (wx.Frame):
         self.nb.AddPage(page2, "AVCONV")
         sizer = wx.BoxSizer()
         sizer.Add(self.nb, 1, wx.EXPAND)
-        iList = iwx.iList(self.p2,(200,500),(0,0),{"name"})
         
+        
+        self.list = iwx.iList(self.p2,(200,500),(0,0),{"name"})
+        ok_b = wx.Button(self.p2,wx.ID_OK,"OK",(10,550),(80,80),wx.BU_EXACTFIT)
+        ok_b.Bind(wx.EVT_BUTTON, self.OnOk)
         
         self.p1.SetSizer(sizer)
         self.p2.SetSizer(sizer)
         
+#/////////////  PUBSUB
+        Publisher().subscribe(self.OnPositions,("imgGUI.positions"))
 
 
 #        page1.setNewState(config["i_file"])
         
-                
+#/////////////  CALLBACKS
+    def OnOk(self,e):
+        names = self.list.GetNames()        
+        paths = self.list.GetPaths()
+        Publisher().sendMessage("master.filesmsg",paths)
+
     def spawn_imgGUI(self,size,in_file,in_path,out_path):
 
         config = {"i_path": in_path, "i_file": in_file, "o_path": out_path , "size": size }        
         self.imgGUI = imgGUI.GUI(self.f,config)
-        Publisher().subscribe(self.positions,("imgGUI.positions"))
+        Publisher().subscribe(self.OnPositions,("imgGUI.positions"))
                     
                     
-    def positions(self,msg):
+    def OnPositions(self,msg):
         print msg.data
         
 #        boxes = self.GetBoxes()
