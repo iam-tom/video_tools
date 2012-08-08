@@ -5,6 +5,7 @@ import TimeLapseTools
 from wx.lib.pubsub import Publisher
 import subprocess
 import iwx
+import importGUI
 
 class GUI (wx.Frame):
 
@@ -37,8 +38,11 @@ class GUI (wx.Frame):
         config["size"] = (sw/2,sh)
         page1 = imgGUI.GUI(self.nb,config)
         page2 = avconvGUI.GUI(self.nb)
+        page3 = importGUI.GUI(self.nb,config)
+        
         self.nb.AddPage(page1, "TLM")
         self.nb.AddPage(page2, "AVCONV")
+        self.nb.AddPage(page3,"IMPORT")
         sizer = wx.BoxSizer()
         sizer.Add(self.nb, 1, wx.EXPAND)
         
@@ -49,6 +53,7 @@ class GUI (wx.Frame):
         
         self.p1.SetSizer(sizer)
         self.p2.SetSizer(sizer)
+
         
 #/////////////  PUBSUB
         Publisher().subscribe(self.OnPositions,("imgGUI.positions"))
@@ -60,7 +65,7 @@ class GUI (wx.Frame):
     def OnOk(self,e):
         names = self.list.GetNames()        
         paths = self.list.GetPaths()
-        Publisher().sendMessage("master.filesmsg",paths)
+        Publisher().sendMessage("master.filesmsg",{paths,names})
 
     def spawn_imgGUI(self,size,in_file,in_path,out_path):
 

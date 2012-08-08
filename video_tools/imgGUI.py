@@ -3,6 +3,7 @@ import wx
 import cStringIO
 from PIL import Image
 from wx.lib.pubsub import Publisher
+from TimeLapseTools import tlm
 
 
 class GUI(wx.Panel):
@@ -30,6 +31,9 @@ class GUI(wx.Panel):
         
         self.setInitState()
         
+#//////////////// TLM ///////////
+
+        
         
 #//////////////// PUBSUB /////////
  
@@ -42,7 +46,7 @@ class GUI(wx.Panel):
 #///////////CALLBACKS /////////////
 
     def OnFilesMsg(self,msg):
-        self.setNewState(msg.data[0]) 
+        self.setNewState(msg.data[0][0]) 
                         
 
     def setNewState(self,in_path):
