@@ -179,8 +179,14 @@ class GUI(wx.Panel):
         self.bmp_work = self.bmp_orig
         print "reset"
         
+        
+        
 class imgList (iwx.iList):
-    def __init__(self,parent,i_size,i_pos,i_col_list):
+#iwx.iList with previer and type check
+    def __init__(self,parent,i_size,i_pos):
+        i_col_list = list()
+        i_col_list.append("name")
+        i_col_list.append("format")
         self.L =iwx.iList(parent,i_size,i_pos,i_col_list)
         b_prev=wx.Button(parent,wx.ID_ANY,"Preview",(i_size[0]+20,160),(70,30),wx.BU_EXACTFIT)
         b_prev.Bind(wx.EVT_BUTTON, self.OnPrev,b_prev)
@@ -218,6 +224,9 @@ class imgList (iwx.iList):
         bmp = self.get_bmp("/tmp/thb"+self.config["format"])
        
         self.canvas.SetBitmap( bmp)
+        
+    def OnAdd(self,e):
+        print "TO BE IMPLEMENTED"
               
 
 
