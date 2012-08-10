@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 import wx
 
+import cStringIO
+
 class iStaticText(wx.StaticText):
 
         
@@ -101,9 +103,19 @@ class iList(wx.ListCtrl):
         b_remove.Bind(wx.EVT_BUTTON, self.OnRemove, b_remove)
         b_reset.Bind(wx.EVT_BUTTON, self.OnReset, b_reset)
 
+
 # OnRemove()
     def OnRemove(self,e):
-        #get indices of selected items
+        indices = self.get_selected()
+	
+        # remove selected items
+        for j in indices:
+            self.LC.DeleteItem(j)
+            self.file_list.pop(j)
+            self.path_list.pop(j)
+
+    def get_selected(self):
+#get indices of selected items
         num_item = self.LC.GetItemCount()  
 
         i = 0
@@ -113,12 +125,8 @@ class iList(wx.ListCtrl):
            if a == True:
                indices.append(i)
            i = i+1
-	
-        # remove selected items
-        for j in indices:
-            self.LC.DeleteItem(j)
-            self.file_list.pop(j)
-            self.path_list.pop(j)
+        return indices
+        
 
 # OnAdd()
     def OnAdd(self,e):
@@ -149,6 +157,16 @@ class iList(wx.ListCtrl):
 # GetNames()
     def GetNames(self):
         return self.file_list
+        
+        
+        
+
+        
+        
+    
+        
 
 
         
+
+

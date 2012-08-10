@@ -46,10 +46,15 @@ class GUI (wx.Frame):
         sizer = wx.BoxSizer()
         sizer.Add(self.nb, 1, wx.EXPAND)
         
-        
-        self.list = iwx.iList(self.p2,(200,500),(0,0),{"name"})
+#        graphical elements
+
+
+
+        self.list = imgGUI.imgList(self.p2,(200,500),(0,0),{"name"})
         ok_b = wx.Button(self.p2,wx.ID_OK,"OK",(10,550),(80,80),wx.BU_EXACTFIT)
         ok_b.Bind(wx.EVT_BUTTON, self.OnOk)
+        
+        
         
         self.p1.SetSizer(sizer)
         self.p2.SetSizer(sizer)
@@ -63,9 +68,14 @@ class GUI (wx.Frame):
         
 #/////////////  CALLBACKS
     def OnOk(self,e):
-        names = self.list.GetNames()        
-        paths = self.list.GetPaths()
-        Publisher().sendMessage("master.filesmsg",{paths,names})
+        names = self.list.L.GetNames()        
+        paths = self.list.L.GetPaths()
+        msg = list()
+        if len(names) > 0 or len(paths) > 0:
+            msg.append(paths)
+            msg.append(names)
+        
+            Publisher().sendMessage("master.filesmsg",msg)
 
     def spawn_imgGUI(self,size,in_file,in_path,out_path):
 

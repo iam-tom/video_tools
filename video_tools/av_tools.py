@@ -38,11 +38,12 @@ class thumbnailer():
 #        get movie name    
         dot = self.i_path.find(".")
         mov_name = self.i_path[0:dot]
-        o_path = self.o_path+mov_name+"_thb"+self.format
+#        o_path = self.o_path+mov_name+"_thb"+self.format
+        o_path = self.o_path+"thb"+self.format
     
     
     
-        command = ["ffmpeg","-i",self.i_path,"-vframes","1","-s",str(self.frame_size),"-v","-10","-y",o_path]
+        command = ["avconv","-i",self.i_path,"-vframes","1","-s",str(self.frame_size),"-v","-10","-y",o_path]
         subprocess.call(command)
         
         

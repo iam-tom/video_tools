@@ -1,9 +1,11 @@
 import sys
 import wx
+import iwx
 import cStringIO
 from PIL import Image
 from wx.lib.pubsub import Publisher
 from TimeLapseTools import tlm
+from av_tools import thumbnailer
 
 
 class GUI(wx.Panel):
@@ -16,7 +18,7 @@ class GUI(wx.Panel):
         self.in_path = config["i_file"]
         self.size = config["size"]
         
-        self.init_img = ".data/tlm_init.bmp"
+        self.init_img = ".data/tlm_init.png"
         
 #//////////////// graphical elements /////////        
         p_size=(self.size[0],self.size[1])
@@ -177,7 +179,45 @@ class GUI(wx.Panel):
         self.bmp_work = self.bmp_orig
         print "reset"
         
+class imgList (iwx.iList):
+    def __init__(self,parent,i_size,i_pos,i_col_list):
+        self.L =iwx.iList(parent,i_size,i_pos,i_col_list)
+        b_prev=wx.Button(parent,wx.ID_ANY,"Preview",(i_size[0]+20,160),(70,30),wx.BU_EXACTFIT)
+        b_prev.Bind(wx.EVT_BUTTON, self.OnPrev,b_prev)
+        self.T = thumbnailer()
+        self.prev_init_state(parent,(i_size[0]+140, 60))
+        wx.StaticText(parent,wx.ID_ANY,"Preview",pos=(i_size[0]+140,40))	
 
+        
+
+        
+    def prev_init_state(self,parent,pos):
+        self.config = {"format":".png","frame_size":"qvga", "i_path":"", "o_path":"/tmp/" }
+
+        bmp  = self.get_bmp(".data/prev_init.png")
+        self.canvas =wx.StaticBitmap(parent, -1, bmp,pos )    
+
+    def get_bmp(self,path):
+        data = open(path, "rb").read()
+        # convert to a data stream
+        stream = cStringIO.StringIO(data)
+        # convert to a bitmap
+        image = wx.ImageFromStream( stream )  
+
+        bmp = wx.BitmapFromImage(image)
+        return bmp
+                
+    def OnPrev(self,e):
+        
+        index = self.L.get_selected()
+        self.config["i_path"] = self.L.path_list[index[0]]
+        
+        self.T.UpdateConfig(self.config)
+        self.T.CreateThumbnail()
+        
+        bmp = self.get_bmp("/tmp/thb"+self.config["format"])
+       
+        self.canvas.SetBitmap( bmp)
               
 
 
