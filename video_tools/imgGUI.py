@@ -187,21 +187,23 @@ class imgList (iwx.iList):
         i_col_list = list()
         i_col_list.append("name")
         i_col_list.append("format")
-        self.L =iwx.iList(parent,i_size,i_pos,i_col_list)
+        self.prev_config ={"pos":(i_size[0]+140,60),"parent":parent}
+        
+        super(imgList,self).__init__(parent,i_size,i_pos,i_col_list)
         b_prev=wx.Button(parent,wx.ID_ANY,"Preview",(i_size[0]+20,160),(70,30),wx.BU_EXACTFIT)
         b_prev.Bind(wx.EVT_BUTTON, self.OnPrev,b_prev)
         self.T = thumbnailer()
-        self.prev_init_state(parent,(i_size[0]+140, 60))
+        self.prev_init_state()
         wx.StaticText(parent,wx.ID_ANY,"Preview",pos=(i_size[0]+140,40))	
 
         
 
         
-    def prev_init_state(self,parent,pos):
+    def prev_init_state(self):
         self.config = {"format":".png","frame_size":"qvga", "i_path":"", "o_path":"/tmp/" }
 
         bmp  = self.get_bmp(".data/prev_init.png")
-        self.canvas =wx.StaticBitmap(parent, -1, bmp,pos )    
+        self.canvas =wx.StaticBitmap(self.prev_config["parent"], -1, bmp,self.prev_config["pos"] )    
 
     def get_bmp(self,path):
         data = open(path, "rb").read()
@@ -215,8 +217,8 @@ class imgList (iwx.iList):
                 
     def OnPrev(self,e):
         
-        index = self.L.get_selected()
-        self.config["i_path"] = self.L.path_list[index[0]]
+        index = self.get_selected()
+        self.config["i_path"] = self.path_list[index[0]]
         
         self.T.UpdateConfig(self.config)
         self.T.CreateThumbnail()
@@ -225,8 +227,10 @@ class imgList (iwx.iList):
        
         self.canvas.SetBitmap( bmp)
         
-    def OnAdd(self,e):
-        print "TO BE IMPLEMENTED"
+    def OnReset(self,e):
+        iwx.iList.OnReset(self,e)
+        self.prev_init_state()
+        
               
 
 
