@@ -14,8 +14,14 @@ class tlm (object):
 #        default values for flags
         self.flags={"filter":Image.BICUBIC}
         
-        self.make_input_list()
+        if os.path.isdir(self.in_path[0]) == True:
+            self.make_input_list()
+        else:
+            self.in_frames = in_path
 
+            
+
+            
         
     def set_flags(self,filter_method):
         self.flags["filter"] = filter_method
@@ -54,8 +60,10 @@ class tlm (object):
 
 
         for curr_frame in self.in_frames:           
-            curr_str = self.in_path+curr_frame
-            img = Image.open(curr_str)
+#            curr_str = self.in_path+curr_frame
+
+            img = Image.open(curr_frame)
+
             img_size = img.size
             if self.ul_x[i]+box_size[0] < img_size[0] and self.ul_y[i]+box_size[1]:
                 img = img.crop((self.ul_x[i],self.ul_y[i],self.ul_x[i]+box_size[0],self.ul_y[i]+box_size[1]))
@@ -81,7 +89,7 @@ if __name__ == '__main__':
 #    frame_size = (1920,1080)
     frame_size = (50,50)
     output_size = (20,20)
-    in_path = "/host/MEDIA/photography/2012-04-20 SPAIN/sunrise/raw_lapses/lapse_0/"
+    #in_path = "/host/MEDIA/photography/2012-04-20 SPAIN/sunrise/raw_lapses/lapse_0/"
     o = "/home/tom/lapse1"
     
 

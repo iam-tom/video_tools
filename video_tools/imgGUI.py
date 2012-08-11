@@ -8,14 +8,14 @@ from TimeLapseTools import tlm
 from av_tools import thumbnailer
 
 
-class GUI(wx.Panel):
+class tlmGUI(wx.Panel):
     def __init__(self, parent,config):
     
 #//////////////// allocations /////////////////
 
         self.positions = list()
     
-        self.in_path = config["i_file"]
+        self.in_path = list()
         self.size = config["size"]
         
         self.init_img = ".data/tlm_init.png"
@@ -31,9 +31,8 @@ class GUI(wx.Panel):
        
 
         
-        self.setInitState()
-        
-#//////////////// TLM ///////////
+        self.setInitState()      
+
 
         
         
@@ -48,6 +47,7 @@ class GUI(wx.Panel):
 #///////////CALLBACKS /////////////
 
     def OnFilesMsg(self,msg):
+        self.in_path = msg.data[0]
         self.setNewState(msg.data[0][0]) 
                         
 
@@ -137,7 +137,14 @@ class GUI(wx.Panel):
             
     def OnAccept(self,e, config):
    
-        Publisher().sendMessage(("imgGUI.positions"), self.positions)    
+        Publisher().sendMessage(("imgGUI.positions"), self.positions)
+
+        T = tlm(self.in_path,"..")
+        T.computeBoxes((self.positions[0].x,self.positions[0].y),
+                        (self.positions[2].x,self.positions[2].y))
+        frame_size = (self.positions[1].x-self.positions[0].x,
+                        self.positions[1].y-self.positions[0].y)
+        T.crop_scale_save(frame_size,frame_size)    
 
 
     def OnLeftClick(self, e):

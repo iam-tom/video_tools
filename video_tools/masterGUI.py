@@ -36,7 +36,7 @@ class GUI (wx.Frame):
         
                
         config["size"] = (sw/2,sh)
-        page1 = imgGUI.GUI(self.nb,config)
+        page1 = imgGUI.tlmGUI(self.nb,config)
         page2 = avconvGUI.GUI(self.nb)
         page3 = importGUI.GUI(self.nb,config)
         
@@ -68,8 +68,8 @@ class GUI (wx.Frame):
         
 #/////////////  CALLBACKS
     def OnOk(self,e):
-        names = self.list.L.GetNames()        
-        paths = self.list.L.GetPaths()
+        names = self.list.GetNames()        
+        paths = self.list.GetPaths()
         msg = list()
         if len(names) > 0 or len(paths) > 0:
             msg.append(paths)
