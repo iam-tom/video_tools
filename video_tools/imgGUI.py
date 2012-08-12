@@ -1,4 +1,5 @@
 import sys
+import os
 import wx
 import iwx
 import cStringIO
@@ -28,6 +29,9 @@ class tlmGUI(wx.Panel):
         b_accept=wx.Button(self,wx.ID_OK,"OK",(0,(self.size[1]*4)/5),(70,30),wx.BU_EXACTFIT)
         b_accept.Bind(wx.EVT_BUTTON,lambda  evt , config = config: self.OnAccept(evt,config))
         
+#        b_browse =wx.TextCtrl(self, -1, "", pos=(100,(self.size[1]*4)/5))
+        self.b_browse = iwx.iBrowse(self,(200,(self.size[1]*4)/5))
+
        
 
         
@@ -138,13 +142,16 @@ class tlmGUI(wx.Panel):
     def OnAccept(self,e, config):
    
         Publisher().sendMessage(("imgGUI.positions"), self.positions)
-
-        T = tlm(self.in_path,"..")
-        T.computeBoxes((self.positions[0].x,self.positions[0].y),
+        
+        out_path = self.b_browse.GetData()
+        if os.path.isdir(out_path)==True:
+            T = tlm(self.in_path,out_path)
+            T.computeBoxes((self.positions[0].x,self.positions[0].y),
                         (self.positions[2].x,self.positions[2].y))
-        frame_size = (self.positions[1].x-self.positions[0].x,
+            frame_size = (self.positions[1].x-self.positions[0].x,
                         self.positions[1].y-self.positions[0].y)
-        T.crop_scale_save(frame_size,frame_size)    
+            T.crop_scale_save(frame_size,frame_size)
+            print "DONE"    
 
 
     def OnLeftClick(self, e):
