@@ -4,7 +4,7 @@ import wx
 import iwx
 import cStringIO
 from PIL import Image
-from wx.lib.pubsub import Publisher
+
 from TimeLapseTools import tlm
 from av_tools import thumbnailer
 
@@ -42,7 +42,7 @@ class tlmGUI(wx.Panel):
         
 #//////////////// PUBSUB /////////
  
-        Publisher().subscribe(self.OnFilesMsg,"master.filesmsg") 
+#        Publisher().subscribe(self.OnFilesMsg,"master.filesmsg") 
  
  
  
@@ -50,9 +50,9 @@ class tlmGUI(wx.Panel):
  
 #///////////CALLBACKS /////////////
 
-    def OnFilesMsg(self,msg):
-        self.in_path = msg.data[0]
-        self.setNewState(msg.data[0][0]) 
+    def SetInPath(self,msg):
+        self.in_path = msg[0]
+        self.setNewState(msg[0][0]) 
                         
 
     def setNewState(self,in_path):

@@ -1,7 +1,7 @@
 import os
 import wx
 import wdManager
-from wx.lib.pubsub import Publisher
+
 
 
 import iwx
@@ -45,7 +45,7 @@ class GUI(wx.Panel):
 
 #//////////////// PUBSUB /////////
  
-        Publisher().subscribe(self.OnFilesMsg,"master.filesmsg") 
+
         
 #buttons
         b_process=wx.Button(self,wx.ID_ANY,"Import",(270,480),(70,30),wx.BU_EXACTFIT)
@@ -145,9 +145,9 @@ class GUI(wx.Panel):
 #-----callback methods
 
 
-    def OnFilesMsg(self,msg):
-        self.list_paths = msg.data[0]
-        self.list_names = msg.data[1] 
+    def SetInPath(self,msg):
+        self.list_paths = msg[0]
+        self.list_names = msg[1] 
 
 # OnEditDesc()
     def OnEditDesc(self,e):

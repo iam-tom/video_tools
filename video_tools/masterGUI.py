@@ -2,7 +2,7 @@ import wx
 import imgGUI
 import avconvGUI
 import TimeLapseTools
-from wx.lib.pubsub import Publisher
+
 import subprocess
 import iwx
 import importGUI
@@ -36,13 +36,13 @@ class GUI (wx.Frame):
         
                
         config["size"] = (sw/2,sh)
-        page1 = imgGUI.tlmGUI(self.nb,config)
-        page2 = avconvGUI.GUI(self.nb)
-        page3 = importGUI.GUI(self.nb,config)
+        self.page1 = imgGUI.tlmGUI(self.nb,config)
+        self.page2 = avconvGUI.GUI(self.nb)
+        self.page3 = importGUI.GUI(self.nb,config)
         
-        self.nb.AddPage(page1, "TLM")
-        self.nb.AddPage(page2, "AVCONV")
-        self.nb.AddPage(page3,"IMPORT")
+        self.nb.AddPage(self.page1, "TLM")
+        self.nb.AddPage(self.page2, "AVCONV")
+        self.nb.AddPage(self.page3,"IMPORT")
         sizer = wx.BoxSizer()
         sizer.Add(self.nb, 1, wx.EXPAND)
         
@@ -60,12 +60,7 @@ class GUI (wx.Frame):
         self.p2.SetSizer(sizer)
 
         
-#/////////////  PUBSUB
-        Publisher().subscribe(self.OnPositions,("imgGUI.positions"))
 
-
-#        page1.setNewState(config["i_file"])
-        
 #/////////////  CALLBACKS
     def OnOk(self,e):
         names = self.list.GetNames()        
@@ -75,13 +70,14 @@ class GUI (wx.Frame):
             msg.append(paths)
             msg.append(names)
         
-            Publisher().sendMessage("master.filesmsg",msg)
-
+#            wx.Publisher().sendMessage("master.filesmsg",msg)
+        self.page1.SetInPath(msg)
+        self.page3.SetInPath(msg)
     def spawn_imgGUI(self,size,in_file,in_path,out_path):
 
         config = {"i_path": in_path, "i_file": in_file, "o_path": out_path , "size": size }        
         self.imgGUI = imgGUI.GUI(self.f,config)
-        Publisher().subscribe(self.OnPositions,("imgGUI.positions"))
+#        wx.Publisher().subscribe(self.OnPositions,("imgGUI.positions"))
                     
                     
     def OnPositions(self,msg):
