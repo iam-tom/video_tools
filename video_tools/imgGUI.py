@@ -7,6 +7,7 @@ from PIL import Image
 
 from TimeLapseTools import tlm
 from av_tools import thumbnailer
+from av_tools import frame_extractor
 
 
 class tlmGUI(wx.Panel):
@@ -20,6 +21,12 @@ class tlmGUI(wx.Panel):
         self.size = config["size"]
         
         self.init_img = ".data/tlm_init.png"
+        
+        
+        self.mode = 0 # default is im_seq mode
+#        mode = 1 # default is vid mode
+        
+        
         
 #//////////////// graphical elements /////////        
         p_size=(self.size[0],self.size[1])
@@ -52,10 +59,52 @@ class tlmGUI(wx.Panel):
 
     def SetInPath(self,msg):
         self.in_path = msg[0]
-        self.setNewState(msg[0][0]) 
+        self.check_mode(self.in_path[0])
                         
+        if self.mode == 0:
+            self.setNewState(msg[0][0])
+        elif self.mode == 1:
+            self.get_thumb(self.in_path[0])
 
-    def setNewState(self,in_path):
+            self.setNewState("/tmp/v/thb.png")
+
+            
+
+        
+                
+         
+                        
+    def check_mode(self,i_file):
+        
+        formats={".avi",".AVI",".mov",".MOV",".mp4",".mpeg"}
+        
+        dot =i_file.rfind(".")
+        suffix =i_file[dot:len(i_file)]
+        chk = suffix in formats
+        if chk == True:
+            self.mode = 1			
+
+    def get_thumb(self,in_path):
+        config = {"format":".png","frame_size":"", "i_path":in_path, "o_path":"/tmp/v/" }
+        t = thumbnailer()
+        t.UpdateConfig(config)
+        t.Run()
+    
+    def get_frames(self,in_path,fps):
+        config = {"format":".png","zeros":3,"fps":fps,"frame_size":"", "i_path":in_path, "o_path":"/tmp/f/" }
+        f = frame_extractor()
+        f.UpdateConfig(config)
+        f.Run()
+        
+        
+        
+        
+        
+
+
+    def setNewState(self,in_path):   
+    
+    
         
 #     wipe canvas   
             
@@ -101,8 +150,7 @@ class tlmGUI(wx.Panel):
         # convert to a bitmap
         image = wx.ImageFromStream( stream )      
         image = self.scale_image(image)
-        print image.GetWidth()
-        print image.GetHeight()
+
         
 
         bmp = wx.BitmapFromImage(image)
@@ -112,8 +160,7 @@ class tlmGUI(wx.Panel):
     def scale_image(self,image):
         o_width = image.GetWidth()
         o_height = image.GetHeight()
-        print o_width
-        print self.size[0]
+
         q = float(self.size[0]) /float( o_width)
         new_width = self.size[0]
         new_height = o_height*q
@@ -121,7 +168,7 @@ class tlmGUI(wx.Panel):
         if new_height*5 > self.size[1]*4:
             print "rescaling"
             new_height = (self.size[1]*4)/5
-            print new_height
+
             q = float(new_height)/float(o_height)
             new_width = o_width *q
             
@@ -140,6 +187,12 @@ class tlmGUI(wx.Panel):
         return image
             
     def OnAccept(self,e, config):
+        
+        if self.mode ==1:
+            self.get_frames(self.in_path[0],1)
+            self.in_path = list()
+            self.in_path.append("/tmp/f/")
+    
    
 
         
@@ -151,6 +204,7 @@ class tlmGUI(wx.Panel):
             frame_size = (self.positions[1].x-self.positions[0].x,
                         self.positions[1].y-self.positions[0].y)
             T.crop_scale_save(frame_size,frame_size)
+            T.ToVid()
             print "DONE"    
 
 
@@ -235,7 +289,7 @@ class imgList (iwx.iList):
         self.config["i_path"] = self.path_list[index[0]]
         
         self.T.UpdateConfig(self.config)
-        self.T.CreateThumbnail()
+        self.T.Run()
         
         bmp = self.get_bmp("/tmp/thb"+self.config["format"])
        

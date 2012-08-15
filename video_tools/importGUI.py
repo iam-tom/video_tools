@@ -204,13 +204,11 @@ class GUI(wx.Panel):
             for i in range(len(self.list_paths)):
                 input_name= self.list_names[i]
                 input_file = self.list_paths[i]
-                self.AvconvString(input_name,self.WD.basepath,av_config)
-                raw_input("1")
-                Converter.UpdateConfig(av_config)
-                print av_config
-                raw_input("2")
-                Converter.Convert()
-                raw_input("3")
+                self.AvconvString(input_name,self.WD.basepath,av_config)                
+                Converter.UpdateConfig(av_config)  
+                print "converting file %i of %i"%(i,len(self.list_paths))
+                Converter.Run()
+
 
 
 

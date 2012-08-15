@@ -1,6 +1,7 @@
 import os
 
 from PIL import Image
+import av_tools
 
 
 class tlm (object):
@@ -20,18 +21,40 @@ class tlm (object):
             self.in_frames = in_path
 
             
+    def FromVid(self,fps,size):
+        fe = av_tools.frame_extractor()
+        fe_config={"format":".png","zeros":3,"i_path":self.in_path,"o_path":"/tmp/tlm/","frame_size":size,"fps":fps}
+        fe.UpdateConfig(fe_config)
+        fe.Run()
+        # todo get images -> put in in_path
+        
+    def ToVid(self):
+        config_s={"format":".mov","zeros":3,"i_path":self.out_path,"o_path":"/home/tom/","fps":25}
+        stream = av_tools.streamer()
+        stream.UpdateConfig(config_s)
+        print "RUN IT"
+        print self.out_path
+        stream.Run()
 
+        
             
         
-    def set_flags(self,filter_method):
+    def set_flags(self,filter_method,mode):
         self.flags["filter"] = filter_method
+  
     
     def make_input_list(self):
-        allf = sorted(os.listdir(self.in_path)); 
+        allf = sorted(os.listdir(self.in_path[0])); 
         for i in xrange(len(allf)-1, -1, -1):
-            if os.path.isdir(self.in_path + os.path.sep + allf[i]):
-               self.in_frames.append(allf.pop(i))
-        self.in_frames.extend(allf) 
+            if os.path.isdir(self.in_path[0] + os.path.sep + allf[i]):
+                str_ =self.in_path[0]+allf.pop(i)
+                self.in_frames.append(str_)
+            else:
+                str_ =self.in_path[0]+allf.pop(i)
+                self.in_frames.append(str_)
+                
+
+
         
 
     
@@ -41,7 +64,7 @@ class tlm (object):
         range_y = ul_1[1] - ul_0[1]
         if steps> range_x  and steps > range_y:
             print "warning: more steps, than pixel range"
-            quit()
+
         else:
             dx= (range_x / steps)
             dy= (range_y / steps) 
@@ -76,6 +99,12 @@ class tlm (object):
             #print (p,0,p+100,200)
             #raw_input("press enter to continue")
             
+
+
+
+
+
+
 
 
 if __name__ == '__main__':

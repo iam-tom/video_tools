@@ -20,6 +20,8 @@ class GUI (wx.Frame):
         
         
         
+        
+        
         self.f = wx.Frame(None, title=title, size=(sw,sh) )
         self.f.Show()
         
@@ -43,6 +45,8 @@ class GUI (wx.Frame):
         self.nb.AddPage(self.page1, "TLM")
         self.nb.AddPage(self.page2, "AVCONV")
         self.nb.AddPage(self.page3,"IMPORT")
+        
+        self.active_page = self.page1
         
         self.nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED,self.OnTabChanged)
         
@@ -74,6 +78,7 @@ class GUI (wx.Frame):
             msg.append(names)
         
 #            wx.Publisher().sendMessage("master.filesmsg",msg)
+        
         self.active_page.SetInPath(msg)
 #        self.page1.SetInPath(msg)
 #        self.page3.SetInPath(msg)
