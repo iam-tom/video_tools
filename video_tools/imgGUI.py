@@ -42,7 +42,7 @@ class tlmGUI(wx.Panel):
         
 #//////////////// PUBSUB /////////
  
-#        Publisher().subscribe(self.OnFilesMsg,"master.filesmsg") 
+
  
  
  
@@ -141,7 +141,7 @@ class tlmGUI(wx.Panel):
             
     def OnAccept(self,e, config):
    
-        Publisher().sendMessage(("imgGUI.positions"), self.positions)
+
         
         out_path = self.b_browse.GetData()
         if os.path.isdir(out_path)==True:

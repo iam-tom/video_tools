@@ -1,7 +1,7 @@
 import os
 import wx
 import wdManager
-
+import av_tools
 
 
 import iwx
@@ -29,13 +29,13 @@ class GUI(wx.Panel):
         self.list_names = list()
 
         codec_preset_display=["-","mpeg2","h.264"]
-        self.codec_preset_intern=[" "," -c:v mpeg2"," -c:v lib264"]
+        self.codec_preset_intern=[" ",".mpeg",".mov"]
 
         res_preset_display=["-","hd 720p","hd 1080p"]
-        self.res_preset_intern=[" "," -s 1280x720"," -s 1920x1080"]
+        self.res_preset_intern=[" ","1280x720","1920x1080"]
 
     	bv_preset_display=["-","3000kb/s","1000kb/s"]
-        self.bv_preset_intern=[" " ," -b:v 3000K"," -b:v 10000K"]
+        self.bv_preset_intern=[" " ,"3000K","10000K"]
 	    
 	    
 #----graphical components
@@ -52,28 +52,29 @@ class GUI(wx.Panel):
 
 
 #checkbox
-        self.chkbx = wx.CheckBox(self,wx.ID_ANY,"Convert",pos=(7,240))
+        self.chkbx = wx.CheckBox(self,wx.ID_ANY,"Convert",pos=(7,310))
 
 #choice
-	s_codec=wx.StaticText(self,wx.ID_ANY,"Codec",pos=(7,270))	
-        self.choice_codec=wx.Choice(self, wx.ID_ANY, pos= (7,290), size=(70,30), choices=codec_preset_display)
-	s_codec=wx.StaticText(self,wx.ID_ANY,"Resolution",pos=(7,330))
-        self.choice_res=wx.Choice(self, wx.ID_ANY, pos= (7,350), size=(70,30), choices=res_preset_display)
-        s_bv=wx.StaticText(self,wx.ID_ANY,"Video Quality",pos=(7,390))
-        self.choice_bv=wx.Choice(self, wx.ID_ANY, pos= (7,410), size=(70,30), choices=bv_preset_display)
+	s_codec=wx.StaticText(self,wx.ID_ANY,"Codec",pos=(7,330))	
+        self.choice_codec=wx.Choice(self, wx.ID_ANY, pos= (7,350), size=(70,30), choices=codec_preset_display)
+	s_codec=wx.StaticText(self,wx.ID_ANY,"Resolution",pos=(7,390))
+        self.choice_res=wx.Choice(self, wx.ID_ANY, pos= (7,410), size=(70,30), choices=res_preset_display)
+        s_bv=wx.StaticText(self,wx.ID_ANY,"Video Quality",pos=(7,450))
+        self.choice_bv=wx.Choice(self, wx.ID_ANY, pos= (7,470), size=(70,30), choices=bv_preset_display)
 
 #WD STUFF~~~~~~~~~~~~~~
         dummy_wd=wx.StaticText(self,wx.ID_ANY,"Working Directory: Browse for existing WD \n  or chose path for new WD.",pos=(7,10))
 
-        wd_b_reset=wx.Button(self,wx.ID_ANY,"Reset",(250,60),(70,30),wx.BU_EXACTFIT)
+        wd_b_reset=wx.Button(self,wx.ID_ANY,"Reset",(7,60),(70,30),wx.BU_EXACTFIT)
+        wd_b_browse=wx.Button(self,wx.ID_ANY,"Browse",(150,60),(70,30),wx.BU_EXACTFIT)
 
-	wd_dummy1 = wx.StaticText(self,-1,"__________",(7,50))
+	wd_dummy1 = wx.StaticText(self,-1,"_________________________",(7,80))
 	self.wd_s_path = iwx.iStaticText(self,-1,"Path:",(7,110))
 	self.wd_s_name = iwx.iStaticText(self,-1,"Name:",(7,170))
 	self.wd_s_desc = iwx.iStaticText(self,-1,"Details:",(7,230))
-	wd_dummy1 = wx.StaticText(self,-1,"__________",(7,245))       
+	wd_dummy1 = wx.StaticText(self,-1,"_________________________",(7,290))       
 
-        wd_b_browse=wx.Button(self,wx.ID_ANY,"Browse",(150,60),(70,30),wx.BU_EXACTFIT)
+
         wd_b_desc=wx.Button(self,wx.ID_ANY,"View / Edit",(7,270),(100,30),wx.BU_EXACTFIT)
 
         self.Show(True)
@@ -98,10 +99,10 @@ class GUI(wx.Panel):
 	   self.wd_s_path.AddString("%s" % self.WD.basepath)
         dir_dlg.Destroy()
         os.chdir(self.WD.basepath)
-        selfroject = wdManager.Project_Creator()
+        self.project = wdManager.Project_Creator()
         if os.path.isfile(".wd") == True:
             
-            selfroject.ReadWDFile(self.WD)
+            self.project.ReadWDFile(self.WD)
 
             self.WD.old_wd = True
             
@@ -147,7 +148,8 @@ class GUI(wx.Panel):
 
     def SetInPath(self,msg):
         self.list_paths = msg[0]
-        self.list_names = msg[1] 
+        self.list_names = msg[1]
+        print self.list_paths 
 
 # OnEditDesc()
     def OnEditDesc(self,e):
@@ -165,56 +167,67 @@ class GUI(wx.Panel):
         do_convert = False
         if self.WD.done == False:
 
-            selfroject.CreateNewProject(self.WD)
+            self.project.CreateNewProject(self.WD)
 
             self.WD.done = True
 
 
 
 
-        if len(list_paths) == 0:
+        if len(self.list_paths) == 0:
             print "Choose input files first"
 
         if self.chkbx.IsChecked() == True:
+            Converter = av_tools.converter()
             do_convert = True
-            target_res_string =self.res_preset_intern[self.choice_res.GetCurrentSelection()]
-            target_codec_string = self.codec_preset_intern[self.choice_codec.GetCurrentSelection()]
-            target_bv_string = self.bv_preset_intern[self.choice_bv.GetCurrentSelection()]
-            target_list =[target_codec_string,target_res_string,target_bv_string]
-        else:
+            av_config={"format":".mov","zeros":3,"i_path":"","o_path":"","frame_size":"vga","fps":50,"bv":"10000K"}
+            av_config["frame_size"]=self.res_preset_intern[self.choice_res.GetCurrentSelection()]
+            av_config["format"]= self.codec_preset_intern[self.choice_codec.GetCurrentSelection()]
+            av_config["bv"] = self.bv_preset_intern[self.choice_bv.GetCurrentSelection()]
 
-            target_list=[" "," " ," "]
+      
 
-        k=0   
-        for i in list_paths:
-            input_name= list_names[k]
-            input_file = i
-            cp_string=self.CpString(input_name,i,self.WD.basepath)
+            
+
+
+        for i in range(len(self.list_paths)):
+            input_name= self.list_names[i]
+            input_file = self.list_paths[i]
+            cp_string=self.CpString(input_name,input_file,self.WD.basepath)
+            print "copying"
             os.system(cp_string)
-            k=k+1
+
 
         if do_convert == True:
-            k=0
-
-            for i in list_paths:
-                 input_name= list_names[k]
-                 input_file = i
-                 avconv_string=self.AvconvString(input_name,self.WD.basepath,target_list)
-                 print avconv_string
-                 os.system(avconv_string)
-                 k=k+1
-                 #print avconv_string
 
 
+            for i in range(len(self.list_paths)):
+                input_name= self.list_names[i]
+                input_file = self.list_paths[i]
+                self.AvconvString(input_name,self.WD.basepath,av_config)
+                raw_input("1")
+                Converter.UpdateConfig(av_config)
+                print av_config
+                raw_input("2")
+                Converter.Convert()
+                raw_input("3")
 
 
-        #avconv_string = AvconvString(target_list)
+
+
+
+
+
             
 
 #AvconvString()
-    def AvconvString(self,input_name,WD,target_list):
-        acs="avconv -i "+WD+"/files/video/raw/"+input_name+ target_list[0]+target_list[1]+target_list[2]+" -strict experimental "+WD+"/files/video/conv/"+input_name
-        return acs       	    
+    def AvconvString(self,input_name,WD,config):
+        config["o_path"] = WD+"/files/video/conv/"
+        config["i_path"] = list()
+        config["i_path"].append(WD+"/files/video/raw/"+input_name) 
+        
+
+       	    
 #CpString()
     def CpString(self,input_name,input_path,WD):
         cps="cp "+input_path+" "+WD+"/files/video/raw/"+input_name

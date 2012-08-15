@@ -93,7 +93,7 @@ class frame_extractor ():
         mov_name = self.i_path[0:dot]
         o_path = self.o_path+mov_name+"%"+str(self.leading_zeros)+"d"+self.format
         
-        command = ["ffmpeg","-i",self.i_path,"-vsync",str(self.fps),"-s",self.frame_size,"-v","-10","-y",o_path]
+        command = ["avconv","-i",self.i_path,"-vsync",str(self.fps),"-s",self.frame_size,"-v","-10","-y",o_path]
         subprocess.call(command)            
         
 
@@ -111,6 +111,7 @@ class converter ():
         self.o_path = str()
         self.frame_size = "vga"
         self.fps = 25
+        self.bv = "3000K"
         
     def UpdateConfig(self,config):
         self.format = config["format"]
@@ -118,18 +119,20 @@ class converter ():
         self.o_path = config["o_path"]
         self.frame_size = config["frame_size"]
         self.fps = config["fps"]
+        self.q = config["bv"]
 
     def Convert(self):
     
         for i_file in self.i_path:
     #        get movie name
 
-            dot = i_file.find(".")
-            mov_name = i_file[0:dot]
+            dot = i_file.rfind(".")
+            slash = i_file.rfind("/")
+            mov_name = i_file[slash+1:dot]
             o_path = self.o_path+mov_name+"_conv"+self.format
             
 
-            command = ["ffmpeg","-i",i_file,"-s",self.frame_size,"-r",str(self.fps),o_path]
+            command = ["avconv","-i",i_file,"-strict","experimental","-s",self.frame_size,"-r",str(self.fps),"-b:v",self.bv,o_path]
             subprocess.call(command)       
         
     
@@ -175,7 +178,7 @@ class streamer ():
         i_path = i_name+"%"+str(self.leading_zeros)+"d"+i_format
         
 
-        command = ["ffmpeg","-r",str(self.fps),"-i",i_path,"-s",self.frame_size,"-r",str(self.fps),o_path]
+        command = ["avconv","-r",str(self.fps),"-i",i_path,"-s",self.frame_size,"-r",str(self.fps),o_path]
         subprocess.call(command)       
         
     
@@ -196,7 +199,7 @@ if __name__ == '__main__':
     i_path_list = list()
     i_path_list.append("test.mov")
     config={"format":".png","zeros":3,"i_path":"test.mov","o_path":"","frame_size":"vga","fps":1}
-    config_c={"format":".mov","zeros":3,"i_path":i_path_list,"o_path":"","frame_size":"vga","fps":25}
+    config_c={"format":".mov","zeros":3,"i_path":i_path_list,"o_path":"","frame_size":"vga","fps":25,"bv":"10000K"}
     config_s={"format":".mov","zeros":3,"i_path":"test001.png","o_path":"","frame_size":"vga","fps":25}
     F = frame_extractor()
     T = thumbnailer()

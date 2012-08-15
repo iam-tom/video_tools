@@ -36,13 +36,16 @@ class GUI (wx.Frame):
         
                
         config["size"] = (sw/2,sh)
-        self.page1 = imgGUI.tlmGUI(self.nb,config)
+        self.page1 = imgGUI.tlmGUI(self.nb,config )
         self.page2 = avconvGUI.GUI(self.nb)
         self.page3 = importGUI.GUI(self.nb,config)
         
         self.nb.AddPage(self.page1, "TLM")
         self.nb.AddPage(self.page2, "AVCONV")
         self.nb.AddPage(self.page3,"IMPORT")
+        
+        self.nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED,self.OnTabChanged)
+        
         sizer = wx.BoxSizer()
         sizer.Add(self.nb, 1, wx.EXPAND)
         
@@ -71,8 +74,17 @@ class GUI (wx.Frame):
             msg.append(names)
         
 #            wx.Publisher().sendMessage("master.filesmsg",msg)
-        self.page1.SetInPath(msg)
-        self.page3.SetInPath(msg)
+        self.active_page.SetInPath(msg)
+#        self.page1.SetInPath(msg)
+#        self.page3.SetInPath(msg)
+        
+
+    def OnTabChanged(self,event):
+        self.active_page  = event.EventObject.GetChildren()[event.Selection]
+        event.Skip()
+
+
+        
     def spawn_imgGUI(self,size,in_file,in_path,out_path):
 
         config = {"i_path": in_path, "i_file": in_file, "o_path": out_path , "size": size }        

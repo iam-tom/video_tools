@@ -2,7 +2,7 @@
 import wx
 
 import cStringIO
-
+import time
 class iStaticText(wx.StaticText):
 
         
@@ -88,6 +88,7 @@ class iList(wx.ListCtrl):
         self.path_list = list()
         self.name_list = list()
         self.file_list = list()
+        self.disp_list = list()
         self.LC = wx.ListCtrl(parent,size=i_size,pos= i_pos,style= wx.TE_MULTILINE | wx.BORDER_SUNKEN)
         col_num=0
         for col_name in i_col_list:
@@ -135,10 +136,54 @@ class iList(wx.ListCtrl):
         if dlg.ShowModal() == wx.ID_OK:
             self.file_list = dlg.GetFilenames()
             self.path_list = dlg.GetPaths()
-	dlg.Destroy()
+                        
+        dlg.Destroy()
+#        self.seq_check(self.file_list)
         for f in self.file_list:
             self.LC.InsertStringItem(0,f)    
 
+    def seq_check(self,i):
+        a = i[0]
+        b = i[1]
+        print a
+        print b
+        p = ""
+#       check for pattern
+        for c in b:
+            chk = c in a
+            if chk == True:
+
+                p=p+"1"
+            elif chk == False:
+
+                p=p+ "0"
+        
+
+        i1= p.find("0")    
+        i2= p.rfind("0")
+        print p
+        print i1
+        print i2
+        q = i1
+        while True:
+            q = q-1
+            chk2 = "0" in a[q]
+            if chk2 == True:
+                continue
+            elif chk2 ==False:
+                break
+            
+
+        print a[0:q+1]
+        print a[0:i1]
+        start = a[q+1:i2]
+
+
+#        start =int(start)
+#        print start
+
+
+            
 # OnReset()    
     def OnReset(self,e):
         num_item = len(self.file_list)
