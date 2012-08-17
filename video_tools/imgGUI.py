@@ -9,6 +9,8 @@ from TimeLapseTools import tlm
 from av_tools import thumbnailer
 from av_tools import frame_extractor
 
+# changed tlm api - maybe leads to errors
+# changed to opitonal zoom mode maybe leads to errors
 
 class tlmGUI(wx.Panel):
     def __init__(self, parent,config):
@@ -23,8 +25,10 @@ class tlmGUI(wx.Panel):
         self.init_img = ".data/tlm_init.png"
         
         
-        self.mode = 0 # default is im_seq mode
-#        mode = 1 # default is vid mode
+        self.vid_mode = False # default is im_seq mode
+#       self.vid_mode  = True # default is vid mode
+        self.zoom_mode = False #default is pan only
+#        self.zoom_mode = True #default is pan only
         
         
         
@@ -61,12 +65,12 @@ class tlmGUI(wx.Panel):
         self.in_path = msg[0]
         self.check_mode(self.in_path[0])
                         
-        if self.mode == 0:
+        if self.vid_mode == False:
             self.setNewState(msg[0][0])
-        elif self.mode == 1:
+        elif self.vid_mode == True:
             self.get_thumb(self.in_path[0])
 
-            self.setNewState("/tmp/v/thb.png")
+            self.setNewState("/tmp/imgGUI/thb.png")
 
             
 
@@ -82,27 +86,23 @@ class tlmGUI(wx.Panel):
         suffix =i_file[dot:len(i_file)]
         chk = suffix in formats
         if chk == True:
-            self.mode = 1			
+            self.vid_mode = True			
 
     def get_thumb(self,in_path):
-        config = {"format":".png","frame_size":"", "i_path":in_path, "o_path":"/tmp/v/" }
+        config = {"format":".png","frame_size":"", "i_path":in_path, "o_path":"/tmp/imgGUI/" }
         t = thumbnailer()
         t.UpdateConfig(config)
         t.Run()
-    
-    def get_frames(self,in_path,fps):
-        config = {"format":".png","zeros":3,"fps":fps,"frame_size":"", "i_path":in_path, "o_path":"/tmp/f/" }
-        f = frame_extractor()
-        f.UpdateConfig(config)
-        f.Run()
+            
         
         
-        
-        
+    def check_zoom_mode(self):
+        self.zoom_mode = True
+        print "to be implemented"     
         
 
 
-    def setNewState(self,in_path):   
+    def setNewState(self,imageFile):   
     
     
         
@@ -111,7 +111,7 @@ class tlmGUI(wx.Panel):
             
 
     #        CLEAN VERISION
-            imageFile = in_path
+
             data_orig = open(imageFile, "rb").read()
             # convert to a data stream
             stream_orig = cStringIO.StringIO(data_orig)
@@ -188,31 +188,32 @@ class tlmGUI(wx.Panel):
             
     def OnAccept(self,e, config):
         
-        if self.mode ==1:
-            self.get_frames(self.in_path[0],1)
-            self.in_path = list()
-            self.in_path.append("/tmp/f/")
-    
-   
-
-        
+        T = tlm()
         out_path = self.b_browse.GetData()
         if os.path.isdir(out_path)==True:
-            T = tlm(self.in_path,out_path)
-            T.computeBoxes((self.positions[0].x,self.positions[0].y),
-                        (self.positions[2].x,self.positions[2].y))
-            frame_size = (self.positions[1].x-self.positions[0].x,
-                        self.positions[1].y-self.positions[0].y)
-            T.crop_scale_save(frame_size,frame_size)
-            T.ToVid()
+         #config ={"res":"","fps":"","box_start":"","box_end":""}
+            T.SetIO(self.in_path,out_path)
+            box0=list()
+            box1=list()
+            box1.append((self.positions[2][0],self.positions[2][1]))
+            box1.append((self.positions[3][0],self.positions[3][1]))
+            box0.append((self.positions[0][0],self.positions[0][1]))
+            box0.append((self.positions[1][0],self.positions[1][1]))
+            config ={"res":(640,480),"fps":25,"box_start":box0,"box_end":box1}
+            if self.vid_mode ==True:
+
+                T.Vid2Seq(config)
+            if self.vid_mode ==False:
+                
+                T.Seq2Seq(config)            
+            
             print "DONE"    
 
 
     def OnLeftClick(self, e):
 
-
+        self.check_zoom_mode()
         pos = e.GetPosition()
-
         dc = wx.MemoryDC() 
         dc.SelectObject(self.bmp_work)
         self.positions.append(pos)
@@ -225,11 +226,20 @@ class tlmGUI(wx.Panel):
             dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
             dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
             dc.EndDrawing()
-        elif len(self.positions) == 3:
+        elif len(self.positions) == 3 and self.zoom_mode == False:
             dim_box1=(self.positions[1][0]- self.positions[0][0],self.positions[1][1]- self.positions[0][1])
             ul = self.positions[2]
             dr = (self.positions[2][0]+dim_box1[0],self.positions[2][1]+dim_box1[1])
+            self.positions.append(dr)
             dc.BeginDrawing()
+            dc.SetPen(wx.Pen("blue",style=wx.SOLID))
+            dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
+            dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
+            dc.EndDrawing()
+            
+        elif len(self.positions) == 4 and self.zoom_mode == True:
+            ul = self.positions[2]
+            dr = self.positions[3]
             dc.SetPen(wx.Pen("blue",style=wx.SOLID))
             dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
             dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
@@ -300,5 +310,6 @@ class imgList (iwx.iList):
         self.prev_init_state()
         
               
+
 
 
