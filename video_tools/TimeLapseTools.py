@@ -86,16 +86,15 @@ class tlm (object):
         ul_1=box1[0]
         dr_1=box1[1]            
 
-        temp_path_crop = "/tmp/tlm/crops/"  
+        temp_path_crop = "/tmp/tlm_crops/"  
 #        process
-        if len(self.in_files) > 1:
-            print "to be implemented"
-            quit()
-        else:
-            self.compute_boxes(self.in_files,ul_0,dr_0,ul_1,dr_1)
-            self.crop_scale_save(self.in_files,frame_size,temp_path_crop)
-            self.stream(temp_path_crop,fps,self.o_dir)  
-            
+
+ 
+        self.compute_boxes(self.in_files,ul_0,dr_0,ul_1,dr_1)
+        self.crop_scale_save(self.in_files,frame_size,temp_path_crop)
+        self.stream(temp_path_crop,fps,self.out_dir)  
+
+        self.clean_temp(temp_path_crop)    
             
     def Vid2Seq(self,config):
 #        update config       dr_1=config["box_end"][1]
@@ -107,20 +106,20 @@ class tlm (object):
         dr_0=box0[1]        
         ul_1=box1[0]
         dr_1=box1[1]             
-        temp_path = "/tmp/tlm/frames/"
+        temp_path = "/tmp/tlm_frames/"
         
 #        process
         if len(self.in_files) > 1:
             print "to be implemented"
             quit()
         else:
-            self.extract_frames(self.in_files,temp_path)
+            self.extract_frames(fps,self.in_files,temp_path)
+            
             tmp_files =  self.files_from_dir(temp_path)
             self.compute_boxes(tmp_files,ul_0,dr_0,ul_1,dr_1)
             self.crop_scale_save(tmp_files,frame_size,self.out_dir)  
         
-            
-
+        self.clean_temp(temp_path)
     def Vid2Vid(self,config):
 #        update config
         frame_size=config["res"]
@@ -131,20 +130,20 @@ class tlm (object):
         dr_0=box0[1]        
         ul_1=box1[0]
         dr_1=box1[1]       
-        temp_path_full = "/tmp/tlm/frames/"
-        temp_path_crop = "/tmp/tlm/crops/"  
+        temp_path_full = "/tmp/tlm_frames/"
+        temp_path_crop = "/tmp/tlm_crops/"  
 #        process
         if len(self.in_files) > 1:
             print "to be implemented"
             quit()
         else:
-            self.extract_frames(self.in_files,temp_path_full)
+            self.extract_frames(fps,self.in_files,temp_path_full)
             tmp_files =  self.files_from_dir(temp_path_full)
             self.compute_boxes(tmp_files,ul_0,dr_0,ul_1,dr_1)
             self.crop_scale_save(tmp_files,frame_size,temp_path_crop)
-            self.stream(temp_path_crop,fps,self.o_dir)   
-   
-  
+            self.stream(temp_path_crop,fps,self.out_dir)   
+        self.clean_temp(temp_path_full)  
+        self.clean_temp(temp_path_crop)
 
 #////////////////////////////////       
             
@@ -163,7 +162,12 @@ class tlm (object):
         dr_0=box0[1]        
         ul_1=box1[0]
         dr_1=box1[1]
-
+    def frame_size_str(self,in_size):
+        fs_str= str()
+        fs_str+=str(in_size[0])
+        fs_str+="x"
+        fs_str+=str(in_size[1])
+        return fs_str 
 
     def files_from_dir(self,path):
         file_list = list()
@@ -179,7 +183,7 @@ class tlm (object):
                
     def extract_frames(self,fps,vid_file,out_path):
         fe = av_tools.frame_extractor()
-        fe_config={"format":".png","zeros":4,"i_path":vid_file,"o_path":out_path,"fps":fps}
+        fe_config={"format":".png","zeros":5,"i_path":vid_file,"o_path":out_path,"fps":fps,"frame_size":""}
         fe.UpdateConfig(fe_config)
         fe.Run()
 
@@ -199,14 +203,27 @@ class tlm (object):
                 self.in_files.append(str_)
                 
                 
-    def stream(self,i_dir,fps,o_dir):
-        config_s={"format":".mov","zeros":4,"i_path":i_dir,"o_path":o_dir,"fps":25}
+    def stream(self,i_dir,fps,out_dir):
+        config_s={"format":".mov","zeros":5,"i_path":i_dir,"o_path":out_dir,"fps":25}
         stream = av_tools.streamer()
         stream.UpdateConfig(config_s)
-        print self.out_dir
+        
         stream.Run()
                 
 
+    def zero_str(self,n_zeros,i):
+        
+        i_str=str(i)
+        zero_str=str()
+        for n in range(n_zeros):
+            zero_str+="0"
+        zero_str=zero_str[0:len(zero_str)-len(i_str)]+i_str
+        return zero_str
+
+    def clean_temp(self,path):
+        cmd = "rm "+path+"*"
+        os.system(cmd)      
+   
 
 #/////////old API//////////////        
 
@@ -237,6 +254,11 @@ class tlm (object):
 
         
     def crop_scale_save(self,files,o_size,o_path):
+        chk = os.path.isdir(o_path)
+        if chk == False:
+            cmd = "mkdir "+o_path
+            os.system("cmd")
+
         i = 0  
         in_bounds = i
         for curr_frame in files:
@@ -251,7 +273,8 @@ class tlm (object):
             else:
                 img = img.crop((self.ul_x[in_bounds],self.ul_y[in_bounds],self.dr_x[in_bounds],self.dr_y[in_bounds]))
             img = img.resize(o_size,self.flags["filter"])
-            o_file = o_path+"/img_"+str(i)+".jpg"
+            number_str=self.zero_str(5,i)
+            o_file = o_path+"img_"+number_str+".jpg"
             img.save(o_file)
             i = i+1
 

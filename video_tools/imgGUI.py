@@ -42,8 +42,10 @@ class tlmGUI(wx.Panel):
         
 #        b_browse =wx.TextCtrl(self, -1, "", pos=(100,(self.size[1]*4)/5))
         self.b_browse = iwx.iBrowse(self,(200,(self.size[1]*4)/5))
-
-       
+        
+        choices_out_mode=["Img Sequence","Video"]
+        self.choices_out_mode=wx.Choice(self, wx.ID_ANY, pos= (500,(self.size[1]*4)/5), size=(70,30), choices=choices_out_mode)
+      
 
         
         self.setInitState()      
@@ -63,7 +65,7 @@ class tlmGUI(wx.Panel):
 
     def SetInPath(self,msg):
         self.in_path = msg[0]
-        self.check_mode(self.in_path[0])
+        self.check_in_mode(self.in_path[0])
                         
         if self.vid_mode == False:
             self.setNewState(msg[0][0])
@@ -75,10 +77,16 @@ class tlmGUI(wx.Panel):
             
 
         
-                
-         
+    def check_out_mode(self):
+        chk =self.choices_out_mode.GetCurrentSelection()
+        
+        if chk == 0:
+            seq_out = True
+        elif chk ==1:
+            seq_out = False
+        return seq_out
                         
-    def check_mode(self,i_file):
+    def check_in_mode(self,i_file):
         
         formats={".avi",".AVI",".mov",".MOV",".mp4",".mpeg"}
         
@@ -101,7 +109,20 @@ class tlmGUI(wx.Panel):
         print "to be implemented"     
         
 
-
+    def get_out_dir(self):
+        out_path = self.b_browse.GetData()
+        slash = out_path.rfind("/")
+        if (len(out_path)-slash) >1:
+            out_path+="/"
+        chk = os.path.isdir(out_path)
+        if chk == False:
+            self.make_dir(out_path)
+        return out_path
+    
+    def make_dir(self,path):
+        cmd = "mkdir "+path
+        os.system(cmd)
+        
     def setNewState(self,imageFile):   
     
     
@@ -187,11 +208,9 @@ class tlmGUI(wx.Panel):
         return image
             
     def OnAccept(self,e, config):
-        
-        T = tlm()
-        out_path = self.b_browse.GetData()
-        if os.path.isdir(out_path)==True:
-         #config ={"res":"","fps":"","box_start":"","box_end":""}
+            out_path = self.get_out_dir()        
+            T = tlm()
+                 #config ={"res":"","fps":"","box_start":"","box_end":""}
             T.SetIO(self.in_path,out_path)
             box0=list()
             box1=list()
@@ -200,12 +219,24 @@ class tlmGUI(wx.Panel):
             box0.append((self.positions[0][0],self.positions[0][1]))
             box0.append((self.positions[1][0],self.positions[1][1]))
             config ={"res":(640,480),"fps":25,"box_start":box0,"box_end":box1}
+            seq_out = True 
+            seq_out = self.check_out_mode()
+            
             if self.vid_mode ==True:
+                if seq_out ==True:
+                    print"VID2SEQ"
+                    T.Vid2Seq(config)
+                else:
+                    print"VID2VID"
+                    T.Vid2Vid(config)
 
-                T.Vid2Seq(config)
             if self.vid_mode ==False:
-                
-                T.Seq2Seq(config)            
+                if seq_out ==True:
+                    print"SEQ2SEQ"
+                    T.Seq2Seq(config)
+                else:
+                    print"SEQ2VID"
+                    T.Seq2Vid(config)               
             
             print "DONE"    
 

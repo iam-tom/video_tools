@@ -98,19 +98,21 @@ class frame_extractor ():
 
     def Run(self):
 #        get movie name    
-        dot = self.i_path.find(".")
-        slash = self.i_path.rfind("/")
-        mov_name = self.i_path[slash+1:dot]
+        dot = self.i_path[0].find(".")
+        slash = self.i_path[0].rfind("/")
+        mov_name = self.i_path[0][slash+1:dot]
         o_path = self.o_path+mov_name+"%"+str(self.leading_zeros)+"d"+self.format
-        
+        print o_path 
         if os.path.isdir(self.o_path) == False:
             mkdir_str = "mkdir "+self.o_path
             os.system(mkdir_str)
         if len(self.frame_size)>0:
-            command = ["avconv","-i",self.i_path,"-r",str(self.fps),"-s",self.frame_size,"-v","-10","-y",o_path]
+            command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-s",self.frame_size,"-v","-10","-y",o_path]
         else:
-            command = ["avconv","-i",self.i_path,"-r",str(self.fps),"-y",o_path]
-        subprocess.call(command)            
+           
+            command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-y",o_path]
+            print command
+            subprocess.call(command)            
         
 
 
@@ -171,7 +173,7 @@ class streamer ():
         self.fps = 25
         
     def UpdateConfig(self,config):
-        self.format = config["format"]
+        self.format= config["format"]
         self.i_path = config["i_path"]
         self.o_path = config["o_path"]
 #        self.frame_size = config["frame_size"]
@@ -182,27 +184,36 @@ class streamer ():
     def Run(self):
 #        get movie name
 
-        if os.path.isdir(self.i_path) == True:
+        chk =  os.path.isdir(self.i_path)
+        print self.i_path
+        if chk  == True:
+            print "DIR DETECTED"
             allf = sorted(os.listdir(self.i_path)); 
             f = allf[0]
-            dot = self.i_path.rfind(".")
-
+            print f
+            dot = f.rfind(".")
+            print dot
             i_format = f[(dot):(len(self.i_path))]
             i_name =  f[0:(dot-self.leading_zeros)]
-            
-        else:                        
-                
-            dot = self.i_path.find(".")
-            i_format = self.i_path[(dot):(len(self.i_path))]
-            i_name =  self.i_path[0:(dot-self.leading_zeros)]
+            i_path = self.i_path+i_name+"%"+str(self.leading_zeros)+"d"+i_format
+
             print i_format
             print i_name
-        
+        else:                        
+                
+            dot = self.i_path[0].rfind(".")
+            i_format = self.i_path[0][(dot):(len(self.i_path))]
+            i_name =  self.i_path[0][0:(dot-self.leading_zeros)]
+            i_path = self.i_path[0][0:(dot-self.leading_zeros)]+"%"+str(self.leading_zeros)+"d"+i_format
+            print "---------------"
+            print i_format
+            print i_name
+            print "---------------"       
         
         o_path = self.o_path+i_name+"_stream"+self.format
+        print o_path
         
-        i_path = i_name+"%"+str(self.leading_zeros)+"d"+i_format
-        
+        print i_path
         if len(self.frame_size)>0:
             command = ["avconv","-r",str(self.fps),"-i",i_path,"-s",self.frame_size,"-r",str(self.fps),o_path]
         else:
