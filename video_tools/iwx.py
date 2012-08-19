@@ -86,9 +86,7 @@ class iList(wx.ListCtrl):
     def __init__(self,parent,i_size,i_pos,i_col_list):
 #presets
         self.path_list = list()
-        self.name_list = list()
         self.file_list = list()
-        self.disp_list = list()
         self.LC = wx.ListCtrl(parent,size=i_size,pos= i_pos,style= wx.TE_MULTILINE | wx.BORDER_SUNKEN)
         col_num=0
         for col_name in i_col_list:

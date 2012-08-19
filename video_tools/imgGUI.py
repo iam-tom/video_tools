@@ -352,12 +352,14 @@ class imgList (iwx.iList):
     def OnAdd(self,e):
         dlg = wx.FileDialog(None,"Choose Files ",style =wx.FD_MULTIPLE )
         if dlg.ShowModal() == wx.ID_OK:
-            self.file_list = dlg.GetFilenames()
-            self.path_list = dlg.GetPaths()
-                        
+            new_files = dlg.GetFilenames()
+            new_paths = dlg.GetPaths()
+            self.path_list = new_paths
+            self.file_list = new_files
         dlg.Destroy()
 
-        t0 = time.time()
+#TODO: ---merge old list with new entries(uniqueness)
+#      ---collapse list and make mapping from displayed lsit to paths
         if self.chkbx.IsChecked()==True:
 
             sc = imgutils.seq_compressor(set(self.file_list))
@@ -366,7 +368,6 @@ class imgList (iwx.iList):
             self.file_list = list(groups)
         
             
-            t1=time.time()
             i=0
 #        self.seq_check(self.file_list)
             for f in self.file_list:
@@ -374,5 +375,6 @@ class imgList (iwx.iList):
                 self.LC.InsertStringItem(0,f)    
                 self.LC.SetStringItem(0,1,meta[i]["format"])  
         else:
+
             for f in self.file_list:
                 self.LC.InsertStringItem(0,f)

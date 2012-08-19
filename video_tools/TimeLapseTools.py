@@ -277,7 +277,7 @@ class tlm (object):
             o_file = o_path+"img_"+number_str+".jpg"
             img.save(o_file)
             i = i+1
-
+        print "cropped scaled saved"
 #////////////////////////////////////
 
 

@@ -4,6 +4,7 @@
 import PIL
 import subprocess
 import os
+import threading
 
 
 #/////////////// /////////////////////////// //////////////
@@ -70,15 +71,18 @@ class thumbnailer():
 #/////////////// ///////////////  ////////////// //////////////
 
 
-class frame_extractor ():
+class frame_extractor (threading.Thread):
 
     def __init__(self):
-    
+        self.thr=threading.Thread(target=self.exe)
+        self.thr.deamon=True
+        self.thr.deamon = True    
 #/////////////// Allocations and default vaules //////////////
         self.format = ".png"
         self.leading_zeros = 3
         self.i_path = str()
         self.o_path = str()
+        self.o_dir = str()
         self.frame_size = ""
         self.fps = 1
 
@@ -90,7 +94,7 @@ class frame_extractor ():
         self.format = config["format"]
         self.leading_zeros = config["zeros"]
         self.i_path = config["i_path"]
-        self.o_path = config["o_path"]
+        self.o_dir = config["o_path"]
         self.frame_size = config["frame_size"]
         self.fps = config["fps"]
         
@@ -101,16 +105,18 @@ class frame_extractor ():
         dot = self.i_path[0].find(".")
         slash = self.i_path[0].rfind("/")
         mov_name = self.i_path[0][slash+1:dot]
-        o_path = self.o_path+mov_name+"%"+str(self.leading_zeros)+"d"+self.format
-        print o_path 
+        self.o_path = self.o_dir+mov_name+"%"+str(self.leading_zeros)+"d"+self.format
         if os.path.isdir(self.o_path) == False:
-            mkdir_str = "mkdir "+self.o_path
+            mkdir_str = "mkdir "+self.o_dir
             os.system(mkdir_str)
+        self.thr.start()
+
+    def exe(self):    
         if len(self.frame_size)>0:
-            command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-s",self.frame_size,"-v","-10","-y",o_path]
+            command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-s",self.frame_size,"-v","-10","-y",self.o_path]
         else:
            
-            command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-y",o_path]
+            command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-y",self.o_path]
             print command
             subprocess.call(command)            
         
