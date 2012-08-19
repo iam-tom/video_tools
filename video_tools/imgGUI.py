@@ -9,6 +9,8 @@ from TimeLapseTools import tlm
 from av_tools import thumbnailer
 from av_tools import frame_extractor
 
+import imgutils
+import time
 # changed tlm api - maybe leads to errors
 # changed to opitonal zoom mode maybe leads to errors
 
@@ -44,9 +46,11 @@ class tlmGUI(wx.Panel):
         self.b_browse = iwx.iBrowse(self,(200,(self.size[1]*4)/5))
         
         choices_out_mode=["Img Sequence","Video"]
-        self.choices_out_mode=wx.Choice(self, wx.ID_ANY, pos= (500,(self.size[1]*4)/5), size=(70,30), choices=choices_out_mode)
+        self.choices_out_mode=wx.Choice(self, wx.ID_ANY, pos= (500,(self.size[1]*4)/5), size=(130,30), choices=choices_out_mode)
       
 
+        choices_zoom_mode=["Zoom&Pan","Pan Only"]
+        self.choices_zoom_mode=wx.Choice(self, wx.ID_ANY, pos= (700,(self.size[1]*4)/5), size=(130,30), choices=choices_zoom_mode)
         
         self.setInitState()      
 
@@ -105,8 +109,12 @@ class tlmGUI(wx.Panel):
         
         
     def check_zoom_mode(self):
-        self.zoom_mode = True
-        print "to be implemented"     
+        chk = self.choices_zoom_mode.GetCurrentSelection()
+        if chk == 0:
+            self.zoom_mode =True 
+        elif chk ==1:
+            self.zoom_mode = False
+             
         
 
     def get_out_dir(self):
@@ -305,7 +313,7 @@ class imgList (iwx.iList):
         self.prev_init_state()
         wx.StaticText(parent,wx.ID_ANY,"Preview",pos=(i_size[0]+140,40))	
 
-        
+        self.chkbx=wx.CheckBox(parent,wx.ID_ANY," Img Seq",pos =(i_size[0]+20,200)) 
 
         
     def prev_init_state(self):
@@ -340,7 +348,31 @@ class imgList (iwx.iList):
         iwx.iList.OnReset(self,e)
         self.prev_init_state()
         
-              
+        
+    def OnAdd(self,e):
+        dlg = wx.FileDialog(None,"Choose Files ",style =wx.FD_MULTIPLE )
+        if dlg.ShowModal() == wx.ID_OK:
+            self.file_list = dlg.GetFilenames()
+            self.path_list = dlg.GetPaths()
+                        
+        dlg.Destroy()
 
+        t0 = time.time()
+        if self.chkbx.IsChecked()==True:
 
-
+            sc = imgutils.seq_compressor(set(self.file_list))
+            groups= sc.get_groups()
+            meta = sc.get_meta()
+            self.file_list = list(groups)
+        
+            
+            t1=time.time()
+            i=0
+#        self.seq_check(self.file_list)
+            for f in self.file_list:
+                print "format = %s"% meta[i]["format"]
+                self.LC.InsertStringItem(0,f)    
+                self.LC.SetStringItem(0,1,meta[i]["format"])  
+        else:
+            for f in self.file_list:
+                self.LC.InsertStringItem(0,f)
