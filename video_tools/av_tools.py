@@ -6,6 +6,8 @@ import subprocess
 import os
 import threading
 
+import utils
+
 
 #/////////////// /////////////////////////// //////////////
 #/////////////// CLASS:  THUMBNAILER //////////////
@@ -43,10 +45,10 @@ class thumbnailer():
 #        o_path = self.o_path+mov_name+"_thb"+self.format
         o_path = self.o_path+"thb"+self.format
     
-    
-        if os.path.isdir(self.o_path) == False:
-            mkdir_str = "mkdir "+self.o_path
-            os.system(mkdir_str)
+        utils.assert_dir(self.o_path) 
+        #if os.path.isdir(self.o_path) == False:
+        #    mkdir_str = "mkdir -p "+self.o_path
+        #    os.system(mkdir_str)
 
         if len(self.frame_size)>0:
             command = ["avconv","-i",self.i_path,"-vframes","1","-s",str(self.frame_size),"-y",o_path]
@@ -75,7 +77,6 @@ class frame_extractor (threading.Thread):
 
     def __init__(self):
         self.thr=threading.Thread(target=self.exe)
-        self.thr.deamon=True
         self.thr.deamon = True    
 #/////////////// Allocations and default vaules //////////////
         self.format = ".png"
@@ -106,9 +107,10 @@ class frame_extractor (threading.Thread):
         slash = self.i_path[0].rfind("/")
         mov_name = self.i_path[0][slash+1:dot]
         self.o_path = self.o_dir+mov_name+"%"+str(self.leading_zeros)+"d"+self.format
-        if os.path.isdir(self.o_path) == False:
-            mkdir_str = "mkdir "+self.o_dir
-            os.system(mkdir_str)
+        utils.assert_dir(self.o_path)
+        #if os.path.isdir(self.o_path) == False:
+        #    mkdir_str = "mkdir -p "+self.o_dir
+        #    os.system(mkdir_str)
         self.thr.start()
 
     def exe(self):    

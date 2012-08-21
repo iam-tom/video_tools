@@ -11,6 +11,9 @@ from av_tools import frame_extractor
 
 import imgutils
 import time
+
+import utils
+
 # changed tlm api - maybe leads to errors
 # changed to opitonal zoom mode maybe leads to errors
 
@@ -122,9 +125,11 @@ class tlmGUI(wx.Panel):
         slash = out_path.rfind("/")
         if (len(out_path)-slash) >1:
             out_path+="/"
-        chk = os.path.isdir(out_path)
-        if chk == False:
-            self.make_dir(out_path)
+        utils.assert_dir(out_path)
+
+       # chk = os.path.isdir(out_path)
+       # if chk == False:
+       #     self.make_dir(out_path)
         return out_path
     
     def make_dir(self,path):
