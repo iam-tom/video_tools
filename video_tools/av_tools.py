@@ -77,7 +77,7 @@ class frame_extractor (threading.Thread):
 
     def __init__(self):
         self.thr=threading.Thread(target=self.exe)
-        self.thr.deamon = True    
+        self.thr.deamon=True    
 #/////////////// Allocations and default vaules //////////////
         self.format = ".png"
         self.leading_zeros = 3
@@ -120,7 +120,7 @@ class frame_extractor (threading.Thread):
            
             command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-y",self.o_path]
             print command
-            subprocess.call(command)            
+            subprocess.popen(command)            
         
 
 

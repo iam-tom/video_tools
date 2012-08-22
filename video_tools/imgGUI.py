@@ -122,10 +122,10 @@ class tlmGUI(wx.Panel):
 
     def get_out_dir(self):
         out_path = self.b_browse.GetData()
+        utils.assert_dir(out_path)
         slash = out_path.rfind("/")
         if (len(out_path)-slash) >1:
             out_path+="/"
-        utils.assert_dir(out_path)
 
        # chk = os.path.isdir(out_path)
        # if chk == False:
@@ -221,7 +221,8 @@ class tlmGUI(wx.Panel):
         return image
             
     def OnAccept(self,e, config):
-            out_path = self.get_out_dir()        
+            out_path = self.get_out_dir()
+            utils.assert_dir(out_path)        
             T = tlm()
                  #config ={"res":"","fps":"","box_start":"","box_end":""}
             T.SetIO(self.in_path,out_path)
@@ -362,7 +363,6 @@ class imgList (iwx.iList):
             self.path_list = new_paths
             self.file_list = new_files
         dlg.Destroy()
-
 #TODO: ---merge old list with new entries(uniqueness)
 #      ---collapse list and make mapping from displayed lsit to paths
         if self.chkbx.IsChecked()==True:
@@ -380,6 +380,7 @@ class imgList (iwx.iList):
                 self.LC.InsertStringItem(0,f)    
                 self.LC.SetStringItem(0,1,meta[i]["format"])  
         else:
-
             for f in self.file_list:
-                self.LC.InsertStringItem(0,f)
+                num_items=self.LC.GetItemCount()
+                self.LC.InsertStringItem(num_items,f)
+

@@ -88,6 +88,7 @@ class iList(wx.ListCtrl):
         self.path_list = list()
         self.file_list = list()
         self.LC = wx.ListCtrl(parent,size=i_size,pos= i_pos,style= wx.TE_MULTILINE | wx.BORDER_SUNKEN)
+        
         col_num=0
         for col_name in i_col_list:
             self.LC.InsertColumn(col_num,col_name)
