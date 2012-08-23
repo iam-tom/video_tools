@@ -29,4 +29,12 @@ class assert_dir():
         if chk == False:
            cmd="mkdir -p "+path
            os.system(cmd)
-
+class tuple_op():
+    def __init__(self,t):
+        self.tup=t 
+    def mul(self,factor):
+        res=tuple([int(factor*i) for i in self.tup])
+        return res
+    def div(self,factor):
+        res=tuple([i/factor for i in self.tup])
+        return res

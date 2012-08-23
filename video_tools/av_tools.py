@@ -45,7 +45,6 @@ class thumbnailer():
 #        o_path = self.o_path+mov_name+"_thb"+self.format
         o_path = self.o_path+"thb"+self.format
     
-        utils.assert_dir(self.o_path) 
         #if os.path.isdir(self.o_path) == False:
         #    mkdir_str = "mkdir -p "+self.o_path
         #    os.system(mkdir_str)
@@ -73,11 +72,9 @@ class thumbnailer():
 #/////////////// ///////////////  ////////////// //////////////
 
 
-class frame_extractor (threading.Thread):
+class frame_extractor ():
 
     def __init__(self):
-        self.thr=threading.Thread(target=self.exe)
-        self.thr.deamon=True    
 #/////////////// Allocations and default vaules //////////////
         self.format = ".png"
         self.leading_zeros = 3
@@ -107,12 +104,11 @@ class frame_extractor (threading.Thread):
         slash = self.i_path[0].rfind("/")
         mov_name = self.i_path[0][slash+1:dot]
         self.o_path = self.o_dir+mov_name+"%"+str(self.leading_zeros)+"d"+self.format
-        utils.assert_dir(self.o_path)
+        utils.assert_dir(self.o_dir)
         #if os.path.isdir(self.o_path) == False:
         #    mkdir_str = "mkdir -p "+self.o_dir
         #    os.system(mkdir_str)
-        self.thr.start()
-
+        self.exe()
     def exe(self):    
         if len(self.frame_size)>0:
             command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-s",self.frame_size,"-v","-10","-y",self.o_path]
@@ -120,7 +116,7 @@ class frame_extractor (threading.Thread):
            
             command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-y",self.o_path]
             print command
-            subprocess.popen(command)            
+            subprocess.call(command)            
         
 
 
@@ -177,7 +173,7 @@ class streamer ():
         self.i_path = str()
         self.o_path = str()
         self.leading_zeros = 3
-        self.frame_size = "vga"
+        self.frame_size = ""
         self.fps = 25
         
     def UpdateConfig(self,config):
@@ -193,35 +189,23 @@ class streamer ():
 #        get movie name
 
         chk =  os.path.isdir(self.i_path)
-        print self.i_path
         if chk  == True:
-            print "DIR DETECTED"
             allf = sorted(os.listdir(self.i_path)); 
             f = allf[0]
-            print f
             dot = f.rfind(".")
-            print dot
             i_format = f[(dot):(len(self.i_path))]
             i_name =  f[0:(dot-self.leading_zeros)]
             i_path = self.i_path+i_name+"%"+str(self.leading_zeros)+"d"+i_format
 
-            print i_format
-            print i_name
         else:                        
                 
             dot = self.i_path[0].rfind(".")
             i_format = self.i_path[0][(dot):(len(self.i_path))]
             i_name =  self.i_path[0][0:(dot-self.leading_zeros)]
             i_path = self.i_path[0][0:(dot-self.leading_zeros)]+"%"+str(self.leading_zeros)+"d"+i_format
-            print "---------------"
-            print i_format
-            print i_name
-            print "---------------"       
         
         o_path = self.o_path+i_name+"_stream"+self.format
-        print o_path
         
-        print i_path
         if len(self.frame_size)>0:
             command = ["avconv","-r",str(self.fps),"-i",i_path,"-s",self.frame_size,"-r",str(self.fps),o_path]
         else:
