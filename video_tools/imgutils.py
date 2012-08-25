@@ -14,7 +14,8 @@ class seq_compressor():
         self.data = sorted(DATA)
         self.groups = set()
         self.meta = list()
-        
+        self.mapping=dict()
+        self.last_index=0
 # This algorithm only works if DATA is sorted.
 #DATA = ["home/image_00101.png", "home/image_00102.png", "home/image_00103.png"]
     def get_groups(self):
@@ -22,13 +23,15 @@ class seq_compressor():
         self. groups = [self.collapse_group(tuple(group)) \
                 for key, group in itertools.groupby(enumerate(self.data),
                      lambda(index, name): index - int(self.extract_number(name)))]
-
+        
         return self.groups
 
     def get_meta(self):
         if len(self.groups) >0:
             return self.meta 
-    
+    def get_mapping(self):
+        if len(self.mapping)>0:
+            return self.mapping 
     def extract_number(self,name):
          
 
@@ -48,27 +51,36 @@ class seq_compressor():
 
     def collapse_group(self,group):
          if len(group) == 1:
-             return group[0][1]  # Unique names collapse to themselves.
-         first = self.extract_number(group[0][1])  # Fetch range
-         last = self. extract_number(group[-1][1])  # of this group.
-         # Cheap way to compute the string length of the upper bound,
-         # discarding leading zeroes.
-         length = len(str(int(last)))
-         dot = group[0][1].rfind(".")
-          
-         slash = group[0][1].rfind("/")
-         
-         # Now we have the length of the variable part of the names,
-         # the rest is only formatting.
-
-
-         #Set metadata of group
-         num_items = len(group)
-         seq_format= group[0][1][dot:len(group[0][1])]
-         info ={"num_items":num_items,"format":seq_format}
-         self.meta.append(info)
-        
-         return "%s[%s-%s]" % (group[0][1][slash+1:dot-length],
-             first[-length:], last[-length:])
-
-
+            self.last_index+=len(group)
+            self.mapping[group[0][1]]=self.last_index    
+            return group[0][1]  # Unique names collapse to themselves.
+         else:    
+             first = self.extract_number(group[0][1])  # Fetch range
+             last = self. extract_number(group[-1][1])  # of this group.
+             # Cheap way to compute the string length of the upper bound,
+             # discarding leading zeroes.
+             length = len(str(int(last)))
+             dot = group[0][1].rfind(".")
+              
+             slash = group[0][1].rfind("/")
+             
+             # Now we have the length of the variable part of the names,
+             # the rest is only formatting.
+    
+             #create mapping for group
+             single_files =list()
+             for file in group:
+                 single_files.append(file)
+             group_name = group[0][1][slash+1:dot-length]+"["+ first[-length:]+"-"+ last[-length:]+"]"
+            # self.mapping[group_name]=single_files   
+             self.mapping[group_name]=self.last_index   
+             self.last_index+=len(group)
+             #Set metadata of group
+             num_items = len(group)
+             seq_format= group[0][1][dot:len(group[0][1])]
+             info ={"num_items":num_items,"format":seq_format}
+             self.meta.append(info)
+            
+             return "%s[%s-%s]" % (group[0][1][slash+1:dot-length],
+                 first[-length:], last[-length:])
+    

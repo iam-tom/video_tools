@@ -1,4 +1,6 @@
 import sys
+
+
 import os
 import wx
 import iwx
@@ -11,10 +13,19 @@ from av_tools import frame_extractor
 
 import imgutils
 import time
-# changed tlm api - maybe leads to errors
-# changed to opitonal zoom mode maybe leads to errors
+
+import utils
+
 
 class tlmGUI(wx.Panel):
+
+# Member Variables:
+# positions ..................... corner points of crop boxes
+# canvas scale .................. scale factor from original img to canvas coordinates
+# full size ..................... size of original image
+# init_img ...................... initial image, displayed on canvas
+
+
     def __init__(self, parent,config):
     
 #//////////////// allocations /////////////////
@@ -23,15 +34,24 @@ class tlmGUI(wx.Panel):
     
         self.in_path = list()
         self.size = config["size"]
+        self.full_size=tuple()
         
+        self.canvas_scale=float()
         self.init_img = ".data/tlm_init.png"
         
         
         self.vid_mode = False # default is im_seq mode
 #       self.vid_mode  = True # default is vid mode
-        self.zoom_mode = False #default is pan only
+
+
+#---tl_modes:
+#    1 - pan only default
+#    2 - pan&zoom
+#    3 - full
+        tl_mode = 1
+#        self.zoom_mode = False #default is pan only
 #        self.zoom_mode = True #default is pan only
-        
+#        sel.full_mode  = True #default is pan only        
         
         
 #//////////////// graphical elements /////////        
@@ -43,15 +63,24 @@ class tlmGUI(wx.Panel):
         b_accept.Bind(wx.EVT_BUTTON,lambda  evt , config = config: self.OnAccept(evt,config))
         
 #        b_browse =wx.TextCtrl(self, -1, "", pos=(100,(self.size[1]*4)/5))
-        self.b_browse = iwx.iBrowse(self,(200,(self.size[1]*4)/5))
+        self.b_browse = iwx.iBrowse(self,(100,(self.size[1]*4)/5))
         
         choices_out_mode=["Img Sequence","Video"]
-        self.choices_out_mode=wx.Choice(self, wx.ID_ANY, pos= (500,(self.size[1]*4)/5), size=(130,30), choices=choices_out_mode)
+        self.choices_out_mode_lookup=["1","2"]
+        self.choices_out_mode=wx.Choice(self, wx.ID_ANY, pos= (350,(self.size[1]*4)/5), size=(130,30), choices=choices_out_mode)
       
 
-        choices_zoom_mode=["Zoom&Pan","Pan Only"]
-        self.choices_zoom_mode=wx.Choice(self, wx.ID_ANY, pos= (700,(self.size[1]*4)/5), size=(130,30), choices=choices_zoom_mode)
-        
+        choices_tl_mode=["Pan Only","Zoom&Pan","Full Image"]
+        self.choices_tl_mode_lookup=[1,2,3]
+        self.choices_tl_mode=wx.Choice(self, wx.ID_ANY, pos= (700,((self.size[1]*4)/5)-50), size=(130,30), choices=choices_tl_mode)
+       
+        self.choices_resolution_lookup=[self.full_size,(1280,720),(1920,1080),(640,480)]
+        choices_resolution=["Original","1280x720","1920x1080","640x480"] 
+        self.choices_resolution=wx.Choice(self,wx.ID_ANY,pos=(500,(self.size[1]*4)/5),size=(150,30),choices=choices_resolution)
+
+        choices_fps=["24fps","25fps","50fps"]
+        self. choices_fps_lookup=[24,25,50]
+        self.choices_fps=wx.Choice(self, wx.ID_ANY, pos= (700,((self.size[1]*4)/5)), size=(130,30), choices=choices_fps)
         self.setInitState()      
 
 
@@ -108,23 +137,57 @@ class tlmGUI(wx.Panel):
             
         
         
-    def check_zoom_mode(self):
-        chk = self.choices_zoom_mode.GetCurrentSelection()
+    def check_tl_mode(self):
+        chk = self.choices_tl_mode.GetCurrentSelection()
         if chk == 0:
-            self.zoom_mode =True 
+            tl_mode=self.choices_tl_mode_lookup[0]
         elif chk ==1:
-            self.zoom_mode = False
-             
+            tl_mode=self.choices_tl_mode_lookup[1]
+        elif chk ==2:
+            tl_mode=self.choices_tl_mode_lookup[2]
+        print "selection mode is %d"%tl_mode     
+        return tl_mode 
+    def check_fps(self):
+        chk = self.choices_fps.GetCurrentSelection()
+        if chk == 0:
+            fps=self.choices_fps_lookup[0]
+        elif chk ==1:
+            fps=self.choices_fps_lookup[1]
+            
+        elif chk ==2:
+            fps=self.choices_fps_lookup[2]
+            
+        print "output fps is set to %i"%fps     
+
+        return fps
+
+    def check_resolution(self):
         
+        chk = self.choices_resolution.GetCurrentSelection()
+        if chk ==0:
+           res=self.choices_resolution_lookup[0]
+           res=self.full_size
+           
+        elif chk ==1:
+           es=self.choices_resolution_lookup[1]
+
+        elif chk ==2:
+           res=self.choices_resolution_lookup[2]
+
+        elif chk ==3:
+           res=self.choices_resolution_lookup[3]
+        return res
 
     def get_out_dir(self):
         out_path = self.b_browse.GetData()
+        utils.assert_dir(out_path)
         slash = out_path.rfind("/")
         if (len(out_path)-slash) >1:
             out_path+="/"
-        chk = os.path.isdir(out_path)
-        if chk == False:
-            self.make_dir(out_path)
+
+       # chk = os.path.isdir(out_path)
+       # if chk == False:
+       #     self.make_dir(out_path)
         return out_path
     
     def make_dir(self,path):
@@ -146,6 +209,8 @@ class tlmGUI(wx.Panel):
             stream_orig = cStringIO.StringIO(data_orig)
             # convert to a bitmap
             image =  wx.ImageFromStream( stream_orig )
+            self.full_size=image.GetSize()
+            self.set_canvas_scale(image)
             image = self.scale_image(image)
             self.bmp_orig = wx.BitmapFromImage(image)
 
@@ -177,7 +242,7 @@ class tlmGUI(wx.Panel):
         # convert to a data stream
         stream = cStringIO.StringIO(data)
         # convert to a bitmap
-        image = wx.ImageFromStream( stream )      
+        image = wx.ImageFromStream( stream )
         image = self.scale_image(image)
 
         
@@ -211,32 +276,68 @@ class tlmGUI(wx.Panel):
 #            q =float(new_height) /float( o_height)
 #            new_height = o_height  * q
 
-
+        
+       
         image = image.Scale(new_width,new_height,wx.IMAGE_QUALITY_HIGH)
         return image
+        
+    def set_canvas_scale(self,image):
+        o_width = image.GetWidth()
+        o_height = image.GetHeight()
+
+        q = float(self.size[0]) /float( o_width)
+        new_width = self.size[0]
+        new_height = o_height*q
+        
+        if new_height*5 > self.size[1]*4:
+
+            new_height = (self.size[1]*4)/5
+            q = float(new_height)/float(o_height)
+        self.canvas_scale=q   
             
     def OnAccept(self,e, config):
-            out_path = self.get_out_dir()        
+            tl_mode = self.check_tl_mode() 
+            if tl_mode ==3:
+                self.positions[:]=[]
+                self.positions.append((0,0))
+                self.positions.append(self.full_size)
+                self.positions.append((0,0))
+                self.positions.append(self.full_size)
+            else:
+                l=list()
+                for point in self.positions:
+                    x=point[0] / self.canvas_scale
+                    y=point[1] / self.canvas_scale 
+                    t=(int(x),int(y))
+                    l.append(t)
+                self.positions=l 
+            
+            out_path = self.get_out_dir()
+            utils.assert_dir(out_path)        
             T = tlm()
-                 #config ={"res":"","fps":"","box_start":"","box_end":""}
+            #config ={"res":"","fps":"","box_start":"","box_end":""}
             T.SetIO(self.in_path,out_path)
             box0=list()
             box1=list()
-            box1.append((self.positions[2][0],self.positions[2][1]))
-            box1.append((self.positions[3][0],self.positions[3][1]))
-            box0.append((self.positions[0][0],self.positions[0][1]))
-            box0.append((self.positions[1][0],self.positions[1][1]))
-            config ={"res":(640,480),"fps":25,"box_start":box0,"box_end":box1}
+            box1.append((self.positions[2][0],(self.positions[2][1])))
+            box1.append((self.positions[3][0],(self.positions[3][1])))
+            box0.append((self.positions[0][0],(self.positions[0][1])))
+            box0.append((self.positions[1][0],(self.positions[1][1])))
+
+            output_res = self.check_resolution()
+            output_fps = self.check_fps()
+
+            config ={"res":output_res,"fps":output_fps,"box_start":box0,"box_end":box1}
             seq_out = True 
             seq_out = self.check_out_mode()
-            
+                
             if self.vid_mode ==True:
                 if seq_out ==True:
                     print"VID2SEQ"
                     T.Vid2Seq(config)
                 else:
-                    print"VID2VID"
-                    T.Vid2Vid(config)
+                   print"VID2VID"
+                   T.Vid2Vid(config)
 
             if self.vid_mode ==False:
                 if seq_out ==True:
@@ -245,18 +346,17 @@ class tlmGUI(wx.Panel):
                 else:
                     print"SEQ2VID"
                     T.Seq2Vid(config)               
-            
+                
             print "DONE"    
 
 
     def OnLeftClick(self, e):
 
-        self.check_zoom_mode()
+        tl_mode = self.check_tl_mode()
         pos = e.GetPosition()
         dc = wx.MemoryDC() 
         dc.SelectObject(self.bmp_work)
         self.positions.append(pos)
-        
         if len(self.positions) == 2:
             ul = self.positions[0]
             dr = self.positions[1]
@@ -265,10 +365,10 @@ class tlmGUI(wx.Panel):
             dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
             dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
             dc.EndDrawing()
-        elif len(self.positions) == 3 and self.zoom_mode == False:
+        elif len(self.positions) == 3 and tl_mode == 1:
             dim_box1=(self.positions[1][0]- self.positions[0][0],self.positions[1][1]- self.positions[0][1])
             ul = self.positions[2]
-            dr = (self.positions[2][0]+dim_box1[0],self.positions[2][1]+dim_box1[1])
+            dr = wx.Point(x=self.positions[2][0]+dim_box1[0],y=self.positions[2][1]+dim_box1[1])
             self.positions.append(dr)
             dc.BeginDrawing()
             dc.SetPen(wx.Pen("blue",style=wx.SOLID))
@@ -276,7 +376,7 @@ class tlmGUI(wx.Panel):
             dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
             dc.EndDrawing()
             
-        elif len(self.positions) == 4 and self.zoom_mode == True:
+        elif len(self.positions) == 4 and tl_mode == 2:
             ul = self.positions[2]
             dr = self.positions[3]
             dc.SetPen(wx.Pen("blue",style=wx.SOLID))
@@ -305,7 +405,6 @@ class imgList (iwx.iList):
         i_col_list.append("name")
         i_col_list.append("format")
         self.prev_config ={"pos":(i_size[0]+140,60),"parent":parent}
-        
         super(imgList,self).__init__(parent,i_size,i_pos,i_col_list)
         b_prev=wx.Button(parent,wx.ID_ANY,"Preview",(i_size[0]+20,160),(70,30),wx.BU_EXACTFIT)
         b_prev.Bind(wx.EVT_BUTTON, self.OnPrev,b_prev)
@@ -315,7 +414,38 @@ class imgList (iwx.iList):
 
         self.chkbx=wx.CheckBox(parent,wx.ID_ANY," Img Seq",pos =(i_size[0]+20,200)) 
 
-        
+
+
+    def apply_file_mapping(self,indices,l):
+        result=list()
+        print indices
+        print self.file_mapping
+        for i in range(0,len(indices)):
+            first  = self.file_mapping[self.disp_list[indices[i]]]
+            if i<len(indices)-1 :
+                last = self.file_mapping[self.disp_list[indices[i+1]]] 
+            else:
+                last = len(l)
+            for i in range(first,last):
+                result.append(l[i])    
+            return result
+
+    def GetPaths(self):
+        indices=iwx.iList.get_selected(self)
+        if self.chkbx.IsChecked()==True:
+           out_list =  self.apply_file_mapping(indices,self.path_list)
+        else:
+           out_list = self.path_list    
+        return out_list
+    def GetNames(self):
+        indices=iwx.iList.get_selected(self)
+        if self.chkbx.IsChecked()==True:
+           out_list =  self.apply_file_mapping(indices,self.file_list)
+        else:
+           out_list = self.file_list    
+        print out_list    
+        return out_list
+                              
     def prev_init_state(self):
         self.config = {"format":".png","frame_size":"qvga", "i_path":"", "o_path":"/tmp/" }
 
@@ -331,6 +461,10 @@ class imgList (iwx.iList):
 
         bmp = wx.BitmapFromImage(image)
         return bmp
+   
+    def get_bmp_size(self,bmp):
+        size = bmp.GetSize()
+        return size
                 
     def OnPrev(self,e):
         
@@ -352,27 +486,32 @@ class imgList (iwx.iList):
     def OnAdd(self,e):
         dlg = wx.FileDialog(None,"Choose Files ",style =wx.FD_MULTIPLE )
         if dlg.ShowModal() == wx.ID_OK:
-            self.file_list = dlg.GetFilenames()
-            self.path_list = dlg.GetPaths()
-                        
+            new_files = dlg.GetFilenames()
+            new_paths = dlg.GetPaths()
+            
+            self.path_list = new_paths
+            self.file_list =  new_files
+            self.disp_list = new_files
         dlg.Destroy()
-
-        t0 = time.time()
+# When Sequence Detection is active
         if self.chkbx.IsChecked()==True:
 
-            sc = imgutils.seq_compressor(set(self.file_list))
+            sc = imgutils.seq_compressor(set(self.path_list))
             groups= sc.get_groups()
+            self.file_mapping=sc.get_mapping()
+           
             meta = sc.get_meta()
-            self.file_list = list(groups)
-        
-            
-            t1=time.time()
+            self.disp_list = list(groups)
+            print self.disp_list
             i=0
-#        self.seq_check(self.file_list)
-            for f in self.file_list:
+            for f in self.disp_list:
                 print "format = %s"% meta[i]["format"]
                 self.LC.InsertStringItem(0,f)    
                 self.LC.SetStringItem(0,1,meta[i]["format"])  
+                i=i+1
         else:
-            for f in self.file_list:
+            for f in self.disp_list:
+
                 self.LC.InsertStringItem(0,f)
+                
+        

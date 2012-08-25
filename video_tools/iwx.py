@@ -86,10 +86,10 @@ class iList(wx.ListCtrl):
     def __init__(self,parent,i_size,i_pos,i_col_list):
 #presets
         self.path_list = list()
-        self.name_list = list()
         self.file_list = list()
         self.disp_list = list()
-        self.LC = wx.ListCtrl(parent,size=i_size,pos= i_pos,style= wx.TE_MULTILINE | wx.BORDER_SUNKEN)
+        self.LC = wx.ListCtrl(parent,size=i_size,pos= i_pos,style= wx.LC_REPORT | wx.BORDER_SUNKEN)
+        
         col_num=0
         for col_name in i_col_list:
             self.LC.InsertColumn(col_num,col_name)
@@ -136,10 +136,10 @@ class iList(wx.ListCtrl):
         if dlg.ShowModal() == wx.ID_OK:
             self.file_list = dlg.GetFilenames()
             self.path_list = dlg.GetPaths()
-                        
+            self.disp_list = dlg.GetFilenames()           
         dlg.Destroy()
 #        self.seq_check(self.file_list)
-        for f in self.file_list:
+        for f in self.disp_list:
             self.LC.InsertStringItem(0,f)    
 
     def seq_check(self,i):
@@ -194,14 +194,22 @@ class iList(wx.ListCtrl):
             i=i+1
         self.file_list =[]
         self.path_list =[]
-
+        self.disp_list=[]
 # GetPaths()
     def GetPaths(self):
-        return self.path_list
+        indices=self.get_selected()
+        out_list=()
+        for i in indices:
+            out_list.append(self.path_list[i])        
+        return out_list
     
 # GetNames()
     def GetNames(self):
-        return self.file_list
+        indices=self.get_selected()
+        out_list=()
+        for i in indices:
+            out_list.append(self.path_list[i])        
+        return out_list
         
         
         

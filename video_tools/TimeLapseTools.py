@@ -3,6 +3,9 @@ import os
 from PIL import Image
 import av_tools
 
+import utils
+
+
 
 class tlm (object):
 
@@ -254,10 +257,12 @@ class tlm (object):
 
         
     def crop_scale_save(self,files,o_size,o_path):
-        chk = os.path.isdir(o_path)
-        if chk == False:
-            cmd = "mkdir "+o_path
-            os.system("cmd")
+        
+        utils.assert_dir(o_path)
+        #chk = os.path.isdir(o_path)
+        #if chk == False:
+        #    cmd = "mkdir -p  "+o_path
+        #    os.system("cmd")
 
         i = 0  
         in_bounds = i
@@ -277,7 +282,7 @@ class tlm (object):
             o_file = o_path+"img_"+number_str+".jpg"
             img.save(o_file)
             i = i+1
-
+        print "cropped scaled saved"
 #////////////////////////////////////
 
 
