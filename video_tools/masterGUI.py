@@ -23,7 +23,6 @@ class GUI (wx.Frame):
         
         
         self.f = wx.Frame(None, title=title, size=(sw,sh) )
-        self.f.Show()
         
         splitter = wx.SplitterWindow(self.f,-1)
         
@@ -55,9 +54,10 @@ class GUI (wx.Frame):
         
 #        graphical elements
 
-
-
         self.list = imgGUI.imgList(self.p2,(200,500),(0,0))
+
+
+
         ok_b = wx.Button(self.p2,wx.ID_OK,"OK",(10,550),(80,80),wx.BU_EXACTFIT)
         ok_b.Bind(wx.EVT_BUTTON, self.OnOk)
         
@@ -68,6 +68,7 @@ class GUI (wx.Frame):
 
         
 
+        self.f.Show()
 #/////////////  CALLBACKS
     def OnOk(self,e):
         names = self.list.GetNames()        

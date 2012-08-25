@@ -175,7 +175,7 @@ class streamer ():
         self.leading_zeros = 3
         self.frame_size = ""
         self.fps = 25
-        
+        self.q = "5000K" 
     def UpdateConfig(self,config):
         self.format= config["format"]
         self.i_path = config["i_path"]
@@ -183,7 +183,7 @@ class streamer ():
 #        self.frame_size = config["frame_size"]
         self.fps = config["fps"]
         self.leading_zeros = config["zeros"]
-        
+#        self.q = config["bv"]
 
     def Run(self):
 #        get movie name
@@ -207,9 +207,9 @@ class streamer ():
         o_path = self.o_path+i_name+"_stream"+self.format
         
         if len(self.frame_size)>0:
-            command = ["avconv","-r",str(self.fps),"-i",i_path,"-s",self.frame_size,"-r",str(self.fps),o_path]
+            command = ["avconv","-r",str(self.fps),"-i",i_path,"-s",self.frame_size,"-b:v","10000K","-r",str(self.fps),o_path]
         else:
-            command = ["avconv","-r",str(self.fps),"-i",i_path,"-r",str(self.fps),o_path]
+            command = ["avconv","-r",str(self.fps),"-i",i_path,"-b:v","10000K","-r",str(self.fps),o_path]
         subprocess.call(command)       
         
     

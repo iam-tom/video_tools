@@ -16,10 +16,16 @@ import time
 
 import utils
 
-# changed tlm api - maybe leads to errors
-# changed to opitonal zoom mode maybe leads to errors
 
 class tlmGUI(wx.Panel):
+
+# Member Variables:
+# positions ..................... corner points of crop boxes
+# canvas scale .................. scale factor from original img to canvas coordinates
+# full size ..................... size of original image
+# init_img ...................... initial image, displayed on canvas
+
+
     def __init__(self, parent,config):
     
 #//////////////// allocations /////////////////
@@ -170,7 +176,6 @@ class tlmGUI(wx.Panel):
 
         elif chk ==3:
            res=self.choices_resolution_lookup[3]
-        print res#s"output resolution is %i x %i"%res
         return res
 
     def get_out_dir(self):
@@ -298,6 +303,14 @@ class tlmGUI(wx.Panel):
                 self.positions.append(self.full_size)
                 self.positions.append((0,0))
                 self.positions.append(self.full_size)
+            else:
+                l=list()
+                for point in self.positions:
+                    x=point[0] / self.canvas_scale
+                    y=point[1] / self.canvas_scale 
+                    t=(int(x),int(y))
+                    l.append(t)
+                self.positions=l 
             
             out_path = self.get_out_dir()
             utils.assert_dir(out_path)        
@@ -306,15 +319,13 @@ class tlmGUI(wx.Panel):
             T.SetIO(self.in_path,out_path)
             box0=list()
             box1=list()
-            box1.append((int(self.positions[2][0]/self.canvas_scale),int(self.positions[2][1]/self.canvas_scale)))
-            box1.append((int(self.positions[3][0]/self.canvas_scale),int(self.positions[3][1]/self.canvas_scale)))
-            box0.append((int(self.positions[0][0]/self.canvas_scale),int(self.positions[0][1]/self.canvas_scale)))
-            box0.append((int(self.positions[1][0]/self.canvas_scale),int(self.positions[1][1]/self.canvas_scale)))
+            box1.append((self.positions[2][0],(self.positions[2][1])))
+            box1.append((self.positions[3][0],(self.positions[3][1])))
+            box0.append((self.positions[0][0],(self.positions[0][1])))
+            box0.append((self.positions[1][0],(self.positions[1][1])))
 
             output_res = self.check_resolution()
             output_fps = self.check_fps()
-            print output_res
-            print  output_fps
 
             config ={"res":output_res,"fps":output_fps,"box_start":box0,"box_end":box1}
             seq_out = True 
@@ -357,7 +368,7 @@ class tlmGUI(wx.Panel):
         elif len(self.positions) == 3 and tl_mode == 1:
             dim_box1=(self.positions[1][0]- self.positions[0][0],self.positions[1][1]- self.positions[0][1])
             ul = self.positions[2]
-            dr = (self.positions[2][0]+dim_box1[0],self.positions[2][1]+dim_box1[1])
+            dr = wx.Point(x=self.positions[2][0]+dim_box1[0],y=self.positions[2][1]+dim_box1[1])
             self.positions.append(dr)
             dc.BeginDrawing()
             dc.SetPen(wx.Pen("blue",style=wx.SOLID))
@@ -403,7 +414,38 @@ class imgList (iwx.iList):
 
         self.chkbx=wx.CheckBox(parent,wx.ID_ANY," Img Seq",pos =(i_size[0]+20,200)) 
 
-        
+
+
+    def apply_file_mapping(self,indices,l):
+        result=list()
+        print indices
+        print self.file_mapping
+        for i in range(0,len(indices)):
+            first  = self.file_mapping[self.disp_list[indices[i]]]
+            if i<len(indices)-1 :
+                last = self.file_mapping[self.disp_list[indices[i+1]]] 
+            else:
+                last = len(l)
+            for i in range(first,last):
+                result.append(l[i])    
+            return result
+
+    def GetPaths(self):
+        indices=iwx.iList.get_selected(self)
+        if self.chkbx.IsChecked()==True:
+           out_list =  self.apply_file_mapping(indices,self.path_list)
+        else:
+           out_list = self.path_list    
+        return out_list
+    def GetNames(self):
+        indices=iwx.iList.get_selected(self)
+        if self.chkbx.IsChecked()==True:
+           out_list =  self.apply_file_mapping(indices,self.file_list)
+        else:
+           out_list = self.file_list    
+        print out_list    
+        return out_list
+                              
     def prev_init_state(self):
         self.config = {"format":".png","frame_size":"qvga", "i_path":"", "o_path":"/tmp/" }
 
@@ -446,24 +488,30 @@ class imgList (iwx.iList):
         if dlg.ShowModal() == wx.ID_OK:
             new_files = dlg.GetFilenames()
             new_paths = dlg.GetPaths()
+            
             self.path_list = new_paths
-            self.file_list = new_files
+            self.file_list =  new_files
+            self.disp_list = new_files
         dlg.Destroy()
-#TODO: ---merge old list with new entries(uniqueness)
-#      ---collapse list and make mapping from displayed lsit to paths
+# When Sequence Detection is active
         if self.chkbx.IsChecked()==True:
 
-            sc = imgutils.seq_compressor(set(self.file_list))
+            sc = imgutils.seq_compressor(set(self.path_list))
             groups= sc.get_groups()
+            self.file_mapping=sc.get_mapping()
+           
             meta = sc.get_meta()
-            self.file_list = list(groups)
+            self.disp_list = list(groups)
+            print self.disp_list
             i=0
-            for f in self.file_list:
+            for f in self.disp_list:
                 print "format = %s"% meta[i]["format"]
                 self.LC.InsertStringItem(0,f)    
                 self.LC.SetStringItem(0,1,meta[i]["format"])  
+                i=i+1
         else:
-            for f in self.file_list:
-                num_items=self.LC.GetItemCount()
-                self.LC.InsertStringItem(num_items,f)
+            for f in self.disp_list:
 
+                self.LC.InsertStringItem(0,f)
+                
+        
