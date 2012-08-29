@@ -213,34 +213,6 @@ class iList(wx.ListCtrl):
         
         
         
-class iBrowse (wx.Panel):
-
-    def __init__(self,parent,pos):
-        self.topic = "Output Directory"
-        self.btn_string = "Browse"
-        self.parent = parent
-        self.pos= pos
-        self._setElements()
-
-        
-    def _setElements(self):    
-        self.t_browse =wx.TextCtrl(self.parent, -1, "", pos=self.pos,size=(150,30))
-        self.b_browse=wx.Button(self.parent,wx.ID_ANY,self.btn_string,(self.pos[0]+150,self.pos[1]),(70,30),wx.BU_EXACTFIT)
-        self.b_browse.Bind(wx.EVT_BUTTON,self.OnBrowse,self.b_browse)
-        
-    def OnBrowse(self,e):
-        dir_dlg = wx.DirDialog(self.parent, "Choose a directory:",
-                                 style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
-        if dir_dlg.ShowModal() == wx.ID_OK:
-            self.t_browse.AppendText(dir_dlg.GetPath())
-    
-    def SetText(self,topic,btn_string):
-        self.topic = topic
-        self.btn_string = btn_string
-        self._setElements()
-    
-    def GetData(self):
-        return self.t_browse.GetValue()
         
         
 

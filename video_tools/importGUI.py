@@ -2,7 +2,7 @@ import os
 import wx
 import wdManager
 import av_tools
-
+import GUIelements
 
 import iwx
 
@@ -57,8 +57,9 @@ class GUI(wx.Panel):
 #choice
 	s_codec=wx.StaticText(self,wx.ID_ANY,"Codec",pos=(7,330))	
         self.choice_codec=wx.Choice(self, wx.ID_ANY, pos= (7,350), size=(70,30), choices=codec_preset_display)
-	s_codec=wx.StaticText(self,wx.ID_ANY,"Resolution",pos=(7,390))
-        self.choice_res=wx.Choice(self, wx.ID_ANY, pos= (7,410), size=(70,30), choices=res_preset_display)
+#	s_codec=wx.StaticText(self,wx.ID_ANY,"Resolution",pos=(7,390))
+#        self.choice_res=wx.Choice(self, wx.ID_ANY, pos= (7,410), size=(70,30), choices=res_preset_display)
+        self.choice_res=GUIelements.iChoice(self,(7,390),"res")
         s_bv=wx.StaticText(self,wx.ID_ANY,"Video Quality",pos=(7,450))
         self.choice_bv=wx.Choice(self, wx.ID_ANY, pos= (7,470), size=(70,30), choices=bv_preset_display)
 
@@ -181,7 +182,7 @@ class GUI(wx.Panel):
             Converter = av_tools.converter()
             do_convert = True
             av_config={"format":".mov","zeros":3,"i_path":"","o_path":"","frame_size":"vga","fps":50,"bv":"10000K"}
-            av_config["frame_size"]=self.res_preset_intern[self.choice_res.GetCurrentSelection()]
+            av_config["frame_size"]=self.choice_res.GetChoice()
             av_config["format"]= self.codec_preset_intern[self.choice_codec.GetCurrentSelection()]
             av_config["bv"] = self.bv_preset_intern[self.choice_bv.GetCurrentSelection()]
 
