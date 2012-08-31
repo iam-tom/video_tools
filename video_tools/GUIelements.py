@@ -24,8 +24,14 @@ class iChoice(wx.Choice):
             heading = "Framerate"
 
 
-        h=wx.StaticText(parent,wx.ID_ANY,heading,(in_pos[0],in_pos [1]-20))	
-        super(iChoice,self).__init__(parent,wx.ID_ANY,pos=in_pos,size=(100,30),choices=self.choices)
+        #h=wx.StaticText(parent,wx.ID_ANY,heading)	
+        super(iChoice,self).__init__(parent,wx.ID_ANY,choices=self.choices)
+        #self.bs=wx.BoxSizer(wx.VERTICAL)       	
+        #self.bs.Add(h,1,wx.EXPAND)
+        #self.bs.Add(self,1,wx.EXPAND)
+        #self.SetAutoLayout(True)
+        #self.SetSizer(self.bs)
+        #self.Layout()
 
 
     def GetChoice(self):
