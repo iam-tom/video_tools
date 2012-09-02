@@ -6,6 +6,7 @@ import GUIelements
 
 import iwx
 
+import utils
 
 
 #Configure GUI - to import and convert video files
@@ -183,7 +184,10 @@ class GUI(wx.Panel):
             do_convert = True
             av_config={"format":".mov","zeros":3,"i_path":"","o_path":"","frame_size":"vga","fps":50,"bv":"10000K"}
             av_config["frame_size"]=self.choice_res.GetChoice()
+            av_config["frame_size"]=""# OVERRIDE TO BE FIXED
+            
             av_config["format"]= self.codec_preset_intern[self.choice_codec.GetCurrentSelection()]
+            av_config["format"]= ".MOV"
             av_config["bv"] = self.bv_preset_intern[self.choice_bv.GetCurrentSelection()]
 
       
@@ -195,7 +199,7 @@ class GUI(wx.Panel):
             input_name= self.list_names[i]
             input_file = self.list_paths[i]
             cp_string=self.CpString(input_name,input_file,self.WD.basepath)
-            print "copying"
+            utils.assert_dir(self.WD.basepath)
             os.system(cp_string)
 
 
@@ -206,6 +210,9 @@ class GUI(wx.Panel):
                 input_name= self.list_names[i]
                 input_file = self.list_paths[i]
                 self.AvconvString(input_name,self.WD.basepath,av_config)                
+                print "config"
+                print av_config
+                
                 Converter.UpdateConfig(av_config)  
                 print "converting file %i of %i"%(i,len(self.list_paths))
                 Converter.Run()
@@ -229,7 +236,8 @@ class GUI(wx.Panel):
        	    
 #CpString()
     def CpString(self,input_name,input_path,WD):
-        cps="cp "+input_path+" "+WD+"/files/video/raw/"+input_name
+        cps="cp "+input_path+" "+WD+"/files/video/raw/"
+        #cps="cp "+input_path+" "+WD+"/files/video/raw/"+input_name
         return cps
 
 

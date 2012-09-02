@@ -136,7 +136,7 @@ class converter ():
         self.bv = "3000K"
         
     def UpdateConfig(self,config):
-        self.format = config["format"]
+        self.container = config["format"]
         self.i_path = config["i_path"]
         self.o_path = config["o_path"]
         self.frame_size = config["frame_size"]
@@ -151,10 +151,15 @@ class converter ():
             dot = i_file.rfind(".")
             slash = i_file.rfind("/")
             mov_name = i_file[slash+1:dot]
-            o_path = self.o_path+mov_name+"_conv"+self.format
+            o_path = self.o_path+mov_name+"_conv"+self.container
+            print o_path
             
-
-            command = ["avconv","-i",i_file,"-strict","experimental","-s",self.frame_size,"-r",str(self.fps),"-b:v",self.bv,o_path]
+            if len(self.frame_size)>0:
+                
+                command = ["avconv","-i",i_file,"-strict","experimental","-s",str(self.frame_size),"-r",str(self.fps),"-b:v",self.bv,o_path]
+            else:
+                command = ["avconv","-i",i_file,"-strict","experimental","-r",str(self.fps),"-b:v",self.bv,o_path]
+                
             subprocess.call(command)       
         
     

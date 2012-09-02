@@ -36,8 +36,8 @@ class iChoice(wx.Choice):
 
 
     def GetChoice(self):
-        index = wx.Choice.GetCurrentSelection()
-	return self.choices_lookup(index)
+        index = wx.Choice.GetCurrentSelection(self)
+	return self.choices_lookup[index]
 
 
 
