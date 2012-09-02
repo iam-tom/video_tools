@@ -405,35 +405,3 @@ class tlmGUI(wx.Panel):
         
         
         
-    def OnAdd(self,e):
-        dlg = wx.FileDialog(None,"Choose Files ",style =wx.FD_MULTIPLE )
-        if dlg.ShowModal() == wx.ID_OK:
-            new_files = dlg.GetFilenames()
-            new_paths = dlg.GetPaths()
-            
-            self.path_list = new_paths
-            self.file_list =  new_files
-            self.disp_list = new_files
-        dlg.Destroy()
-# When Sequence Detection is active
-        if self.chkbx.IsChecked()==True:
-
-            sc = imgutils.seq_compressor(set(self.path_list))
-            groups= sc.get_groups()
-            self.file_mapping=sc.get_mapping()
-           
-            meta = sc.get_meta()
-            self.disp_list = list(groups)
-            print self.disp_list
-            i=0
-            for f in self.disp_list:
-                print "format = %s"% meta[i]["format"]
-                self.LC.InsertStringItem(0,f)    
-                self.LC.SetStringItem(0,1,meta[i]["format"])  
-                i=i+1
-        else:
-            for f in self.disp_list:
-
-                self.LC.InsertStringItem(0,f)
-                
-        
