@@ -16,6 +16,10 @@ import time
 
 import utils
 
+import GUIelements
+
+
+
 
 class tlmGUI(wx.Panel):
 
@@ -63,7 +67,7 @@ class tlmGUI(wx.Panel):
         b_accept.Bind(wx.EVT_BUTTON,lambda  evt , config = config: self.OnAccept(evt,config))
         
 #        b_browse =wx.TextCtrl(self, -1, "", pos=(100,(self.size[1]*4)/5))
-        self.b_browse = iwx.iBrowse(self,(100,(self.size[1]*4)/5))
+        self.b_browse = GUIelements.iBrowse(self,(100,(self.size[1]*4)/5))
         
         choices_out_mode=["Img Sequence","Video"]
         self.choices_out_mode_lookup=["1","2"]
@@ -74,13 +78,15 @@ class tlmGUI(wx.Panel):
         self.choices_tl_mode_lookup=[1,2,3]
         self.choices_tl_mode=wx.Choice(self, wx.ID_ANY, pos= (700,((self.size[1]*4)/5)-50), size=(130,30), choices=choices_tl_mode)
        
-        self.choices_resolution_lookup=[self.full_size,(1280,720),(1920,1080),(640,480)]
-        choices_resolution=["Original","1280x720","1920x1080","640x480"] 
-        self.choices_resolution=wx.Choice(self,wx.ID_ANY,pos=(500,(self.size[1]*4)/5),size=(150,30),choices=choices_resolution)
+        #self.choices_resolution_lookup=[self.full_size,(1280,720),(1920,1080),(640,480)]
+        #choices_resolution=["Original","1280x720","1920x1080","640x480"] 
+        #self.choices_resolution=wx.Choice(self,wx.ID_ANY,pos=(500,(self.size[1]*4)/5),size=(150,30),choices=choices_resolution)
 
-        choices_fps=["24fps","25fps","50fps"]
-        self. choices_fps_lookup=[24,25,50]
-        self.choices_fps=wx.Choice(self, wx.ID_ANY, pos= (700,((self.size[1]*4)/5)), size=(130,30), choices=choices_fps)
+        self.choices_res=GUIelements.iChoice(self,(500,(self.size[1]*4)/5),"res")
+        self.choices_fps=GUIelements.iChoice(self, (700,(self.size[1]*4)/5),"fps")
+        #choices_fps=["24fps","25fps","50fps"]
+        #self. choices_fps_lookup=[24,25,50]
+        #self.choices_fps=wx.Choice(self, wx.ID_ANY, pos= (700,((self.size[1]*4)/5)), size=(130,30), choices=choices_fps)
         self.setInitState()      
 
 
@@ -324,7 +330,8 @@ class tlmGUI(wx.Panel):
             box0.append((self.positions[0][0],(self.positions[0][1])))
             box0.append((self.positions[1][0],(self.positions[1][1])))
 
-            output_res = self.check_resolution()
+            #output_res = self.check_resolution()
+            output_res = self.choices_res.GetChoice()
             output_fps = self.check_fps()
 
             config ={"res":output_res,"fps":output_fps,"box_start":box0,"box_end":box1}
@@ -397,121 +404,4 @@ class tlmGUI(wx.Panel):
         print "reset"
         
         
-        
-class imgList (iwx.iList):
-#iwx.iList with previer and type check
-    def __init__(self,parent,i_size,i_pos):
-        i_col_list = list()
-        i_col_list.append("name")
-        i_col_list.append("format")
-        self.prev_config ={"pos":(i_size[0]+140,60),"parent":parent}
-        super(imgList,self).__init__(parent,i_size,i_pos,i_col_list)
-        b_prev=wx.Button(parent,wx.ID_ANY,"Preview",(i_size[0]+20,160),(70,30),wx.BU_EXACTFIT)
-        b_prev.Bind(wx.EVT_BUTTON, self.OnPrev,b_prev)
-        self.T = thumbnailer()
-        self.prev_init_state()
-        wx.StaticText(parent,wx.ID_ANY,"Preview",pos=(i_size[0]+140,40))	
-
-        self.chkbx=wx.CheckBox(parent,wx.ID_ANY," Img Seq",pos =(i_size[0]+20,200)) 
-
-
-
-    def apply_file_mapping(self,indices,l):
-        result=list()
-        print indices
-        print self.file_mapping
-        for i in range(0,len(indices)):
-            first  = self.file_mapping[self.disp_list[indices[i]]]
-            if i<len(indices)-1 :
-                last = self.file_mapping[self.disp_list[indices[i+1]]] 
-            else:
-                last = len(l)
-            for i in range(first,last):
-                result.append(l[i])    
-            return result
-
-    def GetPaths(self):
-        indices=iwx.iList.get_selected(self)
-        if self.chkbx.IsChecked()==True:
-           out_list =  self.apply_file_mapping(indices,self.path_list)
-        else:
-           out_list = self.path_list    
-        return out_list
-    def GetNames(self):
-        indices=iwx.iList.get_selected(self)
-        if self.chkbx.IsChecked()==True:
-           out_list =  self.apply_file_mapping(indices,self.file_list)
-        else:
-           out_list = self.file_list    
-        print out_list    
-        return out_list
-                              
-    def prev_init_state(self):
-        self.config = {"format":".png","frame_size":"qvga", "i_path":"", "o_path":"/tmp/" }
-
-        bmp  = self.get_bmp(".data/prev_init.png")
-        self.canvas =wx.StaticBitmap(self.prev_config["parent"], -1, bmp,self.prev_config["pos"] )    
-
-    def get_bmp(self,path):
-        data = open(path, "rb").read()
-        # convert to a data stream
-        stream = cStringIO.StringIO(data)
-        # convert to a bitmap
-        image = wx.ImageFromStream( stream )  
-
-        bmp = wx.BitmapFromImage(image)
-        return bmp
-   
-    def get_bmp_size(self,bmp):
-        size = bmp.GetSize()
-        return size
-                
-    def OnPrev(self,e):
-        
-        index = self.get_selected()
-        self.config["i_path"] = self.path_list[index[0]]
-        
-        self.T.UpdateConfig(self.config)
-        self.T.Run()
-        
-        bmp = self.get_bmp("/tmp/thb"+self.config["format"])
-       
-        self.canvas.SetBitmap( bmp)
-        
-    def OnReset(self,e):
-        iwx.iList.OnReset(self,e)
-        self.prev_init_state()
-        
-        
-    def OnAdd(self,e):
-        dlg = wx.FileDialog(None,"Choose Files ",style =wx.FD_MULTIPLE )
-        if dlg.ShowModal() == wx.ID_OK:
-            new_files = dlg.GetFilenames()
-            new_paths = dlg.GetPaths()
-            
-            self.path_list = new_paths
-            self.file_list =  new_files
-            self.disp_list = new_files
-        dlg.Destroy()
-# When Sequence Detection is active
-        if self.chkbx.IsChecked()==True:
-
-            sc = imgutils.seq_compressor(set(self.path_list))
-            groups= sc.get_groups()
-            self.file_mapping=sc.get_mapping()
-           
-            meta = sc.get_meta()
-            self.disp_list = list(groups)
-            print self.disp_list
-            i=0
-            for f in self.disp_list:
-                print "format = %s"% meta[i]["format"]
-                self.LC.InsertStringItem(0,f)    
-                self.LC.SetStringItem(0,1,meta[i]["format"])  
-                i=i+1
-        else:
-            for f in self.disp_list:
-
-                self.LC.InsertStringItem(0,f)
-                
         

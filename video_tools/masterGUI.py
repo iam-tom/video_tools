@@ -1,5 +1,6 @@
 import wx
 import imgGUI
+import GUIelements
 import avconvGUI
 import TimeLapseTools
 
@@ -54,7 +55,7 @@ class GUI (wx.Frame):
         
 #        graphical elements
 
-        self.list = imgGUI.imgList(self.p2,(200,500),(0,0))
+        self.list = GUIelements.imgList(self.p2,(200,500),(0,0))
 
 
 
