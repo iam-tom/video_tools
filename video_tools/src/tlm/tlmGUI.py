@@ -7,9 +7,9 @@ import iwx
 import cStringIO
 from PIL import Image
 
-from TimeLapseTools import tlm
-from av_tools import thumbnailer
-from av_tools import frame_extractor
+from tlm import tlm
+from avtools import thumbnailer
+from avtools import frame_extractor
 
 import imgutils
 import time
@@ -117,6 +117,7 @@ class tlmGUI(wx.Panel):
 
         
     def check_out_mode(self):
+        
         chk =self.choices_out_mode.GetCurrentSelection()
         
         if chk == 0:
@@ -154,34 +155,35 @@ class tlmGUI(wx.Panel):
         print "selection mode is %d"%tl_mode     
         return tl_mode 
     def check_fps(self):
-        chk = self.choices_fps.GetCurrentSelection()
-        if chk == 0:
-            fps=self.choices_fps_lookup[0]
-        elif chk ==1:
-            fps=self.choices_fps_lookup[1]
-            
-        elif chk ==2:
-            fps=self.choices_fps_lookup[2]
-            
-        print "output fps is set to %i"%fps     
-
+        fps=self.choices_fps.GetChoice()
+#        chk = self.choices_fps.GetCurrentSelection()
+#        if chk == 0:
+#            fps=self.choices_fps_lookup[0]
+#        elif chk ==1:
+#            fps=self.choices_fps_lookup[1]
+#            
+#        elif chk ==2:
+#            fps=self.choices_fps_lookup[2]
+#            
+#        print "output fps is set to %i"%fps     
+#
         return fps
 
     def check_resolution(self):
-        
-        chk = self.choices_resolution.GetCurrentSelection()
-        if chk ==0:
-           res=self.choices_resolution_lookup[0]
-           res=self.full_size
-           
-        elif chk ==1:
-           es=self.choices_resolution_lookup[1]
+        res = self.choices_resolution.GetChoice()
+      #  chk = self.choices_resolution.GetCurrentSelection()
+      #  if chk ==0:
+      #     res=self.choices_resolution_lookup[0]
+      #     res=self.full_size
+      #     
+      #  elif chk ==1:
+      #     res=self.choices_resolution_lookup[1]
 
-        elif chk ==2:
-           res=self.choices_resolution_lookup[2]
+      #  elif chk ==2:
+      #     res=self.choices_resolution_lookup[2]
 
-        elif chk ==3:
-           res=self.choices_resolution_lookup[3]
+      #  elif chk ==3:
+      #     res=self.choices_resolution_lookup[3]
         return res
 
     def get_out_dir(self):

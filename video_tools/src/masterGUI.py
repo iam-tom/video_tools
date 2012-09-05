@@ -1,12 +1,14 @@
+from project_config import path_config
+pc=path_config("paths")
 import wx
-import imgGUI
+import tlmGUI
 import GUIelements
-import avconvGUI
-import TimeLapseTools
+import avtoolsGUI
+import tlm
 
 import subprocess
 import iwx
-import importGUI
+import wdGUI
 
 class GUI (wx.Frame):
 
@@ -38,12 +40,10 @@ class GUI (wx.Frame):
         
                
         config["size"] = (sw/2,sh)
-        self.page1 = imgGUI.tlmGUI(self.nb,config )
-        self.page2 = avconvGUI.GUI(self.nb)
-        self.page3 = importGUI.GUI(self.nb,config)
+        self.page1 = tlmGUI.tlmGUI(self.nb,config )
+        self.page3 = wdGUI.wdGUI(self.nb,config)
         
         self.nb.AddPage(self.page1, "TLM")
-        self.nb.AddPage(self.page2, "AVCONV")
         self.nb.AddPage(self.page3,"IMPORT")
         
         self.active_page = self.page1
@@ -92,11 +92,6 @@ class GUI (wx.Frame):
 
 
         
-    def spawn_imgGUI(self,size,in_file,in_path,out_path):
-
-        config = {"i_path": in_path, "i_file": in_file, "o_path": out_path , "size": size }        
-        self.imgGUI = imgGUI.GUI(self.f,config)
-#        wx.Publisher().subscribe(self.OnPositions,("imgGUI.positions"))
                     
                     
     def OnPositions(self,msg):

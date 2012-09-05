@@ -1,0 +1,9 @@
+IMPORT GUI---------------------
+ - make layout based on box sizers
+ - resolution choice is out of position
+ - edit description does not really reset
+
+ - import is not possible into existing workspace --path issues
+
+
+- convert choices have no affect yet
