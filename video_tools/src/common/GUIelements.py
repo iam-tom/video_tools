@@ -3,7 +3,7 @@
 #- elements of GUI such as buttons or checkboxes...V
 import wx
 import iwx
-from  av_tools import thumbnailer
+from  avtools import thumbnailer
 import cStringIO
 import imgutils
 

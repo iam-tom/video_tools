@@ -1,7 +1,7 @@
 import os
 
 from PIL import Image
-import av_tools
+import avtools
 
 import utils
 
@@ -185,7 +185,7 @@ class tlm (object):
         return file_list
                
     def extract_frames(self,fps,vid_file,out_path):
-        fe = av_tools.frame_extractor()
+        fe = avtools.frame_extractor()
         fe_config={"format":".png","zeros":5,"i_path":vid_file,"o_path":out_path,"fps":fps,"frame_size":""}
         fe.UpdateConfig(fe_config)
         fe.Run()
@@ -208,7 +208,7 @@ class tlm (object):
                 
     def stream(self,i_dir,fps,out_dir):
         config_s={"format":".mov","zeros":5,"i_path":i_dir,"o_path":out_dir,"fps":25}
-        stream = av_tools.streamer()
+        stream = avtools.streamer()
         stream.UpdateConfig(config_s)
         
         stream.Run()
