@@ -9,13 +9,11 @@ class warper:
         print "initialized"
         self.warp_frames=50.0
         self.in_path = list()
-        self.in_path.append("seq_01.png")
-        self.in_path.append("seq_02.png")
-        self.in_path.append("seq_03.png")
-        self.in_path.append("seq_04.png")
-        self.in_path.append("seq_05.png")
-        self.o_path="/share/goa-tz/evaluation_geometry_map/data/TF/screenshots/seq/"
-        self.o_type=".png"
+        self.in_path.append("original.jpg")
+        self.in_path.append("transformed.jpg")
+
+        self.o_path=""
+        self.o_type=".jpg"
         self.config={"i_path":self.in_path,"o_path":self.o_path,"warp_frames":self.warp_frames,"o_type":self.o_type}
     def Update_config(self,config):
         self.config = config
