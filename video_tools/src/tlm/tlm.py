@@ -4,10 +4,10 @@ from PIL import Image
 import avtools
 
 import utils
+from threading import Thread
 
 
-
-class tlm (object):
+class tlm (Thread):
 
 
 
@@ -30,6 +30,10 @@ class tlm (object):
 #       T.Vid2Vid(config) .................. tl from video - output is video
 
     def __init__(self):
+
+        Thread.__init__(self)
+        self.deamon=True
+        
         self.in_files = list()
         self.ul_x = tuple()
         self.ul_y = tuple()
@@ -60,15 +64,15 @@ class tlm (object):
     def Seq2Seq(self,config):
 
 #        update config
-        frame_size=config["res"]
-        fps=config["fps"]
-        box0  =config["box_start"]
-        box1  =config["box_end"]
-        ul_0 =box0[0]
-        dr_0=box0[1]        
-        ul_1=box1[0]
-        dr_1=box1[1]
-        
+        self.frame_size=config["res"]
+        self.fps=config["fps"]
+        self.box0  =config["box_start"]
+        self.box1  =config["box_end"]
+        self.ul_0 =box0[0]
+        self.dr_0=box0[1]        
+        self.ul_1=box1[0]
+        self.dr_1=box1[1]
+        self.flag="Seq2Seq" 
         #        process
         self.compute_boxes(self.in_files,ul_0,dr_0,ul_1,dr_1)
         
@@ -79,19 +83,20 @@ class tlm (object):
         
     def Seq2Vid(self,config):
 #        update config
-        frame_size=config["res"]
-        fps=config["fps"]
-        box0  =config["box_start"]
-        box1  =config["box_end"]
+        self.frame_size=config["res"]
+        self.fps=config["fps"]
+        self.box0  =config["box_start"]
+        self.box1  =config["box_end"]
 
-        ul_0 =box0[0]
-        dr_0=box0[1]        
-        ul_1=box1[0]
-        dr_1=box1[1]            
+        self.ul_0 =box0[0]
+        self.dr_0=box0[1]        
+        self.ul_1=box1[0]
+        self.dr_1=box1[1]            
 
-        temp_path_crop = "/tmp/tlm_crops/"  
-#        process
+        self.temp_path_crop = "/tmp/tlm_crops/"  
+#       self. process
 
+        self.flag="Seq2Vid" 
  
         self.compute_boxes(self.in_files,ul_0,dr_0,ul_1,dr_1)
         self.crop_scale_save(self.in_files,frame_size,temp_path_crop)
@@ -101,15 +106,16 @@ class tlm (object):
             
     def Vid2Seq(self,config):
 #        update config       dr_1=config["box_end"][1]
-        frame_size=config["res"]
-        fps=config["fps"]
-        box0  =config["box_start"]
-        box1  =config["box_end"]
-        ul_0 =box0[0]
-        dr_0=box0[1]        
-        ul_1=box1[0]
-        dr_1=box1[1]             
-        temp_path = "/tmp/tlm_frames/"
+        self.frame_size=config["res"]
+        self.fps=config["fps"]
+        self.box0  =config["box_start"]
+        self.box1  =config["box_end"]
+        self.ul_0 =box0[0]
+        self.dr_0=box0[1]        
+        self.ul_1=box1[0]
+        self.dr_1=box1[1]             
+        self.temp_path = "/tmp/tlm_frames/"
+        self.flag="Vid2Seq"
         
 #        process
         if len(self.in_files) > 1:
@@ -125,32 +131,47 @@ class tlm (object):
         self.clean_temp(temp_path)
     def Vid2Vid(self,config):
 #        update config
-        frame_size=config["res"]
-        fps=config["fps"]
-        box0  =config["box_start"]
-        box1  =config["box_end"]
-        ul_0 =box0[0]
-        dr_0=box0[1]        
-        ul_1=box1[0]
-        dr_1=box1[1]       
-        temp_path_full = "/tmp/tlm_frames/"
-        temp_path_crop = "/tmp/tlm_crops/"  
-#        process
-        if len(self.in_files) > 1:
-            print "to be implemented"
-            quit()
-        else:
-            self.extract_frames(fps,self.in_files,temp_path_full)
-            tmp_files =  self.files_from_dir(temp_path_full)
-            self.compute_boxes(tmp_files,ul_0,dr_0,ul_1,dr_1)
-            self.crop_scale_save(tmp_files,frame_size,temp_path_crop)
-            self.stream(temp_path_crop,fps,self.out_dir)   
-        self.clean_temp(temp_path_full)  
-        self.clean_temp(temp_path_crop)
+        self.frame_size=config["res"]
+        self.fps=config["fps"]
+        self.box0  =config["box_start"]
+        self.box1  =config["box_end"]
+        self.ul_0 =self.box0[0]
+        self.dr_0=self.box0[1]        
+        self.ul_1=self.box1[0]
+        self.dr_1=self.box1[1]       
+        self.temp_path_full = "/tmp/tlm_frames/"
+        self.temp_path_crop = "/tmp/tlm_crops/"  
+        self.flag="Vid2Vid"
+        self.start()
+##        process
+#        if len(self.in_files) > 1:
+#            print "to be implemented"
+#            quit()
+#        else:
+#            self.extract_frames(fps,self.in_files,temp_path_full)
+#            tmp_files =  self.files_from_dir(temp_path_full)
+#            self.compute_boxes(tmp_files,ul_0,dr_0,ul_1,dr_1)
+#            self.crop_scale_save(tmp_files,frame_size,temp_path_crop)
+#            self.stream(temp_path_crop,fps,self.out_dir)   
+#        self.clean_temp(temp_path_full)  
+#        self.clean_temp(temp_path_crop)
 
 #////////////////////////////////       
-            
- 
+    def run(self):
+        if  self.flag is "Vid2Vid":            
+#           process
+            if len(self.in_files) > 1:
+                print "to be implemented"
+                quit()
+            else:
+                self.extract_frames(self.fps,self.in_files,self.temp_path_full)
+                tmp_files =  self.files_from_dir(self.temp_path_full)
+                self.compute_boxes(tmp_files,self.ul_0,self.dr_0,self.ul_1,self.dr_1)
+                self.crop_scale_save(tmp_files,self.frame_size,self.temp_path_crop)
+                self.stream(self.temp_path_crop,self.fps,self.out_dir)   
+            self.clean_temp(self.temp_path_full)  
+            self.clean_temp(self.temp_path_crop)
+        
  
  
 #//////////internal methods////////////      

@@ -1,3 +1,5 @@
+import project_config
+pr=project_config.path_config("paths")
 import warp
 import transform
 from PIL import Image

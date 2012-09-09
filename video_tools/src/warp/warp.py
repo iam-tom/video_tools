@@ -40,13 +40,13 @@ class warper:
             for level in range(int(self.warp_frames)+1):
                 alpha = level/self.warp_frames
                 im_new=Image.blend(im0,im1,alpha)
+
                 
                 
                 out_file_curr = out_file[0:len(out_file)-len(str(im_ctr))]+str(im_ctr)+self.o_type
                 im_new.save(out_file_curr)
                 im_ctr +=1
-    
-    
+     
 
 if __name__ == "__main__":
     a = warper()

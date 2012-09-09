@@ -4,7 +4,7 @@
 import PIL
 import subprocess
 import os
-import threading
+from threading import Thread 
 
 import utils
 
@@ -75,6 +75,9 @@ class thumbnailer():
 class frame_extractor ():
 
     def __init__(self):
+#///////////// Thread stuff///////////////////
+
+
 #/////////////// Allocations and default vaules //////////////
         self.format = ".png"
         self.leading_zeros = 3
@@ -96,9 +99,12 @@ class frame_extractor ():
         self.frame_size = config["frame_size"]
         self.fps = config["fps"]
         
-    
+
 
     def Run(self):
+
+
+
 #        get movie name    
         dot = self.i_path[0].find(".")
         slash = self.i_path[0].rfind("/")
