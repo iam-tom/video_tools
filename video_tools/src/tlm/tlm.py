@@ -5,8 +5,8 @@ import avtools
 
 import utils
 from threading import Thread
-
-
+from waitbar import iWaitbar
+from multiprocessing import Process
 class tlm (Thread):
 
 
@@ -30,7 +30,7 @@ class tlm (Thread):
 #       T.Vid2Vid(config) .................. tl from video - output is video
 
     def __init__(self):
-
+        Thread.__init__(self)
         Thread.__init__(self)
         self.deamon=True
         
@@ -41,8 +41,9 @@ class tlm (Thread):
         self.dr_y = tuple()
 #        default values for flags
         self.flags={"filter":Image.BICUBIC}
-        
-
+        print 114
+        #self.pb = iWaitbar(None)
+        print 115
 #////////////NEW API//////
 
     def SetIO(self,in_path,out_path):
@@ -68,15 +69,17 @@ class tlm (Thread):
         self.fps=config["fps"]
         self.box0  =config["box_start"]
         self.box1  =config["box_end"]
-        self.ul_0 =box0[0]
-        self.dr_0=box0[1]        
-        self.ul_1=box1[0]
-        self.dr_1=box1[1]
+        self.ul_0 =self.box0[0]
+        self.dr_0=self.box0[1]        
+        self.ul_1=self.box1[0]
+        self.dr_1=self.box1[1]
         self.flag="Seq2Seq" 
-        #        process
-        self.compute_boxes(self.in_files,ul_0,dr_0,ul_1,dr_1)
-        
-        self.crop_scale_save(self.in_files,frame_size,self.out_dir)
+        print "STARTING THREAD"
+        self.start()
+       # #        process
+       # self.compute_boxes(self.in_files,ul_0,dr_0,ul_1,dr_1)
+       # 
+       # self.crop_scale_save(self.in_files,frame_size,self.out_dir)
         
         
         
@@ -88,21 +91,23 @@ class tlm (Thread):
         self.box0  =config["box_start"]
         self.box1  =config["box_end"]
 
-        self.ul_0 =box0[0]
-        self.dr_0=box0[1]        
-        self.ul_1=box1[0]
-        self.dr_1=box1[1]            
+        self.ul_0 =self.box0[0]
+        self.dr_0=self.box0[1]        
+        self.ul_1=self.box1[0]
+        self.dr_1=self.box1[1]            
 
         self.temp_path_crop = "/tmp/tlm_crops/"  
-#       self. process
-
-        self.flag="Seq2Vid" 
- 
-        self.compute_boxes(self.in_files,ul_0,dr_0,ul_1,dr_1)
-        self.crop_scale_save(self.in_files,frame_size,temp_path_crop)
-        self.stream(temp_path_crop,fps,self.out_dir)  
-
-        self.clean_temp(temp_path_crop)    
+        self.flag="Seq2Vid"
+        self.start()
+##       self. process
+#
+#        self.flag="Seq2Vid" 
+# 
+#        self.compute_boxes(self.in_files,ul_0,dr_0,ul_1,dr_1)
+#        self.crop_scale_save(self.in_files,frame_size,temp_path_crop)
+#        self.stream(temp_path_crop,fps,self.out_dir)  
+#
+#        self.clean_temp(temp_path_crop)    
             
     def Vid2Seq(self,config):
 #        update config       dr_1=config["box_end"][1]
@@ -110,25 +115,25 @@ class tlm (Thread):
         self.fps=config["fps"]
         self.box0  =config["box_start"]
         self.box1  =config["box_end"]
-        self.ul_0 =box0[0]
-        self.dr_0=box0[1]        
-        self.ul_1=box1[0]
-        self.dr_1=box1[1]             
+        self.ul_0 =self.box0[0]
+        self.dr_0=self.box0[1]        
+        self.ul_1=self.box1[0]
+        self.dr_1=self.box1[1]             
         self.temp_path = "/tmp/tlm_frames/"
         self.flag="Vid2Seq"
-        
-#        process
-        if len(self.in_files) > 1:
-            print "to be implemented"
-            quit()
-        else:
-            self.extract_frames(fps,self.in_files,temp_path)
-            
-            tmp_files =  self.files_from_dir(temp_path)
-            self.compute_boxes(tmp_files,ul_0,dr_0,ul_1,dr_1)
-            self.crop_scale_save(tmp_files,frame_size,self.out_dir)  
-        
-        self.clean_temp(temp_path)
+        self.start()
+##        process
+#        if len(self.in_files) > 1:
+#            print "to be implemented"
+#            quit()
+#        else:
+#            self.extract_frames(fps,self.in_files,temp_path)
+#            
+#            tmp_files =  self.files_from_dir(temp_path)
+#            self.compute_boxes(tmp_files,ul_0,dr_0,ul_1,dr_1)
+#            self.crop_scale_save(tmp_files,frame_size,self.out_dir)  
+#        
+#        self.clean_temp(temp_path)
     def Vid2Vid(self,config):
 #        update config
         self.frame_size=config["res"]
@@ -156,6 +161,7 @@ class tlm (Thread):
 #        self.clean_temp(temp_path_full)  
 #        self.clean_temp(temp_path_crop)
 
+
 #////////////////////////////////       
     def run(self):
         if  self.flag is "Vid2Vid":            
@@ -164,16 +170,48 @@ class tlm (Thread):
                 print "to be implemented"
                 quit()
             else:
+                #self.pb.Start()
                 self.extract_frames(self.fps,self.in_files,self.temp_path_full)
+                #self.pb.SetValue(30)
                 tmp_files =  self.files_from_dir(self.temp_path_full)
                 self.compute_boxes(tmp_files,self.ul_0,self.dr_0,self.ul_1,self.dr_1)
                 self.crop_scale_save(tmp_files,self.frame_size,self.temp_path_crop)
+                #self.pb.Increment(40)
+                
                 self.stream(self.temp_path_crop,self.fps,self.out_dir)   
+                #self.pb.SetValue(90)
             self.clean_temp(self.temp_path_full)  
             self.clean_temp(self.temp_path_crop)
+            #self.pb.Done() 
+        if self.flag is "Seq2Seq": 
+            #        process
+            self.compute_boxes(self.in_files,self.ul_0,self.dr_0,self.ul_1,self.dr_1)
+            
+            self.crop_scale_save(self.in_files,self.frame_size,self.out_dir)
         
+        
+        if self.flag is "Vid2Seq":
+#             process
+             if len(self.in_files) > 1:
+                 print "to be implemented"
+                 quit()
+             else:
+                 self.extract_frames(self.fps,self.in_files,self.temp_path)
+                 
+                 tmp_files =  self.files_from_dir(self.temp_path)
+                 self.compute_boxes(tmp_files,self.ul_0,self.dr_0,self.ul_1,self.dr_1)
+                 self.crop_scale_save(tmp_files,self.frame_size,self.out_dir)  
+             
+             self.clean_temp(self.temp_path)
+        if self.flag is "Seq2Vid": 
+#           self. process
+
  
- 
+            self.compute_boxes(self.in_files,self.ul_0,self.dr_0,self.ul_1,self.dr_1)
+            self.crop_scale_save(self.in_files,self.frame_size,self.temp_path_crop)
+            self.stream(self.temp_path_crop,self.fps,self.out_dir)  
+
+            self.clean_temp(self.temp_path_crop)    
 #//////////internal methods////////////      
 
     def process_config(self,config,frame_size,fps,ul_0,dr_0,ul_1,dr_1): 
@@ -285,8 +323,28 @@ class tlm (Thread):
         #    cmd = "mkdir -p  "+o_path
         #    os.system("cmd")
 
-        i = 0  
+        splitter=utils.split_seq(files,4)
+        split_indices=splitter.get_indices()
+        print split_indices
+        p1=Process(target=self.css_parallel,args=(files[0:split_indices[1]]          ,o_size,o_path,0))
+        p2=Process(target=self.css_parallel,args=(files[split_indices[1]:split_indices[3]],o_size,o_path,split_indices[1]))
+        p3=Process(target=self.css_parallel,args=(files[split_indices[2]:split_indices[3]],o_size,o_path,split_indices[2]))
+        p4=Process(target=self.css_parallel,args=(files[split_indices[3]:-1]          ,o_size,o_path,split_indices[3]))
+        
+        p1.start()
+        p2.start()
+        p3.start()
+        p4.start()
+        
+        p1.join()
+        p2.join()
+        p3.join()
+        p4.join()
+    
+    def css_parallel(self,files,o_size,o_path,ctr):    
+        i = ctr  
         in_bounds = i
+               
         for curr_frame in files:
 
 
@@ -303,7 +361,6 @@ class tlm (Thread):
             o_file = o_path+"img_"+number_str+".jpg"
             img.save(o_file)
             i = i+1
-        print "cropped scaled saved"
 #////////////////////////////////////
 
 

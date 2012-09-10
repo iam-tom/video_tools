@@ -45,12 +45,12 @@ class iChoice(wx.Choice):
 
 class imgList (iwx.iList):
 #iwx.iList with previewer and type check
-    def __init__(self,parent,i_size,i_pos):
+    def __init__(self,parent,i_size):
         i_col_list = list()
         i_col_list.append("name")
         i_col_list.append("format")
         self.prev_config ={"pos":(i_size[0]+140,60),"parent":parent}
-        super(imgList,self).__init__(parent,i_size,i_pos,i_col_list)
+        super(imgList,self).__init__(parent,i_size,i_col_list)
         b_prev=wx.Button(parent,wx.ID_ANY,"Preview",(i_size[0]+20,160),(70,30),wx.BU_EXACTFIT)
         b_prev.Bind(wx.EVT_BUTTON, self.OnPrev,b_prev)
         self.T = thumbnailer()

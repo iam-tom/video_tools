@@ -10,6 +10,7 @@ import subprocess
 import iwx
 import wdGUI
 
+from waitbar import iWaitbar
 class GUI (wx.Frame):
 
     def __init__(self,title,config):
@@ -55,9 +56,7 @@ class GUI (wx.Frame):
         
 #        graphical elements
 
-        self.list = GUIelements.imgList(self.p2,(200,500),(0,0))
-
-
+        self.list = GUIelements.imgList(self.p2,(200,500))
 
         ok_b = wx.Button(self.p2,wx.ID_OK,"OK",(10,550),(80,80),wx.BU_EXACTFIT)
         ok_b.Bind(wx.EVT_BUTTON, self.OnOk)

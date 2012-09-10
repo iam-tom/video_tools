@@ -44,7 +44,7 @@ class thumbnailer():
         mov_name = self.i_path[0:dot]
 #        o_path = self.o_path+mov_name+"_thb"+self.format
         o_path = self.o_path+"thb"+self.format
-    
+        utils.assert_dir(self.o_path)   
         #if os.path.isdir(self.o_path) == False:
         #    mkdir_str = "mkdir -p "+self.o_path
         #    os.system(mkdir_str)

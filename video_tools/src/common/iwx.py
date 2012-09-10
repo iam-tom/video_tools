@@ -83,12 +83,12 @@ class iForm(wx.Frame):
 
 
 class iList(wx.ListCtrl):
-    def __init__(self,parent,i_size,i_pos,i_col_list):
+    def __init__(self,parent,i_size,i_col_list):
 #presets
         self.path_list = list()
         self.file_list = list()
         self.disp_list = list()
-        self.LC = wx.ListCtrl(parent,size=i_size,pos= i_pos,style= wx.LC_REPORT | wx.BORDER_SUNKEN)
+        self.LC = wx.ListCtrl(parent,size=i_size,style= wx.LC_REPORT | wx.BORDER_SUNKEN)
         
         col_num=0
         for col_name in i_col_list:

@@ -1,0 +1,4 @@
+# Paths to be added to sys.path in order to enable convenient importing
+/home/tom/workspace_python/thirdparty
+/home/tom/workspace_python/video_tools/src/common
+/home/tom/workspace_python/video_tools/src/warp

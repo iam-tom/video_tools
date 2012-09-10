@@ -16,7 +16,7 @@
 #
 
 import os
-
+import math
 
 
 
@@ -38,3 +38,20 @@ class tuple_op():
     def div(self,factor):
         res=tuple([i/factor for i in self.tup])
         return res
+
+
+class split_seq():
+    def __init__(self,paths,parts):
+        l=len(paths)
+        print l
+        self.indices=list()
+        if l%parts == 0:
+            for i in range(parts):
+                self.indices.append(i* l/parts)
+        else:
+            for i in range(parts):
+                self.indices.append(int(math.ceil(i * l/parts)))
+    def get_indices(self):
+        return self.indices
+    
+        

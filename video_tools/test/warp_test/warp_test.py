@@ -3,7 +3,7 @@ pr=project_config.path_config("paths")
 import warp
 import transform
 from PIL import Image
-
+import time
 import os
 
 #imagees 9942-->9944
@@ -35,4 +35,7 @@ im3.save("transformed.jpg")
 im1.save("original.jpg")
 
 warper = warp.warper()
-warper.Run()
+t0=time.time()
+warper.Run_parallel()
+t1=time.time()
+print t1-t0
