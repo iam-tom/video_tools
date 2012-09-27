@@ -97,6 +97,7 @@ class warpGUI(wx.Panel):
         self.in_path=list()
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/01_2000.JPG")
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/02_2000.JPG")
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/01_2000.JPG")
 
     #make layout and activate bidnings
         self.make_layout(parent)
@@ -203,7 +204,14 @@ class warpGUI(wx.Panel):
         self.over1.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f1 ,canvas=self.zoom1: self.ZoomCallback(evt,frame,canvas))
         self.zoom0.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f0 , canvas = self.zoom0 : self.PointCallback(evt,frame,canvas))
 
+        self.button_up11.Bind(wx.EVT_BUTTON, self.OnFrameUp)
+        self.button_down12.Bind(wx.EVT_BUTTON, self.OnFrameDown)
+
+
     #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+
+
     def ZoomCallback(self,e,frame,canvas):
         pos=e.GetPos()
         pos = wx.Point(pos.x-canvas.size().x/2,pos.y-canvas.size().y/2)
@@ -222,22 +230,25 @@ class warpGUI(wx.Panel):
         img=wx.ImageFromBitmap(bitmap)
         self.over0.draw(img)
         print pos 
-    def OnFrameUp(self):
+    def OnFrameUp(self,e):
         new_id0=self.f0.id()+1
         new_id1=self.f1.id()+1    
-        if id1>=len(self.in_paths):
+        if new_id1>=len(self.in_path):
             print "last frame..."
             return
-        set_state(new_id0,new_id1)
+        self.set_state(new_id0,new_id1)
+        print "-->UP"
 
         self.over0.draw(self.f0.img())
-    def OnFrameDown(self):
+
+    def OnFrameDown(self,e):
         new_id0=self.f0.id()-1
         new_id1=self.f1.id()-1    
-        if id0<0:
+        if new_id0<0:
             print "first frame..."
             return
-        set_state(new_id0,new_id1)
+        self.set_state(new_id0,new_id1)
+        print "--> DOWN"
 
     def set_state(self,id0,id1):
 
@@ -250,10 +261,10 @@ class warpGUI(wx.Panel):
 
         elif id1 ==self.f0.id()  and id0<>self.f0.id() and id0<>self.f1.id():
              self.f1=self.f0
-             self.f0=frame(self.in_path[id0],i0)
+             self.f0=frame(self.in_path[id0],id0)
 
         elif id1 ==self.f1.id()  and id0<>self.f0.id() and id0<>self.f1.id():
-             self.f0=frame(self.in_path[id0],i0)
+             self.f0=frame(self.in_path[id0],id0)
 
         elif id0 ==self.f0.id()  and id1==self.f1.id() :
              self.f0=self.f0
@@ -264,6 +275,10 @@ class warpGUI(wx.Panel):
                     return
                 self.f0=frame(self.in_path[id0],id0)
                 self.f1=frame(self.in_path[id1],id1)
+        print id1
+        print id0
+        self.over0.draw(self.f0.img())
+        self.over1.draw(self.f1.img())
 
     
     def set_test_state(self,id0,id1):
