@@ -216,6 +216,16 @@ class iList(wx.ListCtrl):
         
         
 
+
+EVT_POS_pub = wx.NewEventType()
+EVT_POS_sub = wx.PyEventBinder(EVT_POS_pub, 1)
+
+class iEvent(wx.PyCommandEvent):
+    def __init__(self, evtType, id,pos):
+        wx.PyCommandEvent.__init__(self, evtType, id)
+        self. pos= pos
+    def GetPos(self):
+        return self.pos
         
         
     

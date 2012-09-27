@@ -1,8 +1,11 @@
 
 import wx
 
+import iwx
 
-class frame():
+
+
+class frame(wx.StaticBitmap):
 #//////////////////////<<<INIT////////////////////////////////////////////
     def __init__(self,path,id):
         self.img_orig_=wx.Image(path,wx.BITMAP_TYPE_ANY)
@@ -58,6 +61,8 @@ class canvas(wx.StaticBitmap):
             wx.StaticBitmap.__init__(self,parent,size=size)
             self.scale_=float()            
             self.size_=size
+    # Bind position callback to canvas
+            self.Bind(wx.EVT_LEFT_DOWN,self.PosCallback)
     def size(self):
         return self.size_
     
@@ -67,7 +72,8 @@ class canvas(wx.StaticBitmap):
        #TODO min of si/so is scale.... 
         scale = float(si.x)/float(so.x)
         self.scale_= scale 
-    
+        
+     
     def draw(self,img):
         img_scaled=img.Scale(self.size_.x,self.size_.y,wx.IMAGE_QUALITY_HIGH)
         self.set_scale(img)
@@ -75,57 +81,54 @@ class canvas(wx.StaticBitmap):
 
     def scale(self):
         return self.scale_
+
+    def pos(self):
+        return self.pos_
+# Callback stuff ----------------------------------
+    def PosCallback(self,e):
+        pos=wx.Point(e.GetPosition().x*self.scale(),e.GetPosition().y*self.scale())
+        evt =iwx.iEvent(iwx.EVT_POS_pub,1,pos)
+        self.GetEventHandler().ProcessEvent(evt)
 class warpGUI(wx.Panel):
 
+
     def __init__(self,parent):
-    
-    
-    
     #default vaules-----------------------------------------------------
-    
-    
-        self.init_img=wx.Image("../../src/.data/tlm_init.bmp",wx.BITMAP_TYPE_ANY,-1)
-       # self.init_img=wx.Image(".data/warp_init.png",wx.BITMAP_TYPE_PNG,-1)
-        self.init_zoom_img=wx.Image("../../src/.data/warp_zoom.png",wx.BITMAP_TYPE_PNG,-1)
         self.in_path=list()
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/01_2000.JPG")
-
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/02_2000.JPG")
+
+    #make layout and activate bidnings
         self.make_layout(parent)
-        self.set_first_state(0,1)
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~~~~~~~~~~~~~~~~~11111111111111111~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~~~~~~~~~~~~~~~~~11111111111111111~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # layout ---------------------------------------
+        self.set_init_state()
+        self.set_test_state(0,1)
+        self.make_bindings()
+
+
     def make_layout(self,parent):
+    # layout ---------------------------------------
         size_over=wx.Size(600,400)
         size_zoom=wx.Size(200,200)
-    #####PANELS
-       #parent panel p1  
-        wx.Panel.__init__(self,parent)
-    ######BOX SIZERS
 
-        #bs1=wx.BoxSizer(wx.VERTICAL)
+    #parent panel p1  
+        wx.Panel.__init__(self,parent)
+    #BOX SIZERS
+
         bs1=wx.FlexGridSizer(rows=3,cols=1)
-        #bs1.SetFlexibleDirection(wx.VERTICAL)
         bs11=wx.BoxSizer(wx.HORIZONTAL)
         bs12=wx.BoxSizer(wx.HORIZONTAL)
         bs13=wx.BoxSizer(wx.HORIZONTAL)
          
         
-    ###### LAYOUT PANEL 11
+    ###### LAYOUT PANEL 0--------------------------------------
         self.button_up11=wx.Button(self,-1,"U\nP",size=(30,200))
 
 
         self.over0=canvas(self,size_over)
-        self.over0.draw(self.init_img) 
 
         bs111=wx.FlexGridSizer(rows=3,cols=1)
-        img=self.init_zoom_img.Scale(size_zoom[0],size_zoom[1],wx.IMAGE_QUALITY_HIGH)
-        #self.zoom0=wx.StaticBitmap(self,-1,wx.BitmapFromImage(img))        
+
         self.zoom0=canvas(self,size_zoom)        
-        self.zoom0.draw(self.init_zoom_img) 
         
         bs1111=wx.BoxSizer(wx.HORIZONTAL)
         
@@ -143,18 +146,15 @@ class warpGUI(wx.Panel):
         bs11.Add(self.over0     , wx.ALIGN_TOP ,0)
         bs11.Add(bs111           , wx.ALIGN_TOP ,0)
         bs11.Add(self.button_up11, wx.ALIGN_TOP ,0)
-    ###### LAYOUT PANEL 11
-
+    ###### LAYOUT PANEL 1------------------------------------
+ 
         self.button_down12=wx.Button(self,-1,"D\nO\nW\nN",size=(30,200))
 
-        img=self.init_img.Scale(size_over[0],size_over[1],wx.IMAGE_QUALITY_HIGH)
-        self.over1=wx.StaticBitmap(self,-1,wx.BitmapFromImage(img))
+        self.over1=canvas(self,size_over)
         
-        #bs121=wx.BoxSizer(wx.VERTICAL)
         bs121=wx.FlexGridSizer(rows=3,cols=1)
 
-        img=self.init_zoom_img.Scale(size_zoom[0],size_zoom[1],wx.IMAGE_QUALITY_HIGH)
-        self.zoom1=wx.StaticBitmap(self,-1,wx.BitmapFromImage(img))        
+        self.zoom1=canvas(self,size_zoom)
         
         bs1211=wx.BoxSizer(wx.HORIZONTAL)
         
@@ -191,26 +191,37 @@ class warpGUI(wx.Panel):
         bs1.Add(bs13,1,wx.ALIGN_BOTTOM) 
         bs1.AddGrowableRow(0,0)
         bs1.AddGrowableRow(1,0)
-        #bs1.AddGrowableRow(2,0)
-        #self.SetAutoLayout(True)
+
         self.SetSizer(bs1)
         self.Layout()
         self.Fit()
 
-#BINDINGS/////////////////////////////////////////////////////////////////
-        self.over0.Bind(wx.EVT_LEFT_DOWN,self.OnLClick)
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~~~~~~~~~~~~~~~~~22222222222222222~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~~~~~~~~~~~~~~~~~22222222222222222~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def OnLClick(self,e):
-    # TEST BINDING TO SET ZOOM
-        pos_scaled=e.GetPosition()
-        print pos_scaled
-        print self.over0.scale()
-        pos=wx.Point((pos_scaled.x*self.over0.scale())-self.zoom0.size().x/2,(pos_scaled.y*self.over0.scale()-self.zoom0.size().y/2))
-        print pos
-        self.set_zoom(self.f0,self.zoom0,pos)
+
+    def make_bindings(self):
+    #BINDINGS-------------------------------------------------------------------
+        self.over0.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f0 ,canvas=self.zoom0: self.ZoomCallback(evt,frame,canvas))
+        self.over1.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f1 ,canvas=self.zoom1: self.ZoomCallback(evt,frame,canvas))
+        self.zoom0.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f0 , canvas = self.zoom0 : self.PointCallback(evt,frame,canvas))
+
+    #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def ZoomCallback(self,e,frame,canvas):
+        pos=e.GetPos()
+        pos = wx.Point(pos.x-canvas.size().x/2,pos.y-canvas.size().y/2)
+        self.set_zoom(frame,canvas,pos)
+    def PointCallback(self, e,frame,canvas):
+
+        pos = e.GetPos()
+        dc = wx.MemoryDC() 
+        bitmap=wx.BitmapFromImage(frame.img())
+        a= dc.SelectObject(bitmap)
+        dc.BeginDrawing()
+        dc.SetPen(wx.Pen("red",style=wx.SOLID))
+        dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
+        dc.DrawRectangle(pos[0]+10,pos[1]+10,pos[0]-10,pos[1]-10)
+        dc.EndDrawing()
+        img=wx.ImageFromBitmap(bitmap)
+        self.over0.draw(img)
+        print pos 
     def OnFrameUp(self):
         new_id0=self.f0.id()+1
         new_id1=self.f1.id()+1    
@@ -254,26 +265,33 @@ class warpGUI(wx.Panel):
                 self.f0=frame(self.in_path[id0],id0)
                 self.f1=frame(self.in_path[id1],id1)
 
-        self.draw_canvas(self.f0.img(),self.over0)
-        self.draw_canvas(self.f1.img(),self.over1)
-        self.draw_pts(self.f0.pts(),self.over0)
-        self.draw_pts(self.f1.pts(),self.over1)
     
-    def set_first_state(self,id0,id1):
+    def set_test_state(self,id0,id1):
 
         self.f0=frame(self.in_path[id0],id0)
         self.f1=frame(self.in_path[id1],id1)
 
-        self.draw_canvas(self.f0.img(),self.over0)
         self.over0.draw(self.f0.img())
-        
         self.set_zoom(self.f0,self.zoom0,wx.Point(1000,1000))
 
-        self.draw_canvas(self.f1.img(),self.over1)
-        self.draw_pts(self.f0.pts(),self.over0)
-        self.draw_pts(self.f1.pts(),self.over1)
-        
-        #self.set_zoom(self.f0,self.zoom0,wx.Point(100,100))
+        self.over1.draw(self.f1.img())
+        self.set_zoom(self.f1,self.zoom1,wx.Point(1000,1000))
+
+    def set_init_state(self):
+
+        init_img="../../src/.data/tlm_init.bmp"
+        init_img_zoom="../../src/.data/warp_zoom.png"
+        self.f0=frame(init_img,-1)
+        self.f1=frame(init_img,-1)
+
+
+        zoom_init_frame=frame(init_img_zoom,-1)
+
+        self.over0.draw(self.f0.img())
+        self.zoom0.draw(zoom_init_frame.img())
+
+        self.over1.draw(self.f1.img())
+        self.zoom1.draw(zoom_init_frame.img())
 
 
     def set_zoom(self,frame,canvas,pos):
@@ -299,7 +317,6 @@ class warpGUI(wx.Panel):
         #crop = frame.img().crop(rec)
         crop = frame.img().GetSubImage(wx.Rect(pos.x,pos.y,canvas.size().x,canvas.size().y))
 
-        self.draw_canvas(crop,canvas)
         canvas.draw(crop)
         sel_pts=list()
         pts=frame.pts() 
@@ -308,8 +325,6 @@ class warpGUI(wx.Panel):
                 sel_pts.append(pts[i]-pos)
                 
 
-    def draw_canvas(self,img,canvas):
-        print "tbi draw_canvas"
     def draw_pts(self,pts,canvas):
         print"tbi drav_pts"                
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
