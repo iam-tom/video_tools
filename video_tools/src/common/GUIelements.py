@@ -6,7 +6,81 @@ import iwx
 from  avtools import thumbnailer
 import cStringIO
 import imgutils
+class iNavpanel(wx.Panel):
+    def __init__(self,parent,steps):
+        #default values
+        wx.Panel.__init__(self,parent)
+        self.ctr=0
+        self.steps=steps
+        self.layout()
+        self.bindings()
+    def layout(self):
+        # layout
+        bs1=wx.BoxSizer(wx.VERTICAL)
+        bs12=wx.BoxSizer(wx.HORIZONTAL)
+        bs11=wx.BoxSizer(wx.HORIZONTAL)
+        fgs11=wx.FlexGridSizer(rows=1,cols=2)
+        fgs11.SetFlexibleDirection(wx.HORIZONTAL)
+        self.gauge=wx.Gauge(self,-1,range=self.steps)
+        self.txt= wx.TextCtrl(self,-1)
+        self.txt.SetEditable(False)
+        self.updateTxt()
 
+
+
+        #bs11.Add(self.gauge,wx.ALIGN_LEFT)
+        #bs11.Add(self.txt,wx.ALIGN_RIGHT)
+        fgs11.Add(self.gauge)
+        fgs11.Add(self.txt  )
+
+
+        self.forward=wx.Button(self,-1,"-->")
+        self.back=wx.Button(self,-1,"<--")
+        bs12.Add(self.back)
+        bs12.Add(self.forward)
+
+        #bs1.Add(bs11,wx.ALIGN_TOP)
+        bs1.Add(fgs11)
+        bs1.Add(bs12 )
+        self.SetSizer(bs1)
+
+    def bindings(self):
+        #bindings
+        self.forward.Bind(wx.EVT_BUTTON,self.OnForward)
+        self.back.Bind(wx.EVT_BUTTON,self.OnBack)
+
+    def OnForward(self,e):
+        self.modifyCtr(1)
+        self.gauge.SetValue(self.ctr)
+        self.updateTxt()
+        self.publishDirection(self.forward,1)
+
+
+    def OnBack(self,e):
+        self.modifyCtr(-1)
+        self.gauge.SetValue(self.ctr)
+        self.updateTxt()
+        self.publishDirection(self.back,-1)
+
+    def updateTxt(self):
+        ctr_str=" "+ str(self.ctr)+" / "+str(self.steps)
+        self.txt.SetValue(ctr_str)
+
+    def modifyCtr(self,val):    
+        if self.ctr + val < 0 or self.ctr +val >self.steps:
+                print "[navbar] - invalid modification of ctr"
+        else:
+            self.ctr +=val
+
+    def publishDirection(self,button,direction):
+        evt=iwx.iEvent(iwx.EVT_INC_pub,1,direction)
+        button.GetEventHandler().ProcessEvent(evt)
+
+    def SetSteps(self,steps):
+        self.steps = steps
+        self.updateTxt()
+        self.gauge.SetRange(steps)
+        print self.steps
 class iChoice(wx.Choice):
 #Default Resolution Choice element
     def __init__(self,parent,in_pos,mode):

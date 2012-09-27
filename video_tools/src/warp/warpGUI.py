@@ -2,7 +2,7 @@
 import wx
 
 import iwx
-
+import GUIelements
 
 
 class frame(wx.StaticBitmap):
@@ -97,12 +97,16 @@ class warpGUI(wx.Panel):
         self.in_path=list()
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/01_2000.JPG")
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/02_2000.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/01_2000.JPG")
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9942.JPG")
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9943.JPG")
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9944.JPG")
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9954.JPG")
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9955.JPG")
 
     #make layout and activate bidnings
         self.make_layout(parent)
         self.set_init_state()
-        self.set_test_state(0,1)
+        #self.set_test_state(0,1)
         self.make_bindings()
 
 
@@ -115,7 +119,7 @@ class warpGUI(wx.Panel):
         wx.Panel.__init__(self,parent)
     #BOX SIZERS
 
-        bs1=wx.FlexGridSizer(rows=3,cols=1)
+        bs1=wx.FlexGridSizer(rows=4,cols=1)
         bs11=wx.BoxSizer(wx.HORIZONTAL)
         bs12=wx.BoxSizer(wx.HORIZONTAL)
         bs13=wx.BoxSizer(wx.HORIZONTAL)
@@ -175,19 +179,19 @@ class warpGUI(wx.Panel):
         bs12.Add(bs121           , wx.ALIGN_TOP ,0)
         bs12.Add(self.button_down12, wx.ALIGN_LEFT ,0)
 
-    ###### LAYOUT PANEL 12
-        
-
-    ###### LAYOUT PANEL 13
-        self.button_up13    =wx.Button(self)
-        self.button_down13   =wx.Button(self)
+    ###### LAYOUT Bottom PANEL 
+        self.button_up13    =wx.Button(self,-1,"BUT!")
+        self.button_down13   =wx.Button(self,-1,"BUT!")
         
         bs13.Add(self.button_up13  ,wx.EXPAND)
         bs13.Add(self.button_down13,wx.EXPAND)
 
+    ##### LAYOUT NAVPANEL
+        self.nav = GUIelements.iNavpanel(self,3)
     ###### MAKE LAYOUT
 
         bs1.Add(bs11,1,wx.ALIGN_LEFT) 
+        bs1.Add(self.nav,1,wx.EXPAND)
         bs1.Add(bs12,1,wx.ALIGN_TOP) 
         bs1.Add(bs13,1,wx.ALIGN_BOTTOM) 
         bs1.AddGrowableRow(0,0)
@@ -200,25 +204,30 @@ class warpGUI(wx.Panel):
 
     def make_bindings(self):
     #BINDINGS-------------------------------------------------------------------
+        # bindings to move focus of zoom
         self.over0.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f0 ,canvas=self.zoom0: self.ZoomCallback(evt,frame,canvas))
         self.over1.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f1 ,canvas=self.zoom1: self.ZoomCallback(evt,frame,canvas))
+        #bindings for pixel picking
         self.zoom0.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f0 , canvas = self.zoom0 : self.PointCallback(evt,frame,canvas))
 
+        # bindings for frame up<-->down
         self.button_up11.Bind(wx.EVT_BUTTON, self.OnFrameUp)
         self.button_down12.Bind(wx.EVT_BUTTON, self.OnFrameDown)
-
+        self.nav.forward.Bind(iwx.EVT_INC_sub,self.OnFrameSwitch)
+        self.nav.back.Bind(iwx.EVT_INC_sub,self.OnFrameSwitch)
 
     #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
 
 
     def ZoomCallback(self,e,frame,canvas):
-        pos=e.GetPos()
+        pos=e.GetVal()
+        print pos
         pos = wx.Point(pos.x-canvas.size().x/2,pos.y-canvas.size().y/2)
         self.set_zoom(frame,canvas,pos)
     def PointCallback(self, e,frame,canvas):
 
-        pos = e.GetPos()
+        pos = e.GetVal()
         dc = wx.MemoryDC() 
         bitmap=wx.BitmapFromImage(frame.img())
         a= dc.SelectObject(bitmap)
@@ -230,6 +239,7 @@ class warpGUI(wx.Panel):
         img=wx.ImageFromBitmap(bitmap)
         self.over0.draw(img)
         print pos 
+
     def OnFrameUp(self,e):
         new_id0=self.f0.id()+1
         new_id1=self.f1.id()+1    
@@ -249,6 +259,19 @@ class warpGUI(wx.Panel):
             return
         self.set_state(new_id0,new_id1)
         print "--> DOWN"
+
+    def OnFrameSwitch(self,e):
+        val=int(e.GetVal())
+        new_id0=self.f0.id()+val
+        new_id1=self.f1.id()+val    
+        if new_id0<0:
+            print "first frame..."
+            return
+        if new_id1>=len(self.in_path):
+            print "last frame..."
+            return
+        else:    
+            self.set_state(new_id0,new_id1)
 
     def set_state(self,id0,id1):
 
@@ -279,6 +302,9 @@ class warpGUI(wx.Panel):
         print id0
         self.over0.draw(self.f0.img())
         self.over1.draw(self.f1.img())
+        #TODO: hard coded initial point of zoom --make middle of frame
+        self.set_zoom(self.f0,self.zoom0,wx.Point(1000,1000))
+        self.set_zoom(self.f1,self.zoom1,wx.Point(1000,1000))
 
     
     def set_test_state(self,id0,id1):
@@ -291,7 +317,9 @@ class warpGUI(wx.Panel):
 
         self.over1.draw(self.f1.img())
         self.set_zoom(self.f1,self.zoom1,wx.Point(1000,1000))
-
+        
+        #update navbar
+        self.nav.SetSteps(len(self.in_path)-1)
     def set_init_state(self):
 
         init_img="../../src/.data/tlm_init.bmp"
