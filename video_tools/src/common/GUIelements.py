@@ -81,6 +81,10 @@ class iNavpanel(wx.Panel):
         self.updateTxt()
         self.gauge.SetRange(steps)
         print self.steps
+
+    def GetCtr(self):
+        return self.ctr
+
 class iChoice(wx.Choice):
 #Default Resolution Choice element
     def __init__(self,parent,in_pos,mode):

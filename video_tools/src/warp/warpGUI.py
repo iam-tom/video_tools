@@ -106,7 +106,7 @@ class warpGUI(wx.Panel):
     #make layout and activate bidnings
         self.make_layout(parent)
         self.set_init_state()
-        #self.set_test_state(0,1)
+        self.set_test_state(0,1)
         self.make_bindings()
 
 
@@ -247,9 +247,9 @@ class warpGUI(wx.Panel):
             print "last frame..."
             return
         self.set_state(new_id0,new_id1)
-        print "-->UP"
 
         self.over0.draw(self.f0.img())
+        self.nav.modifyCtr(self.nav.GetCtr()+1)
 
     def OnFrameDown(self,e):
         new_id0=self.f0.id()-1
@@ -258,7 +258,7 @@ class warpGUI(wx.Panel):
             print "first frame..."
             return
         self.set_state(new_id0,new_id1)
-        print "--> DOWN"
+        self.nav.modifyCtr(self.nav.GetCtr()-1)
 
     def OnFrameSwitch(self,e):
         val=int(e.GetVal())
@@ -306,6 +306,8 @@ class warpGUI(wx.Panel):
         self.set_zoom(self.f0,self.zoom0,wx.Point(1000,1000))
         self.set_zoom(self.f1,self.zoom1,wx.Point(1000,1000))
 
+        # update bindings!
+        self.make_bindings()
     
     def set_test_state(self,id0,id1):
 
