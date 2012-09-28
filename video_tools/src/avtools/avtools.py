@@ -8,28 +8,35 @@ from threading import Thread
 
 import utils
 
-
 #/////////////// /////////////////////////// //////////////
 #/////////////// CLASS:  THUMBNAILER //////////////
 #/////////////// ///////////////  ////////////// //////////////
 
+##
+# Create thumbnail from movie stream
 class thumbnailer():
 
+    ##
+    # Initialize object
+    # @param self object pointer
     def __init__(self):
 #//////////// Allocations ////////////////////
-#        self.config = list()
-#        self.thumb = PIL.Image()
+
+        ## output format
         self.format = ".png"
+        ## input path
         self.i_path = str()
-        self.o_path = str()
+        ## output path
+        self.o_path = str()  
+        ## output frame size
         self.frame_size = ""
-
-
-
-        
         
 #///////////////  Interface Functions //////////////
- 
+
+    ##
+    # Update configuration of thumbnailer
+    # @param self object pointer
+    # @param config Configuration mapping
     def UpdateConfig(self,config):
         self.format = config["format"]
         self.i_path = config["i_path"]
@@ -38,16 +45,14 @@ class thumbnailer():
 
         
         
+    ##
+    # Trigger processing
+    # @param self object pointer
     def Run(self):
-#        get movie name    
         dot = self.i_path.find(".")
         mov_name = self.i_path[0:dot]
-#        o_path = self.o_path+mov_name+"_thb"+self.format
         o_path = self.o_path+"thb"+self.format
         utils.assert_dir(self.o_path)   
-        #if os.path.isdir(self.o_path) == False:
-        #    mkdir_str = "mkdir -p "+self.o_path
-        #    os.system(mkdir_str)
 
         if len(self.frame_size)>0:
             command = ["avconv","-i",self.i_path,"-vframes","1","-s",str(self.frame_size),"-y",o_path]
@@ -55,42 +60,46 @@ class thumbnailer():
             command = ["avconv","-i",self.i_path,"-vframes","1","-y",o_path]
 
         subprocess.call(command)
-
-        
-        
-#/////////////// Internal Methods //////////////
-    def load_thumbnail(self):
-        print "to be implemented"
-#        function loads the thumbnail and saves it as a PIL.IMAGE
-    
- 
- 
- 
     
 #/////////////// /////////////////////////// //////////////
 #/////////////// CLASS:  FRAME EXTRACTOR //////////////
 #/////////////// ///////////////  ////////////// //////////////
 
-
+##
+# Extract frames from movie.
 class frame_extractor ():
 
+    ##
+    # Initialize object
+    # @param self object pointer
     def __init__(self):
 #///////////// Thread stuff///////////////////
 
 
 #/////////////// Allocations and default vaules //////////////
+        ## output format
         self.format = ".png"
+        ## number of leading zeros for frame naming
         self.leading_zeros = 3
+        ## input path
         self.i_path = str()
+        ## output path
         self.o_path = str()
+        ## output directory
         self.o_dir = str()
+        ## output frame size
         self.frame_size = ""
+        ## output frame rate [fps]
         self.fps = 1
 
 
 
 #/////////////// Interface Methods //////////////
 
+    ##
+    # Update configuration of thumbnailer
+    # @param self object pointer
+    # @param config Configuration mapping
     def UpdateConfig(self,config):
         self.format = config["format"]
         self.leading_zeros = config["zeros"]
@@ -101,21 +110,16 @@ class frame_extractor ():
         
 
 
+    ##
+    # Trigger processing
+    # @param self object pointer
     def Run(self):
-
-
-
 #        get movie name    
         dot = self.i_path[0].find(".")
         slash = self.i_path[0].rfind("/")
         mov_name = self.i_path[0][slash+1:dot]
         self.o_path = self.o_dir+mov_name+"%"+str(self.leading_zeros)+"d"+self.format
         utils.assert_dir(self.o_dir)
-        #if os.path.isdir(self.o_path) == False:
-        #    mkdir_str = "mkdir -p "+self.o_dir
-        #    os.system(mkdir_str)
-        self.exe()
-    def exe(self):    
         if len(self.frame_size)>0:
             command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-s",self.frame_size,"-v","-10","-y",self.o_path]
         else:
@@ -130,25 +134,49 @@ class frame_extractor ():
 #/////////////// CLASS:  CONVERTER //////////////
 #/////////////// ///////////////  ////////////// //////////////       
     
+##
+# Convert video.
 class converter ():
 
+    ##
+    # Initialize object
+    # @param self object pointer
     def __init__(self):
 #/////////////// Allocations and default vaules //////////////
+        ## output format
         self.format = ".mov"
+        ## input path
         self.i_path = list()
+        ## output path
         self.o_path = str()
+        ## frame size
         self.frame_size = "vga"
+        ## output frame rate [fps]
         self.fps = 25
+        ## output bitrate [bps]
         self.bv = "3000K"
         
+    ##
+    # Update configuration of thumbnailer
+    # @param self object pointer
+    # @param config Configuration mapping
     def UpdateConfig(self,config):
+        ## output format
         self.container = config["format"]
+        ## input path
         self.i_path = config["i_path"]
+        ## output path
         self.o_path = config["o_path"]
+        ## frame size
         self.frame_size = config["frame_size"]
+        ## output frame rate  [fps]
         self.fps = config["fps"]
+        ## output quality [bps]
         self.q = config["bv"]
 
+    ##
+    # Trigger processing
+    # @param self object pointer
     def Run(self):
     
         for i_file in self.i_path:
@@ -176,17 +204,34 @@ class converter ():
 #/////////////// CLASS:  STREAMER //////////////
 #/////////////// ///////////////  ////////////// ////////////// 
 
+##
+# Stream image sequence to video file.
 class streamer ():
 
+    ##
+    # Initialize object
+    # @param self object pointer
     def __init__(self):
 #/////////////// Allocations and default vaules //////////////
+        ## input format
         self.format = ".mov"
+        ## input paths
         self.i_path = str()
+        ## output path
         self.o_path = str()
+        ## leading zeros in output
         self.leading_zeros = 3
+        ## output frame size
         self.frame_size = ""
+        ## output framerate [fps]
         self.fps = 25
+        ## output bitrate [bps]
         self.q = "5000K" 
+
+    ##
+    # Update configuration of thumbnailer
+    # @param self object pointer
+    # @param config Configuration mapping
     def UpdateConfig(self,config):
         self.format= config["format"]
         self.i_path = config["i_path"]
@@ -196,6 +241,9 @@ class streamer ():
         self.leading_zeros = config["zeros"]
 #        self.q = config["bv"]
 
+    ##
+    # Trigger processing
+    # @param self object pointer
     def Run(self):
 #        get movie name
 

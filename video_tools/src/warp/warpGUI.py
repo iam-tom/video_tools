@@ -16,7 +16,7 @@ class frame(wx.StaticBitmap):
         self.size_=self.img_orig_.GetSize()
 #//////////////////////<<<METHODS///////////////////////////////////////
     def check_log(self):
-        print "tbi check_log"
+        print "[frame]tbi check_log"
         
           
     #    pts_log=list()
@@ -32,7 +32,7 @@ class frame(wx.StaticBitmap):
 
     def save_log(self):
         #TODO: save log with sel.id
-        print "tbi save_log"
+        print "[frame]tbi save_log"
     def reset_hard(self):
     #Warning use with caution - log is being deleted - otherwise use reset
         self.img_work_=img.orig_.Copy()
@@ -61,6 +61,8 @@ class canvas(wx.StaticBitmap):
             wx.StaticBitmap.__init__(self,parent,size=size)
             self.scale_=float()            
             self.size_=size
+            ## image coordinates of middle of canvas.
+            self.offset = wx.Point(0,0)
     # Bind position callback to canvas
             self.Bind(wx.EVT_LEFT_DOWN,self.PosCallback)
     def size(self):
@@ -78,6 +80,14 @@ class canvas(wx.StaticBitmap):
         img_scaled=img.Scale(self.size_.x,self.size_.y,wx.IMAGE_QUALITY_HIGH)
         self.set_scale(img)
         self.SetBitmap(wx.BitmapFromImage(img_scaled))
+    ##
+    # Set offset to middle of current image.
+    # Can be used to ensure valid image coordinates, when
+    # only crop of original image is displayed.
+    # @param self object pointer
+    # @param offset image coordinates of middle of canvas.
+    def set_offset(self,offset):
+        self.offset=offset
 
     def scale(self):
         return self.scale_
@@ -86,7 +96,7 @@ class canvas(wx.StaticBitmap):
         return self.pos_
 # Callback stuff ----------------------------------
     def PosCallback(self,e):
-        pos=wx.Point(e.GetPosition().x*self.scale(),e.GetPosition().y*self.scale())
+        pos=wx.Point(e.GetPosition().x*self.scale()+self.offset.x,e.GetPosition().y*self.scale()+self.offset.y)
         evt =iwx.iEvent(iwx.EVT_POS_pub,1,pos)
         self.GetEventHandler().ProcessEvent(evt)
 class warpGUI(wx.Panel):
@@ -208,7 +218,8 @@ class warpGUI(wx.Panel):
         self.over0.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f0 ,canvas=self.zoom0: self.ZoomCallback(evt,frame,canvas))
         self.over1.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f1 ,canvas=self.zoom1: self.ZoomCallback(evt,frame,canvas))
         #bindings for pixel picking
-        self.zoom0.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f0 , canvas = self.zoom0 : self.PointCallback(evt,frame,canvas))
+        self.zoom0.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f0 , canvas = self.over0 : self.PointCallback(evt,frame,canvas))
+        self.zoom1.Bind(iwx.EVT_POS_sub,lambda evt, frame = self.f1 , canvas = self.over1 : self.PointCallback(evt,frame,canvas))
 
         # bindings for frame up<-->down
         self.button_up11.Bind(wx.EVT_BUTTON, self.OnFrameUp)
@@ -222,7 +233,6 @@ class warpGUI(wx.Panel):
 
     def ZoomCallback(self,e,frame,canvas):
         pos=e.GetVal()
-        print pos
         pos = wx.Point(pos.x-canvas.size().x/2,pos.y-canvas.size().y/2)
         self.set_zoom(frame,canvas,pos)
     def PointCallback(self, e,frame,canvas):
@@ -232,12 +242,13 @@ class warpGUI(wx.Panel):
         bitmap=wx.BitmapFromImage(frame.img())
         a= dc.SelectObject(bitmap)
         dc.BeginDrawing()
-        dc.SetPen(wx.Pen("red",style=wx.SOLID))
+        dc.SetPen(wx.Pen("red",style=wx.SOLID,width=5))
         dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
-        dc.DrawRectangle(pos[0]+10,pos[1]+10,pos[0]-10,pos[1]-10)
+        #dc.DrawRectangle(pos[0],pos[1],30,30)
+        dc.DrawCircle(pos[0],pos[1],25)
         dc.EndDrawing()
         img=wx.ImageFromBitmap(bitmap)
-        self.over0.draw(img)
+        canvas.draw(img)
         print pos 
 
     def OnFrameUp(self,e):
@@ -298,8 +309,6 @@ class warpGUI(wx.Panel):
                     return
                 self.f0=frame(self.in_path[id0],id0)
                 self.f1=frame(self.in_path[id1],id1)
-        print id1
-        print id0
         self.over0.draw(self.f0.img())
         self.over1.draw(self.f1.img())
         #TODO: hard coded initial point of zoom --make middle of frame
@@ -343,26 +352,27 @@ class warpGUI(wx.Panel):
         rec = list()
         dr = pos+(int(canvas.size().x/2),int(canvas.size().y/2))
         ul = pos+(-int(canvas.size().x/2),-int(canvas.size().y/2)) 
-        # Make sure crop is n bounds
-        if ul.x <0:
-            ul.x=0
-            dr.x=canvas.size().x
-        if ul.y < 0:
-            ul.y = 0
-            dr.y=canvas.size().y
-        if dr.x > frame.size().x:
-            ul.x = frame.size().x - canvas.size().x
-            dr.x = frame.size().x
-        if dr.y > frame.size().y:
-            dr.y = frame.size().y        
-            ul.y = frame.size().y -canvas.size().y       
+        
+        ## Make sure crop is n bounds
+        #if ul.x <0:
+        #    ul.x=0
+        #    dr.x=canvas.size().x
+        #if ul.y < 0:
+        #    ul.y = 0
+        #    dr.y=canvas.size().y
+        #if dr.x > frame.size().x:
+        #    ul.x = frame.size().x - canvas.size().x
+        #    dr.x = frame.size().x
+        #if dr.y > frame.size().y:
+        #    dr.y = frame.size().y        
+        #    ul.y = frame.size().y -canvas.size().y       
 
         rec.append(ul)    
         rec.append(dr)    
-        #crop = frame.img().crop(rec)
         crop = frame.img().GetSubImage(wx.Rect(pos.x,pos.y,canvas.size().x,canvas.size().y))
 
         canvas.draw(crop)
+        canvas.set_offset(pos)
         sel_pts=list()
         pts=frame.pts() 
         for i in range(len(pts)):
