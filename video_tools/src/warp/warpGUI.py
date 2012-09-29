@@ -1,6 +1,6 @@
 
 import wx
-
+import utils
 import iwx
 import GUIelements
 
@@ -14,6 +14,8 @@ class frame(wx.StaticBitmap):
         self.check_log()
         self.id_=id
         self.size_=self.img_orig_.GetSize()
+        utils.assert_dir("/tmp/frames")
+        
 #//////////////////////<<<METHODS///////////////////////////////////////
     def check_log(self):
         print "[frame]tbi check_log"
@@ -418,7 +420,3 @@ class warpGUI(wx.Panel):
                 sel_pts.append(pts[i]-pos)
                 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
