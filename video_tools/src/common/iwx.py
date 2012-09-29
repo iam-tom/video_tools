@@ -1,7 +1,9 @@
 #! /usr/bin/env python
 import wx
-
+import imgutils
 import cStringIO
+import utils
+import os
 import time
 class iStaticText(wx.StaticText):
 
@@ -234,6 +236,68 @@ class iEvent(wx.PyCommandEvent):
         
     
         
+class iFrame(wx.StaticBitmap):
+#//////////////////////<<<INIT////////////////////////////////////////////
+    def __init__(self,path,id):
+        self.img_orig_=wx.Image(path,wx.BITMAP_TYPE_ANY)
+        self.img_work_=self.img_orig_.Copy()
+        self.pts_=list()
+        self.id_=id
+        self.size_=self.img_orig_.GetSize()
+        # make sure temporary directory exists (change to database)
+        self.tmpdir="/tmp/frames/"
+        utils.assert_dir(self.tmpdir)
+        self.check_log()
+        
+#//////////////////////<<<METHODS///////////////////////////////////////
+    def check_log(self):
+        log_str=self.tmpdir+"frame_log"+str(self.id_)
+        if os.path.isfile(log_str)==True:
+            f=open(log_str,"r")
+            for line in f:
+                comma= line.find(",")
+                pt=wx.Point(int(line[1:comma]),int(line[comma+1:len(line)-2]))
+                self.pts_.append(pt)
+        else:
+            self.save_log()
+
+    def add_pts(self,pt):
+        self.pts_.append(pt)
+        self.save_log()
+    ##
+    # Save log file with points of frame    
+    def save_log(self):
+        frame_str=self.tmpdir+"frame_log"+str(self.id_)
+        f=open(frame_str,"w")
+        for pt in self.pts_:
+            f.write("%s\n"%str(pt))
+        
+    def reset_hard(self):
+    #Warning use with caution - log is being deleted - otherwise use reset
+        self.img_work_=img.orig_.Copy()
+        self.pts=list()
+        self.save_log()
+
+    def reset(self):
+        self.img_work_=img.orig_.Copy()
+        self.pts=list()
+
+#//////////////////////<<<GETTERS///////////////////////////////////////
+    def img(self):
+        return self.img_work_
+
+    def pil_img(self):
+        pil_img=imgutils.image_to_pil(self.img_work_)
+        return pil_img    
+    def pts(self):
+        return self.pts_  
+   
+    def id(self):
+        return self.id_     
+
+    def size(self):
+        return self.size_
+
 
 
         

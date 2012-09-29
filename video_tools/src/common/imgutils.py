@@ -2,6 +2,9 @@
 
 import itertools
 import re
+import PIL
+import wx
+
 class seq_compressor():
 #class to compress the namestrings of image sequences
 #
@@ -84,3 +87,22 @@ class seq_compressor():
              return "%s[%s-%s]" % (group[0][1][slash+1:dot-length],
                  first[-length:], last[-length:])
     
+def pil_to_image( pil, alpha=True):
+    """ Method will convert PIL Image to wx.Image """
+    if alpha:
+        image = apply( wx.EmptyImage, pil.size )
+        image.SetData( pil.convert( "RGB").tostring() )
+        image.SetAlphaData(pil.convert("RGBA").tostring()[3::4])
+    else:
+        image = wx.EmptyImage(pil.size[0], pil.size[1])
+        new_image = pil.convert('RGB')
+        data = new_image.tostring()
+        image.SetData(data)
+    return image
+
+
+def image_to_pil( image):
+    """ Method will convert wx.Image to PIL Image """
+    pil = PIL.Image.new('RGB', (image.GetWidth(), image.GetHeight()))
+    pil.fromstring(image.GetData())
+    return pil 

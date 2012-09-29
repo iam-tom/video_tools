@@ -1,62 +1,11 @@
 
 import wx
 import utils
+import imgutils
 import iwx
 import GUIelements
-
-
-class frame(wx.StaticBitmap):
-#//////////////////////<<<INIT////////////////////////////////////////////
-    def __init__(self,path,id):
-        self.img_orig_=wx.Image(path,wx.BITMAP_TYPE_ANY)
-        self.img_work_=self.img_orig_.Copy()
-        self.pts_=list()
-        self.check_log()
-        self.id_=id
-        self.size_=self.img_orig_.GetSize()
-        utils.assert_dir("/tmp/frames")
-        
-#//////////////////////<<<METHODS///////////////////////////////////////
-    def check_log(self):
-        print "[frame]tbi check_log"
-        
-          
-    #    pts_log=list()
-    #TODO: if id exists
-    #        open logifile and read pts
-    #        self.add_pts(pts_log)
-    #    else:
-    #        self.save_log()
-
-    def add_pts(self,pt):
-        self.pts_.append(pt)
-        self.save_log()
-
-    def save_log(self):
-        #TODO: save log with sel.id
-        print "[frame]tbi save_log"
-    def reset_hard(self):
-    #Warning use with caution - log is being deleted - otherwise use reset
-        self.img_work_=img.orig_.Copy()
-        self.pts=list()
-        self.save_log()
-
-    def reset(self):
-        self.img_work_=img.orig_.Copy()
-        self.pts=list()
-
-#//////////////////////<<<GETTERS///////////////////////////////////////
-    def img(self):
-        return self.img_work_
-    
-    def pts(self):
-        return self.pts_  
-   
-    def id(self):
-        return self.id_     
-
-    def size(self):
-        return self.size_
+import os
+import warp
 
 class canvas(wx.StaticBitmap):
     def __init__(self,parent,size):
@@ -192,10 +141,10 @@ class warpGUI(wx.Panel):
         bs12.Add(self.button_down12, wx.ALIGN_LEFT ,0)
 
     ###### LAYOUT Bottom PANEL 
-        self.button_up13    =wx.Button(self,-1,"BUT!")
+        self.button_exe    =wx.Button(self,-1,"PROCESS")
         self.button_down13   =wx.Button(self,-1,"BUT!")
         
-        bs13.Add(self.button_up13  ,wx.EXPAND)
+        bs13.Add(self.button_exe  ,wx.EXPAND)
         bs13.Add(self.button_down13,wx.EXPAND)
 
     ##### LAYOUT NAVPANEL
@@ -228,6 +177,9 @@ class warpGUI(wx.Panel):
         self.button_down12.Bind(wx.EVT_BUTTON, self.OnFrameDown)
         self.nav.forward.Bind(iwx.EVT_INC_sub,self.OnFrameSwitch)
         self.nav.back.Bind(iwx.EVT_INC_sub,self.OnFrameSwitch)
+        
+        # bindings for processing
+        self.button_exe.Bind(wx.EVT_BUTTON, self.OnExe)
 
     #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
@@ -254,7 +206,6 @@ class warpGUI(wx.Panel):
         img=wx.ImageFromBitmap(bitmap)
         frame.img_work_ = img
         canvas.draw(img)
-        print pos 
 
     ##
     # @brief Callback for point on canvas
@@ -324,17 +275,17 @@ class warpGUI(wx.Panel):
         # set frames f0 and f1 
         if id0 ==self.f1.id() and id1<>self.f0.id() and id1<>self.f1.id():
              self.f0=self.f1
-             self.f1=frame(self.in_path[id1],id1)
+             self.f1=iwx.iFrame(self.in_path[id1],id1)
         
         elif id0 ==self.f0.id()  and id1<>self.f0.id() and id1<>self.f1.id():
-             self.f1=frame(self.in_path[id1],id1)
+             self.f1=iwx.iFrame(self.in_path[id1],id1)
 
         elif id1 ==self.f0.id()  and id0<>self.f0.id() and id0<>self.f1.id():
              self.f1=self.f0
-             self.f0=frame(self.in_path[id0],id0)
+             self.f0=iwx.iFrame(self.in_path[id0],id0)
 
         elif id1 ==self.f1.id()  and id0<>self.f0.id() and id0<>self.f1.id():
-             self.f0=frame(self.in_path[id0],id0)
+             self.f0=iwx.iFrame(self.in_path[id0],id0)
 
         elif id0 ==self.f0.id()  and id1==self.f1.id() :
              self.f0=self.f0
@@ -343,8 +294,8 @@ class warpGUI(wx.Panel):
         else:
                 if id0 <0 or id1 < 0:
                     return
-                self.f0=frame(self.in_path[id0],id0)
-                self.f1=frame(self.in_path[id1],id1)
+                self.f0=iwx.iFrame(self.in_path[id0],id0)
+                self.f1=iwx.iFrame(self.in_path[id1],id1)
         #update GUI
         self.over0.draw(self.f0.img())
         self.over1.draw(self.f1.img())
@@ -360,8 +311,8 @@ class warpGUI(wx.Panel):
     
     def set_test_state(self,id0,id1):
 
-        self.f0=frame(self.in_path[id0],id0)
-        self.f1=frame(self.in_path[id1],id1)
+        self.f0=iwx.iFrame(self.in_path[id0],id0)
+        self.f1=iwx.iFrame(self.in_path[id1],id1)
 
         self.over0.draw(self.f0.img())
         self.set_zoom(self.f0,self.zoom0,wx.Point(1000,1000))
@@ -375,11 +326,11 @@ class warpGUI(wx.Panel):
 
         init_img="../../src/.data/tlm_init.bmp"
         init_img_zoom="../../src/.data/warp_zoom.png"
-        self.f0=frame(init_img,-1)
-        self.f1=frame(init_img,-1)
+        self.f0=iwx.iFrame(init_img,-1)
+        self.f1=iwx.iFrame(init_img,-1)
 
 
-        zoom_init_frame=frame(init_img_zoom,-1)
+        zoom_init_frame=iwx.iFrame(init_img_zoom,-1)
 
         self.over0.draw(self.f0.img())
         self.zoom0.draw(zoom_init_frame.img())
@@ -418,5 +369,15 @@ class warpGUI(wx.Panel):
         for i in range(len(pts)):
             if (pts[i].x > ul.x and pts[i].x < dr.x) and (pts[i].y > ul.y and pts[i].y < dr.y):
                 sel_pts.append(pts[i]-pos)
-                
+
+    def OnExe(self,e):
+        morpher=warp.morpher()
+        morpher.set_input(self.f0,self.f1)
+        morpher.Run()
+        morphed=morpher.GetResult()
+        utils.assert_dir("/tmp/warpGUI")
+        config={"i_path":self.in_path,"o_path":"/tmp/warpGUI/","warp_frames":50,"o_type":".jpg"}
+        w= warp.warper()
+        w.UpdateConfig(config)
+        w.Run_pair(self.f0.pil_img(),morphed)        
 

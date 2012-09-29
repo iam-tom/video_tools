@@ -1,6 +1,7 @@
 from PIL import Image
 from multiprocessing import Process
 import utils
+import transform
 class warper:
 
 #Class is supposed to enable warping between a sequence of images
@@ -16,13 +17,26 @@ class warper:
         self.o_path="frames/"
         self.o_type=".jpg"
         self.config={"i_path":self.in_path,"o_path":self.o_path,"warp_frames":self.warp_frames,"o_type":self.o_type}
-    def Update_config(self,config):
+    def UpdateConfig(self,config):
         self.config = config
         self.in_path = self.config["i_path"]
         self.o_path  = self.config["o_path"]
         self.warp_frames = self.config["warp_frames"]
-        self.o_type = self.config["type"]
-        
+        self.o_type = self.config["o_type"]
+    ##
+    #   Mode with only 2 images 
+    def Run_pair(self,f0,f1):
+        im0=f0 
+        im1=f1
+        im_ctr = 0
+        out_file = self.o_path+"img_00000"
+        for level in range(int(self.warp_frames)+1):
+            alpha = float(level)/float(self.warp_frames)
+            im_new=Image.blend(im0,im1,alpha)
+            out_file_curr = out_file[0:len(out_file)-len(str(im_ctr))]+str(im_ctr)+self.o_type
+            im_new.save(out_file_curr)
+            im_ctr +=1
+               
     
     def Run(self):
         
@@ -39,7 +53,7 @@ class warper:
             print "processing image %i "%i 
             out_file = self.o_path+"img_00000"
             for level in range(int(self.warp_frames)+1):
-                alpha = level/self.warp_frames
+                alpha = float(level)/float(self.warp_frames)
                 im_new=Image.blend(im0,im1,alpha)
 
                 
@@ -86,7 +100,7 @@ class warper:
     
             out_file = self.o_path+"img_00000"
             for level in range(int(self.warp_frames)+1):
-                alpha = level/self.warp_frames
+                alpha = float(level)/float(self.warp_frames)
                 im_new=Image.blend(im0,im1,alpha)
                 
                 
@@ -98,3 +112,40 @@ class warper:
 if __name__ == "__main__":
     a = warper()
     a.Run()
+
+
+
+##
+# Class handles transformation between two frames
+class morpher():
+    def __init__(self):
+        print "[morpher] initialized"
+    ##
+    # Set input frames
+    # @param f0 iwx.iFrame - start image
+    # @param f1 iwx.iFrame - target image
+    def set_input(self,f0,f1):
+        self.f0 = f0
+        self.f1 = f1
+    ##
+    # Start morphing process
+    # @todo only work with PIL internally
+    def Run(self):
+        print"-----"
+        print self.f0.pts()
+        print"-----"
+        print self.f1.pts()
+        print"-----"
+        est=transform.Affine_Fit(self.f0.pts(),self.f1.pts()) 
+        t=est.Get_Trafo()
+        T =  (t[0][3],t[1][3],t[2][3], t[0][4],t[1][4],t[2][4])
+        img1=self.f1.pil_img()
+        img0=self.f0.pil_img()
+        img0.save("1.jpg")
+        size=self.f0.size()
+        self.img_morphed=img1.transform((size[0],size[1]),Image.AFFINE,T)
+        self.img_morphed.save("2.jpg")
+    def GetResult(self):
+        return self.img_morphed
+
+        

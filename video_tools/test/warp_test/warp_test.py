@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import project_config
 pr=project_config.path_config("paths")
 import warp
@@ -36,6 +37,7 @@ im1.save("original.jpg")
 
 warper = warp.warper()
 t0=time.time()
-warper.Run_parallel()
+#warper.Run_parallel()
+warper.Run()
 t1=time.time()
 print t1-t0
