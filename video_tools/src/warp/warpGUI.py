@@ -26,8 +26,8 @@ class frame(wx.StaticBitmap):
     #    else:
     #        self.save_log()
 
-    def add_pts(self,pts):
-        self.pts.append(pts)
+    def add_pts(self,pt):
+        self.pts_.append(pt)
         self.save_log()
 
     def save_log(self):
@@ -235,22 +235,56 @@ class warpGUI(wx.Panel):
         pos=e.GetVal()
         pos = wx.Point(pos.x-canvas.size().x/2,pos.y-canvas.size().y/2)
         self.set_zoom(frame,canvas,pos)
-    def PointCallback(self, e,frame,canvas):
+    def PointCallbackTEMP(self, e,frame,canvas):
 
         pos = e.GetVal()
         dc = wx.MemoryDC() 
         bitmap=wx.BitmapFromImage(frame.img())
         a= dc.SelectObject(bitmap)
         dc.BeginDrawing()
-        dc.SetPen(wx.Pen("red",style=wx.SOLID,width=5))
+        radius=5*canvas.scale()
+        penwidth=5*canvas.scale()
+        dc.SetPen(wx.Pen("red",style=wx.SOLID,width=penwidth))
         dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
         #dc.DrawRectangle(pos[0],pos[1],30,30)
-        dc.DrawCircle(pos[0],pos[1],25)
+        dc.DrawCircle(pos[0],pos[1],radius)
         dc.EndDrawing()
         img=wx.ImageFromBitmap(bitmap)
+        frame.img_work_ = img
         canvas.draw(img)
         print pos 
 
+    ##
+    # @brief Callback for point on canvas
+    # 
+    # Gets click position and ads it to frame
+    # @param self Object pointer
+    # @param e Event
+    # @param frame Frame, point is in
+    def PointCallback(self, e,frame,canvas):
+        pos = e.GetVal()
+        frame.add_pts(pos)
+        self.draw_pts(frame,canvas)
+
+    ##
+    # @brief draw points of frame
+    def draw_pts(self,frame,canvas):
+        dc = wx.MemoryDC() 
+        bitmap=wx.BitmapFromImage(frame.img())
+        a= dc.SelectObject(bitmap)
+        dc.BeginDrawing()
+        radius=5*canvas.scale()
+        penwidth=5*canvas.scale()
+        dc.SetPen(wx.Pen("red",style=wx.SOLID,width=penwidth))
+        dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
+        for pt in frame.pts():
+            #dc.DrawRectangle(pos[0],pos[1],30,30)
+            dc.DrawCircle(pt.x,pt.y,radius)
+        dc.EndDrawing()
+        img=wx.ImageFromBitmap(bitmap)
+        canvas.draw(img)
+            
+        
     def OnFrameUp(self,e):
         new_id0=self.f0.id()+1
         new_id1=self.f1.id()+1    
@@ -285,7 +319,7 @@ class warpGUI(wx.Panel):
             self.set_state(new_id0,new_id1)
 
     def set_state(self,id0,id1):
-
+        # set frames f0 and f1 
         if id0 ==self.f1.id() and id1<>self.f0.id() and id1<>self.f1.id():
              self.f0=self.f1
              self.f1=frame(self.in_path[id1],id1)
@@ -309,11 +343,15 @@ class warpGUI(wx.Panel):
                     return
                 self.f0=frame(self.in_path[id0],id0)
                 self.f1=frame(self.in_path[id1],id1)
+        #update GUI
         self.over0.draw(self.f0.img())
         self.over1.draw(self.f1.img())
         #TODO: hard coded initial point of zoom --make middle of frame
         self.set_zoom(self.f0,self.zoom0,wx.Point(1000,1000))
         self.set_zoom(self.f1,self.zoom1,wx.Point(1000,1000))
+        # draw points 
+        self.draw_pts(self.f0,self.over0)
+        self.draw_pts(self.f1,self.over1)
 
         # update bindings!
         self.make_bindings()
@@ -380,8 +418,6 @@ class warpGUI(wx.Panel):
                 sel_pts.append(pts[i]-pos)
                 
 
-    def draw_pts(self,pts,canvas):
-        print"tbi drav_pts"                
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
