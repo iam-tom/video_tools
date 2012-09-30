@@ -37,7 +37,7 @@ im1.save("original.jpg")
 
 warper = warp.warper()
 t0=time.time()
-#warper.Run_parallel()
-warper.Run()
+warper.Run_parallel()
+#warper.Run()
 t1=time.time()
 print t1-t0

@@ -80,12 +80,12 @@ class warper:
 
 
 
-         Process(target=self.process_parallel,args=(paths_1,im_ctr1)).start()
+        Process(target=self.process_parallel,args=(paths_1,im_ctr1)).start()
          Process(target=self.process_parallel,args=(paths_2,im_ctr2)).start()
          Process(target=self.process_parallel,args=(paths_3,im_ctr3)).start()
          Process(target=self.process_parallel,args=(paths_4,im_ctr4)).start()
 
-
+        
     def process_parallel(self,files,ctr):
         
         #load image and next image

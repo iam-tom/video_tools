@@ -58,10 +58,10 @@ class warpGUI(wx.Panel):
         self.in_path=list()
         #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/01_2000.JPG")
         #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/02_2000.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9942.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9943.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9944.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9954.JPG")
+        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9942.JPG")
+        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9943.JPG")
+        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9944.JPG")
+        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9954.JPG")
         #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9955.JPG")
         self.out_path = "/home/tom/warptest/"
         self.transformations=list()
@@ -69,10 +69,12 @@ class warpGUI(wx.Panel):
     #make layout and activate bidnings
         self.make_layout(parent)
         self.set_init_state()
-        self.set_test_state(0,1)
+        #self.set_test_state(0,1)
         self.make_bindings()
 
-
+    def SetInPath(self,msg):
+        self.in_path = msg[0]
+        self.set_state(0,1)
     def make_layout(self,parent):
     # layout ---------------------------------------
         size_over=wx.Size(600,400)
@@ -329,8 +331,8 @@ class warpGUI(wx.Panel):
         self.nav.SetSteps(len(self.in_path)-1)
     def set_init_state(self):
 
-        init_img="../../src/.data/tlm_init.bmp"
-        init_img_zoom="../../src/.data/warp_zoom.png"
+        init_img=".data/warp_init.png"
+        init_img_zoom=".data/warp_zoom.png"
         self.f0=iwx.iFrame(init_img,-1)
         self.f1=iwx.iFrame(init_img,-1)
 
