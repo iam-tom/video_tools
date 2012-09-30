@@ -106,3 +106,17 @@ def image_to_pil( image):
     pil = PIL.Image.new('RGB', (image.GetWidth(), image.GetHeight()))
     pil.fromstring(image.GetData())
     return pil 
+
+##
+# trafo multiplication    
+def trafo_combine(a,b):
+    r0=a[0]*b[0]+a[1]*b[4]
+    r1=a[0]*b[1]+a[1]*b[5]
+    r2=a[0]*b[2]+a[1]*b[6]
+    r3=a[0]*b[3]+a[1]*b[7]
+    r4=a[4]*b[0]+a[5]*b[4]
+    r5=a[4]*b[1]+a[5]*b[5]
+    r6=a[4]*b[2]+a[5]*b[6]
+    r7=a[4]*b[3]+a[5]*b[7]
+    r=tuple((r0,r1,r2,r3,r4,r5,r6,r7))        
+    return r

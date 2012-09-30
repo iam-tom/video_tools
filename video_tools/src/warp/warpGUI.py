@@ -56,13 +56,15 @@ class warpGUI(wx.Panel):
     def __init__(self,parent):
     #default vaules-----------------------------------------------------
         self.in_path=list()
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/01_2000.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/02_2000.JPG")
+        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/01_2000.JPG")
+        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/02_2000.JPG")
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9942.JPG")
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9943.JPG")
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9944.JPG")
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9954.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9955.JPG")
+        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9955.JPG")
+        self.out_path = "/home/tom/warptest/"
+        self.transformations=list()
 
     #make layout and activate bidnings
         self.make_layout(parent)
@@ -142,19 +144,21 @@ class warpGUI(wx.Panel):
 
     ###### LAYOUT Bottom PANEL 
         self.button_exe    =wx.Button(self,-1,"PROCESS")
-        self.button_down13   =wx.Button(self,-1,"BUT!")
+        self.button_down13   =wx.Button(self,-1,"TRANSFORM")
         
-        bs13.Add(self.button_exe  ,wx.EXPAND)
-        bs13.Add(self.button_down13,wx.EXPAND)
 
     ##### LAYOUT NAVPANEL
+        bs_nav=wx.BoxSizer(wx.HORIZONTAL)
         self.nav = GUIelements.iNavpanel(self,3)
+        bs_nav.Add(self.nav  ,wx.EXPAND)
+        bs_nav.Add(self.button_exe  ,wx.EXPAND)
+        bs_nav.Add(self.button_down13,wx.EXPAND)
+        
     ###### MAKE LAYOUT
 
         bs1.Add(bs11,1,wx.ALIGN_LEFT) 
-        bs1.Add(self.nav,1,wx.EXPAND)
+        bs1.Add(bs_nav,1,wx.EXPAND)
         bs1.Add(bs12,1,wx.ALIGN_TOP) 
-        bs1.Add(bs13,1,wx.ALIGN_BOTTOM) 
         bs1.AddGrowableRow(0,0)
         bs1.AddGrowableRow(1,0)
 
@@ -180,6 +184,7 @@ class warpGUI(wx.Panel):
         
         # bindings for processing
         self.button_exe.Bind(wx.EVT_BUTTON, self.OnExe)
+        self.button_down13.Bind(wx.EVT_BUTTON, self.OnTransform)
 
     #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
@@ -370,14 +375,25 @@ class warpGUI(wx.Panel):
             if (pts[i].x > ul.x and pts[i].x < dr.x) and (pts[i].y > ul.y and pts[i].y < dr.y):
                 sel_pts.append(pts[i]-pos)
 
-    def OnExe(self,e):
+    def OnExe_old(self,e):
         morpher=warp.morpher()
         morpher.set_input(self.f0,self.f1)
         morpher.Run()
         morphed=morpher.GetResult()
         utils.assert_dir("/tmp/warpGUI")
-        config={"i_path":self.in_path,"o_path":"/tmp/warpGUI/","warp_frames":50,"o_type":".jpg"}
+        config={"i_path":self.in_path,"o_path":"/tmp/warpGUI/","warp_frames":200,"o_type":".jpg"}
         w= warp.warper()
         w.UpdateConfig(config)
         w.Run_pair(self.f0.pil_img(),morphed)        
+
+    def OnExe(self,e):
+        warp.process_sequence(self.in_path,self.out_path,self.transformations)
+
+    def OnTransform(self,e):
+        m=warp.morpher()
+        m.SetInputFrames(self.f0,self.f1)
+        T=m.GetTrafo()
+        self.transformations.append(T)        
+        print "T appended"
+
 

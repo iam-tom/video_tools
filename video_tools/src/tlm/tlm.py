@@ -273,14 +273,6 @@ class tlm (Thread):
         stream.Run()
                 
 
-    def zero_str(self,n_zeros,i):
-        
-        i_str=str(i)
-        zero_str=str()
-        for n in range(n_zeros):
-            zero_str+="0"
-        zero_str=zero_str[0:len(zero_str)-len(i_str)]+i_str
-        return zero_str
 
     def clean_temp(self,path):
         cmd = "rm "+path+"*"
@@ -357,7 +349,7 @@ class tlm (Thread):
             else:
                 img = img.crop((self.ul_x[in_bounds],self.ul_y[in_bounds],self.dr_x[in_bounds],self.dr_y[in_bounds]))
             img = img.resize(o_size,self.flags["filter"])
-            number_str=self.zero_str(5,i)
+            number_str=utils.zero_str(5,i)
             o_file = o_path+"img_"+number_str+".jpg"
             img.save(o_file)
             i = i+1
