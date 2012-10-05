@@ -26,8 +26,11 @@ class warper:
         self.warp_frames = self.config["warp_frames"]
         self.o_type = self.config["o_type"]
     ##
-    #   Mode with only 2 images 
-    def RunPair(self,f0,f1,ctr=0):
+    #   Run blending for two images
+    #   @param f0 Start frame
+    #   @param f1 End frame
+    #   @param ctr Image numbering start counter
+    def process_imgs(self,f0,f1,ctr=0):
         im0=f0 
         im1=f1
         im_ctr = ctr
@@ -39,74 +42,44 @@ class warper:
             im_new.save(out_file_curr)
             im_ctr +=1
                
-    
+   ##
+   # Run warping process with specified configuration 
     def Run(self):
         
         #load image and next image
         im_ctr = 0
         for i in range(len(self.in_path)-1):
     
-            f0  = self.in_path[i]
-            f1 = self.in_path[i+1]
+            p0  = self.in_path[i]
+            p1 = self.in_path[i+1]
     
-            im0 = Image.open(f0)
-            im1 = Image.open(f1)
-    
-            print "processing image %i "%i 
-            out_file = self.o_path+"img"
-            for level in range(int(self.warp_frames)+1):
-                alpha = float(level)/float(self.warp_frames)
-                im_new=Image.blend(im0,im1,alpha)
+            im0 = Image.open(p0)
+            im1 = Image.open(p1)
 
-                out_file_curr = out_file+utils.zero_str(4,im_ctr)+self.o_type
-                im_new.save(out_file_curr)
-                im_ctr +=1
-    def  Run_parallel(self):
-         splitter = utils.split_seq(self.in_path,4)
+            self.process_imgs(im0,im1,ctr=im_ctr*self.warp_frames)
+            im_ctr+=1
+
+   ##
+   # Run warping process with specified configuration with multiprocessing
+   # @param num_proc Number of processes that are spawned
+    
+    def  Run_parallel(self,num_proc=4):
+         splitter = utils.split_seq(self.in_path,num_proc)
          indices=splitter.get_indices()
-         p1 = indices[1]
-         p2 = indices[2]
-         p3 = indices[3]
 
-         paths_1=self.in_path[0:p1]
-         paths_2=self.in_path[p1:p2]
-         paths_3=self.in_path[p2:p3]
-         paths_4=self.in_path[p3:-1]
-         im_ctr1=0
-         im_ctr2=p1*self.warp_frames
-         im_ctr3=p2*self.warp_frames
-         im_ctr4=p3*self.warp_frames
-            
+         for i in range(num_proc-1):
+             if i==0:
+                p0 =0
+             else:
+                p0=indices[i]   
+                p1=indices[i+1]    
 
+         paths=self.in_path[p0:p1]
+         im0=Image.open(self.in_path[p0])
+         im1=Image.open(self.in_path[p1])
+         im_ctr=p0*warp_frames
+         Process(target=self.process_imgs,args=(paths,im_ctr)).start()
 
-
-        Process(target=self.process_parallel,args=(paths_1,im_ctr1)).start()
-         Process(target=self.process_parallel,args=(paths_2,im_ctr2)).start()
-         Process(target=self.process_parallel,args=(paths_3,im_ctr3)).start()
-         Process(target=self.process_parallel,args=(paths_4,im_ctr4)).start()
-
-        
-    def process_parallel(self,files,ctr):
-        
-        #load image and next image
-        im_ctr = ctr
-        for i in range(len(files)-1):
-    
-            f0 = files[i]
-            f1 = files[i+1]
-    
-            im0 = Image.open(f0)
-            im1 = Image.open(f1)
-    
-            out_file = self.o_path+"img",
-            for level in range(int(self.warp_frames)+1):
-                alpha = float(level)/float(self.warp_frames)
-                im_new=Image.blend(im0,im1,alpha)
-                
-                out_file_curr = out_file+utils.zero_str(4,im_ctr)+self.o_type
-                im_new.save(out_file_curr)
-                im_ctr +=1
-     
 
 if __name__ == "__main__":
     a = warper()
@@ -118,6 +91,8 @@ if __name__ == "__main__":
 # Class handles transformation between two frames
 class morpher():
     def __init__(self):
+
+        self.T=0
         print "[morpher] initialized"
     ##
     # Set input frames
@@ -129,7 +104,7 @@ class morpher():
 
     ##
     # Calculate Transformation between two frames
-    def GetTrafo(self):
+    def calc_trafo(self):
         print"-----"
         print self.f0.pts()
         print"-----"
@@ -137,26 +112,41 @@ class morpher():
         print"-----"
         est=transform.Affine_Fit(self.f0.pts(),self.f1.pts()) 
         t=est.Get_Trafo()
-        return  (t[0][3],t[1][3],t[2][3], t[0][4],t[1][4],t[2][4])
+        self.T= (t[0][3],t[1][3],t[2][3], t[0][4],t[1][4],t[2][4])
     ##
     # Start morphing process
     # @todo only work with PIL internally
-    def Run(self):
-        T=self.GetTrafo()
+    def Run(self,T=0,trafo_only=False):
+        if T ==0:
+            self.calc_trafo()
+        else:
+            self.T=T
         img1=self.f1.pil_img()
-        self.transform(img1,T)
+        if trafo_only==False:
+            self.transform(img1,self.T)
     ##
     # Apply transformation
     # @param img1 Frame to be transformed as PIL image
     # @param T transformation
-    def Transform(self,img1,T):
+    def transform(self,img1,T):
         size=self.f0.size()
         self.img_morphed=img1.transform((size[0],size[1]),Image.AFFINE,T)
     ##
     # Get resulting morphed image
     # @param self Object pointer
-    def GetResultImg(self):
+    def GetImgM(self):
         return self.img_morphed
+    
+    ##
+    # Get transformation
+    def GetTrafo(self):
+        if self.T==0:
+            print "execute Run() first"
+        return self.T
+    ##
+    # Save resultant image
+    def SaveImgM(self,o_path):        
+        self.img_morphed.save(o_path+".jpg")
 
 ##
 # Function to process frame sequence.
@@ -194,11 +184,15 @@ def process_sequence(in_path,o_path,T):
         m=morpher()
         m.SetInputFrames(f0,f1)
         if ctr > 0:
-            m.Transform(img1,T_prev)
-            mor=m.GetResultImg()
-            m.Transform(mor,T_curr)
+            m.Run(T_prev)
+            mor=iwx.iFrame(m.GetImgM())
+            m.SetInputFrames(f0,mor)
+            m.Run(T_curr)
         else:
-            m.Transform(img1,T_curr)
-        mor=m.GetResultImg()
-        w.RunPair(img0,mor,ctr=ctr*warp_frames)
+            m.Run(T_curr)
+        mor=m.GetImgM()
+        w.process_images(img0,mor,ctr=ctr*warp_frames)
         ctr+=1
+
+#TODO: - make morphing during GUI activity work
+        #- warping afterwards  / is parallelity even possible

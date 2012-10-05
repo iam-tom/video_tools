@@ -75,6 +75,8 @@ class warpGUI(wx.Panel):
     def SetInPath(self,msg):
         self.in_path = msg[0]
         self.set_state(0,1)
+        self.nav.SetSteps(len(self.in_path))
+        self.make_bindings()
     def make_layout(self,parent):
     # layout ---------------------------------------
         size_over=wx.Size(600,400)
@@ -146,7 +148,7 @@ class warpGUI(wx.Panel):
 
     ###### LAYOUT Bottom PANEL 
         self.button_exe    =wx.Button(self,-1,"PROCESS")
-        self.button_down13   =wx.Button(self,-1,"TRANSFORM")
+        self.button_down13   =wx.Button(self,-1,"--")
         
 
     ##### LAYOUT NAVPANEL
@@ -186,7 +188,6 @@ class warpGUI(wx.Panel):
         
         # bindings for processing
         self.button_exe.Bind(wx.EVT_BUTTON, self.OnExe)
-        self.button_down13.Bind(wx.EVT_BUTTON, self.OnTransform)
 
     #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
@@ -377,25 +378,13 @@ class warpGUI(wx.Panel):
             if (pts[i].x > ul.x and pts[i].x < dr.x) and (pts[i].y > ul.y and pts[i].y < dr.y):
                 sel_pts.append(pts[i]-pos)
 
-    def OnExe_old(self,e):
-        morpher=warp.morpher()
-        morpher.set_input(self.f0,self.f1)
-        morpher.Run()
-        morphed=morpher.GetResult()
-        utils.assert_dir("/tmp/warpGUI")
-        config={"i_path":self.in_path,"o_path":"/tmp/warpGUI/","warp_frames":200,"o_type":".jpg"}
-        w= warp.warper()
-        w.UpdateConfig(config)
-        w.Run_pair(self.f0.pil_img(),morphed)        
 
     def OnExe(self,e):
-        warp.process_sequence(self.in_path,self.out_path,self.transformations)
-
-    def OnTransform(self,e):
         m=warp.morpher()
         m.SetInputFrames(self.f0,self.f1)
-        T=m.GetTrafo()
-        self.transformations.append(T)        
-        print "T appended"
+        m.Run()
+        self.transformations.append(m.GetTrafo())
+        m.SaveImgM("/home/tom/testest/morph")
+
 
 
