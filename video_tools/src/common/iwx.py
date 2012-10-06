@@ -282,6 +282,9 @@ class iFrame(wx.StaticBitmap):
         self.img_work_=img.orig_.Copy()
         self.pts=list()
 
+    def SaveImg(self,path):
+        pil_img=imgutils.image_to_pil(self.img_work_)
+        pil_img.save(path)
 #//////////////////////<<<GETTERS///////////////////////////////////////
     def img(self):
         return self.img_work_

@@ -56,6 +56,7 @@ class warpGUI(wx.Panel):
     def __init__(self,parent):
     #default vaules-----------------------------------------------------
         self.in_path=list()
+        self.morphed_path=list()
         #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/01_2000.JPG")
         #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/02_2000.JPG")
         #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9942.JPG")
@@ -64,6 +65,8 @@ class warpGUI(wx.Panel):
         #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9954.JPG")
         #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9955.JPG")
         self.out_path = "/home/tom/warptest/"
+        self.tmp_path= "/tmp/warpGUI/"
+        utils.assert_dir(self.tmp_path)
         self.transformations=list()
 
     #make layout and activate bidnings
@@ -188,6 +191,7 @@ class warpGUI(wx.Panel):
         
         # bindings for processing
         self.button_exe.Bind(wx.EVT_BUTTON, self.OnExe)
+        self.button_down13.Bind(wx.EVT_BUTTON,self.OnAccept)
 
     #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
@@ -382,9 +386,39 @@ class warpGUI(wx.Panel):
     def OnExe(self,e):
         m=warp.morpher()
         m.SetInputFrames(self.f0,self.f1)
-        m.Run()
+        m.Run(trafo_only=True)
         self.transformations.append(m.GetTrafo())
-        m.SaveImgM("/home/tom/testest/morph")
+    # save init_frame
+        if self.f0.id()==0:
+            m.Run()
+            o_file=self.tmp_path+"imgm"+str(self.f0.id())+".jpg"
+            self.f0.SaveImg(o_file)
+            self.morphed_path.append(o_file)
+        else:
+            for i in range(self.f1.id()):
+                if i ==0:
+                   T=self.transformations[0] 
+                else:
+                    T=imgutils.trafo_combine(T,self.transformations[i])
+                    m.Run(T)
+        o_file=self.tmp_path+"imgm"+str(self.f1.id())+".jpg"
+        m.SaveImgM(o_file)
+        self.morphed_path.append(o_file)
 
+    def OnAccept(self,e):
+        w=warp.warper()
+        config={"i_path":self.morphed_path,"o_path":"/home/tom/TEST/","warp_frames":70,"o_type":".jpg"}
+        w.UpdateConfig(config)
+        pairs=len(self.morphed_path)-1
+        #if pairs<=3 and pairs > 1:
+        #    w.Run_parallel(num_proc=pairs)
+        #elif pairs>3:
+        #    w.Run_parallel(num_proc=3)
+        #else:
+        w.Run()
+    
+    def CleanTmp(self,e):
+        os.system("rm -rf /tmp/warpGUI/*")
+        os.system("rm -rf /tmp/frames/*")
 
 

@@ -35,12 +35,26 @@ class warper:
         im1=f1
         im_ctr = ctr
         out_file = self.o_path+"img"
+       # for level in range(20):
+       #     out_file_curr = out_file+utils.zero_str(4,im_ctr)+self.o_type
+       #     im0.save(out_file_curr)
+       #     im_ctr +=1
+        
         for level in range(int(self.warp_frames)+1):
+            out_file_curr = out_file+utils.zero_str(4,im_ctr)+self.o_type
+            #if level< 10:
+            #    im0.save(out_file_curr)
+            #elif level>self.warp_frames-10:
+            #    im1.save(out_file_curr)    
+            #else:
             alpha = float(level)/float(self.warp_frames)
             im_new=Image.blend(im0,im1,alpha)
-            out_file_curr = out_file+utils.zero_str(4,im_ctr)+self.o_type
             im_new.save(out_file_curr)
             im_ctr +=1
+       # for level in range(20):
+       #     out_file_curr = out_file+utils.zero_str(4,im_ctr)+self.o_type
+       #     im1.save(out_file_curr)
+       #     im_ctr +=1
                
    ##
    # Run warping process with specified configuration 
@@ -63,7 +77,7 @@ class warper:
    # Run warping process with specified configuration with multiprocessing
    # @param num_proc Number of processes that are spawned
     
-    def  Run_parallel(self,num_proc=4):
+    def  Run_parallel(self,num_proc=3):
          splitter = utils.split_seq(self.in_path,num_proc)
          indices=splitter.get_indices()
 
@@ -72,13 +86,13 @@ class warper:
                 p0 =0
              else:
                 p0=indices[i]   
-                p1=indices[i+1]    
+             p1=indices[i+1]    
 
-         paths=self.in_path[p0:p1]
-         im0=Image.open(self.in_path[p0])
-         im1=Image.open(self.in_path[p1])
-         im_ctr=p0*warp_frames
-         Process(target=self.process_imgs,args=(paths,im_ctr)).start()
+             paths=self.in_path[p0:p1]
+             im0=Image.open(self.in_path[p0])
+             im1=Image.open(self.in_path[p1])
+             im_ctr=p0*self.warp_frames
+             Process(target=self.process_imgs,args=(im0,im1,im_ctr)).start()
 
 
 if __name__ == "__main__":
@@ -105,11 +119,6 @@ class morpher():
     ##
     # Calculate Transformation between two frames
     def calc_trafo(self):
-        print"-----"
-        print self.f0.pts()
-        print"-----"
-        print self.f1.pts()
-        print"-----"
         est=transform.Affine_Fit(self.f0.pts(),self.f1.pts()) 
         t=est.Get_Trafo()
         self.T= (t[0][3],t[1][3],t[2][3], t[0][4],t[1][4],t[2][4])
@@ -146,7 +155,7 @@ class morpher():
     ##
     # Save resultant image
     def SaveImgM(self,o_path):        
-        self.img_morphed.save(o_path+".jpg")
+        self.img_morphed.save(o_path)
 
 ##
 # Function to process frame sequence.
