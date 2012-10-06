@@ -60,40 +60,45 @@ class warper:
     def Run(self):
         
         #load image and next image
-        im_ctr = 0
-        for i in range(len(self.in_path)-1):
-    
-            p0  = self.in_path[i]
-            p1 = self.in_path[i+1]
-    
-            im0 = Image.open(p0)
-            im1 = Image.open(p1)
-
-            self.process_imgs(im0,im1,ctr=im_ctr*self.warp_frames)
-            im_ctr+=1
+        ctr = 0
+        self.pre_process(self.in_path,ctr)
+         
 
    ##
    # Run warping process with specified configuration with multiprocessing
    # @param num_proc Number of processes that are spawned
     
-    def Run_parallel(self,num_proc=3):
+    def Run_parallel(self,num_proc=1):
         splitter = utils.split_seq(self.in_path,num_proc)
-        indices=splitter.get_indices()
+        index=splitter.get_indices()
         
-        for i in range(num_proc):
-            if i==num_proc-1:
-                p0 = indices[i]
-                p1 = len(self.in_path)-1
+        
+        for i in range(len(index)):
+            if i+1==len(index):
+                paths=self.in_path[index[i]:len(self.in_path)]
             else:
-                p0=indices[i]   
-                p1=indices[i+1]    
-
-            paths=self.in_path[p0:p1]
-            im0=Image.open(self.in_path[p0])
-            im1=Image.open(self.in_path[p1])
-            im_ctr=p0*self.warp_frames
-            Process(target=self.process_imgs,args=(im0,im1,im_ctr)).start()
-
+                paths=self.in_path[index[i]:(index[i+1]+1)]
+            
+            ctr=index[i]
+            Process(target=self.pre_process,args=(paths,ctr)).start()
+    ##
+    # open images and so on
+    def pre_process(self,path,im_ctr):
+        if len(path)<2:
+            print"[pre_process]:ERROR only single path"
+        for i in range(len(path)):
+            if i ==0:
+                continue
+            else:
+                p0  = path[i-1]
+                p1 = path[i]
+    
+                im0 = Image.open(p0)
+                im1 = Image.open(p1)
+           
+                self.process_imgs(im0,im1,ctr=im_ctr*self.warp_frames)
+                im_ctr+=1
+        
 
 if __name__ == "__main__":
     a = warper()

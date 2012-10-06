@@ -63,7 +63,7 @@ class warpGUI(wx.Panel):
     #make layout and activate bidnings
         self.make_layout(parent)
         self.set_init_state()
-        self.set_test_state(0,1)
+        #self.set_test_state(0,1)
         self.make_bindings()
 
     def SetInPath(self,msg):
@@ -391,13 +391,13 @@ class warpGUI(wx.Panel):
 
     def OnAccept(self,e):
         w=warp.warper()
-        config={"i_path":self.morphed_path,"o_path":"/home/tom/TEST/","warp_frames":70,"o_type":".jpg"}
+        config={"i_path":self.morphed_path,"o_path":"/home/tom/TEST/","warp_frames":50,"o_type":".jpg"}
         w.UpdateConfig(config)
         pairs=len(self.morphed_path)-1
-        if pairs<=3 and pairs > 1:
-            w.Run_parallel(num_proc=pairs)
-        elif pairs>3:
+        if pairs > 5 :
             w.Run_parallel(num_proc=3)
+        elif pairs >3:
+            w.Run_parallel(num_proc=2)
         else:
             w.Run()
     
