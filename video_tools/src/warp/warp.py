@@ -10,7 +10,6 @@ class warper:
 
     def __init__(self):
         #initial values
-        print "initialized"
         self.warp_frames=50.0
         self.in_path = list()
         self.in_path.append("original.jpg")
@@ -77,22 +76,23 @@ class warper:
    # Run warping process with specified configuration with multiprocessing
    # @param num_proc Number of processes that are spawned
     
-    def  Run_parallel(self,num_proc=3):
-         splitter = utils.split_seq(self.in_path,num_proc)
-         indices=splitter.get_indices()
-
-         for i in range(num_proc-1):
-             if i==0:
-                p0 =0
-             else:
+    def Run_parallel(self,num_proc=3):
+        splitter = utils.split_seq(self.in_path,num_proc)
+        indices=splitter.get_indices()
+        
+        for i in range(num_proc):
+            if i==num_proc-1:
+                p0 = indices[i]
+                p1 = len(self.in_path)-1
+            else:
                 p0=indices[i]   
-             p1=indices[i+1]    
+                p1=indices[i+1]    
 
-             paths=self.in_path[p0:p1]
-             im0=Image.open(self.in_path[p0])
-             im1=Image.open(self.in_path[p1])
-             im_ctr=p0*self.warp_frames
-             Process(target=self.process_imgs,args=(im0,im1,im_ctr)).start()
+            paths=self.in_path[p0:p1]
+            im0=Image.open(self.in_path[p0])
+            im1=Image.open(self.in_path[p1])
+            im_ctr=p0*self.warp_frames
+            Process(target=self.process_imgs,args=(im0,im1,im_ctr)).start()
 
 
 if __name__ == "__main__":
@@ -107,7 +107,6 @@ class morpher():
     def __init__(self):
 
         self.T=0
-        print "[morpher] initialized"
     ##
     # Set input frames
     # @param f0 iwx.iFrame - start image

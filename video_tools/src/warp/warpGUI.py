@@ -51,19 +51,10 @@ class canvas(wx.StaticBitmap):
         evt =iwx.iEvent(iwx.EVT_POS_pub,1,pos)
         self.GetEventHandler().ProcessEvent(evt)
 class warpGUI(wx.Panel):
-
-
     def __init__(self,parent):
     #default vaules-----------------------------------------------------
         self.in_path=list()
         self.morphed_path=list()
-        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/01_2000.JPG")
-        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/02_2000.JPG")
-        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9942.JPG")
-        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9943.JPG")
-        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9944.JPG")
-        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9954.JPG")
-        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9955.JPG")
         self.out_path = "/home/tom/warptest/"
         self.tmp_path= "/tmp/warpGUI/"
         utils.assert_dir(self.tmp_path)
@@ -72,7 +63,7 @@ class warpGUI(wx.Panel):
     #make layout and activate bidnings
         self.make_layout(parent)
         self.set_init_state()
-        #self.set_test_state(0,1)
+        self.set_test_state(0,1)
         self.make_bindings()
 
     def SetInPath(self,msg):
@@ -201,23 +192,6 @@ class warpGUI(wx.Panel):
         pos=e.GetVal()
         pos = wx.Point(pos.x-canvas.size().x/2,pos.y-canvas.size().y/2)
         self.set_zoom(frame,canvas,pos)
-    def PointCallbackTEMP(self, e,frame,canvas):
-
-        pos = e.GetVal()
-        dc = wx.MemoryDC() 
-        bitmap=wx.BitmapFromImage(frame.img())
-        a= dc.SelectObject(bitmap)
-        dc.BeginDrawing()
-        radius=5*canvas.scale()
-        penwidth=5*canvas.scale()
-        dc.SetPen(wx.Pen("red",style=wx.SOLID,width=penwidth))
-        dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
-        #dc.DrawRectangle(pos[0],pos[1],30,30)
-        dc.DrawCircle(pos[0],pos[1],radius)
-        dc.EndDrawing()
-        img=wx.ImageFromBitmap(bitmap)
-        frame.img_work_ = img
-        canvas.draw(img)
 
     ##
     # @brief Callback for point on canvas
@@ -242,9 +216,14 @@ class warpGUI(wx.Panel):
         penwidth=5*canvas.scale()
         dc.SetPen(wx.Pen("red",style=wx.SOLID,width=penwidth))
         dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
+        dc.SetTextForeground("red")
+        dc.SetFont(wx.Font(int(10*canvas.scale()), wx.SWISS, wx.NORMAL, wx.BOLD))
+        pt_ctr=0
         for pt in frame.pts():
-            #dc.DrawRectangle(pos[0],pos[1],30,30)
             dc.DrawCircle(pt.x,pt.y,radius)
+            ctr_pos=wx.Point(pt.x+(10*canvas.scale()),pt.y+(10*canvas.scale()))
+            dc.DrawTextPoint(str(pt_ctr),ctr_pos)
+            pt_ctr+=1
         dc.EndDrawing()
         img=wx.ImageFromBitmap(bitmap)
         canvas.draw(img)
@@ -322,6 +301,11 @@ class warpGUI(wx.Panel):
         self.make_bindings()
     
     def set_test_state(self,id0,id1):
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9942.JPG")
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9943.JPG")
+        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9944.JPG")
+        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9954.JPG")
+        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9955.JPG")
 
         self.f0=iwx.iFrame(self.in_path[id0],id0)
         self.f1=iwx.iFrame(self.in_path[id1],id1)
@@ -410,12 +394,12 @@ class warpGUI(wx.Panel):
         config={"i_path":self.morphed_path,"o_path":"/home/tom/TEST/","warp_frames":70,"o_type":".jpg"}
         w.UpdateConfig(config)
         pairs=len(self.morphed_path)-1
-        #if pairs<=3 and pairs > 1:
-        #    w.Run_parallel(num_proc=pairs)
-        #elif pairs>3:
-        #    w.Run_parallel(num_proc=3)
-        #else:
-        w.Run()
+        if pairs<=3 and pairs > 1:
+            w.Run_parallel(num_proc=pairs)
+        elif pairs>3:
+            w.Run_parallel(num_proc=3)
+        else:
+            w.Run()
     
     def CleanTmp(self,e):
         os.system("rm -rf /tmp/warpGUI/*")
