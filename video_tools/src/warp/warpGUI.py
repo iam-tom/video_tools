@@ -16,6 +16,8 @@ class warpGUI(wx.Panel):
         self.tmp_path= "/tmp/warpGUI/"
         utils.assert_dir(self.tmp_path)
         self.transformations=list()
+        # flag for trafo of current state
+        self.trafo_valid=False
 
     #make layout and activate bidnings
         self.make_layout(parent)
@@ -160,20 +162,29 @@ class warpGUI(wx.Panel):
     def PointCallback(self, e,frame,canvas):
         pos = e.GetVal()
         frame.add_pts(pos)
-        self.draw_pts(frame,canvas)
+        self.trafo_valid_check()
+        #self.draw_pts(frame,canvas)
+
+
 
     ##
     # @brief draw points of frame
     def draw_pts(self,frame,canvas):
+        
+        if self.trafo_valid == True:
+            color="green"
+        else:
+            color="red"
+
         dc = wx.MemoryDC() 
         bitmap=wx.BitmapFromImage(frame.img())
         a= dc.SelectObject(bitmap)
         dc.BeginDrawing()
         radius=5*canvas.scale()
         penwidth=5*canvas.scale()
-        dc.SetPen(wx.Pen("red",style=wx.SOLID,width=penwidth))
-        dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
-        dc.SetTextForeground("red")
+        dc.SetPen(wx.Pen(color,style=wx.SOLID,width=penwidth))
+        dc.SetBrush(wx.Brush(color, wx.TRANSPARENT))
+        dc.SetTextForeground(color)
         dc.SetFont(wx.Font(int(10*canvas.scale()), wx.SWISS, wx.NORMAL, wx.BOLD))
         pt_ctr=0
         for pt in frame.pts():
@@ -250,9 +261,11 @@ class warpGUI(wx.Panel):
         #TODO: hard coded initial point of zoom --make middle of frame
         self.set_zoom(self.f0,self.zoom0,wx.Point(1000,1000))
         self.set_zoom(self.f1,self.zoom1,wx.Point(1000,1000))
-        # draw points 
+        # check validity of state and draw points 
+        self.trafo_valid_check()
         self.draw_pts(self.f0,self.over0)
         self.draw_pts(self.f1,self.over1)
+
 
         # update bindings!
         self.make_bindings()
@@ -260,9 +273,9 @@ class warpGUI(wx.Panel):
     def set_test_state(self,id0,id1):
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9942.JPG")
         self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9943.JPG")
-        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9944.JPG")
-        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9954.JPG")
-        #self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9955.JPG")
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9944.JPG")
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9954.JPG")
+        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9955.JPG")
 
         self.f0=iwx.iFrame(self.in_path[id0],id0)
         self.f1=iwx.iFrame(self.in_path[id1],id1)
@@ -363,3 +376,17 @@ class warpGUI(wx.Panel):
         os.system("rm -rf /tmp/frames/*")
 
 
+    def trafo_valid_check(self):
+        self.trafo_valid = False
+        l1=len(self.f0.pts())
+        l2=len(self.f1.pts())
+        print "LENGTHS"
+        print l1
+        print l2
+
+        if l1==l2 and l1>=3 and l2>=3:
+            self.trafo_valid = True
+            print "THIS STATE IS VALID"
+        self.draw_pts(self.f0,self.over0)
+        self.draw_pts(self.f1,self.over1)
+            
