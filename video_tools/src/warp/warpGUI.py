@@ -7,49 +7,6 @@ import GUIelements
 import os
 import warp
 
-class canvas(wx.StaticBitmap):
-    def __init__(self,parent,size):
-            wx.StaticBitmap.__init__(self,parent,size=size)
-            self.scale_=float()            
-            self.size_=size
-            ## image coordinates of middle of canvas.
-            self.offset = wx.Point(0,0)
-    # Bind position callback to canvas
-            self.Bind(wx.EVT_LEFT_DOWN,self.PosCallback)
-    def size(self):
-        return self.size_
-    
-    def set_scale(self,img):
-        so=self.size()
-        si=img.GetSize()
-       #TODO min of si/so is scale.... 
-        scale = float(si.x)/float(so.x)
-        self.scale_= scale 
-        
-     
-    def draw(self,img):
-        img_scaled=img.Scale(self.size_.x,self.size_.y,wx.IMAGE_QUALITY_HIGH)
-        self.set_scale(img)
-        self.SetBitmap(wx.BitmapFromImage(img_scaled))
-    ##
-    # Set offset to middle of current image.
-    # Can be used to ensure valid image coordinates, when
-    # only crop of original image is displayed.
-    # @param self object pointer
-    # @param offset image coordinates of middle of canvas.
-    def set_offset(self,offset):
-        self.offset=offset
-
-    def scale(self):
-        return self.scale_
-
-    def pos(self):
-        return self.pos_
-# Callback stuff ----------------------------------
-    def PosCallback(self,e):
-        pos=wx.Point(e.GetPosition().x*self.scale()+self.offset.x,e.GetPosition().y*self.scale()+self.offset.y)
-        evt =iwx.iEvent(iwx.EVT_POS_pub,1,pos)
-        self.GetEventHandler().ProcessEvent(evt)
 class warpGUI(wx.Panel):
     def __init__(self,parent):
     #default vaules-----------------------------------------------------
@@ -63,7 +20,7 @@ class warpGUI(wx.Panel):
     #make layout and activate bidnings
         self.make_layout(parent)
         self.set_init_state()
-        #self.set_test_state(0,1)
+        self.set_test_state(0,1)
         self.make_bindings()
 
     def SetInPath(self,msg):
@@ -90,11 +47,11 @@ class warpGUI(wx.Panel):
         self.button_up11=wx.Button(self,-1,"U\nP",size=(30,200))
 
 
-        self.over0=canvas(self,size_over)
+        self.over0=iwx.iCanvas(self,size_over)
 
         bs111=wx.FlexGridSizer(rows=3,cols=1)
 
-        self.zoom0=canvas(self,size_zoom)        
+        self.zoom0=iwx.iCanvas(self,size_zoom)        
         
         bs1111=wx.BoxSizer(wx.HORIZONTAL)
         
@@ -116,11 +73,11 @@ class warpGUI(wx.Panel):
  
         self.button_down12=wx.Button(self,-1,"D\nO\nW\nN",size=(30,200))
 
-        self.over1=canvas(self,size_over)
+        self.over1=iwx.iCanvas(self,size_over)
         
         bs121=wx.FlexGridSizer(rows=3,cols=1)
 
-        self.zoom1=canvas(self,size_zoom)
+        self.zoom1=iwx.iCanvas(self,size_zoom)
         
         bs1211=wx.BoxSizer(wx.HORIZONTAL)
         

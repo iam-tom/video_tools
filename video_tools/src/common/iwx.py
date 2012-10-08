@@ -5,6 +5,49 @@ import cStringIO
 import utils
 import os
 import time
+class iCanvas(wx.StaticBitmap):
+    def __init__(self,parent,size):
+            wx.StaticBitmap.__init__(self,parent,size=size)
+            self.scale_=float()            
+            self.size_=size
+            ## image coordinates of middle of canvas.
+            self.offset = wx.Point(0,0)
+    # Bind position callback to canvas
+            self.Bind(wx.EVT_LEFT_DOWN,self.PosCallback)
+    def size(self):
+        return self.size_
+    
+    def set_scale(self,img):
+        so=self.size()
+        si=img.GetSize()
+       #TODO min of si/so is scale.... 
+        scale = float(si.x)/float(so.x)
+        self.scale_= scale 
+        
+     
+    def draw(self,img):
+        img_scaled=img.Scale(self.size_.x,self.size_.y,wx.IMAGE_QUALITY_HIGH)
+        self.set_scale(img)
+        self.SetBitmap(wx.BitmapFromImage(img_scaled))
+    ##
+    # Set offset to middle of current image.
+    # Can be used to ensure valid image coordinates, when
+    # only crop of original image is displayed.
+    # @param self object pointer
+    # @param offset image coordinates of middle of canvas.
+    def set_offset(self,offset):
+        self.offset=offset
+
+    def scale(self):
+        return self.scale_
+
+    def pos(self):
+        return self.pos_
+# Callback stuff ----------------------------------
+    def PosCallback(self,e):
+        pos=wx.Point(e.GetPosition().x*self.scale()+self.offset.x,e.GetPosition().y*self.scale()+self.offset.y)
+        evt =iEvent(EVT_POS_pub,1,pos)
+        self.GetEventHandler().ProcessEvent(evt)
 class iStaticText(wx.StaticText):
 
         
@@ -238,7 +281,7 @@ class iEvent(wx.PyCommandEvent):
         
 class iFrame(wx.StaticBitmap):
 #//////////////////////<<<INIT////////////////////////////////////////////
-    def __init__(self,path,id):
+    def __init__(self,path,id=-1):
         self.img_orig_=wx.Image(path,wx.BITMAP_TYPE_ANY)
         self.img_work_=self.img_orig_.Copy()
         self.pts_=list()
@@ -279,8 +322,7 @@ class iFrame(wx.StaticBitmap):
         self.save_log()
 
     def reset(self):
-        self.img_work_=img.orig_.Copy()
-        self.pts=list()
+        self.img_work_=self.img_orig_.Copy()
 
     def SaveImg(self,path):
         pil_img=imgutils.image_to_pil(self.img_work_)

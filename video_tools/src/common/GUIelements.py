@@ -87,7 +87,7 @@ class iNavpanel(wx.Panel):
 
 class iChoice(wx.Choice):
 #Default Resolution Choice element
-    def __init__(self,parent,in_pos,mode):
+    def __init__(self,parent,mode):
         #modes - to add new choice, just add new mode and check for it
         res_mode=mode in "res"
 	if res_mode == True:
@@ -239,20 +239,22 @@ class imgList (iwx.iList):
                 
         
         
-class iBrowse (wx.Panel):
+class iBrowse (wx.BoxSizer):
 
-    def __init__(self,parent,pos):
+    def __init__(self,parent):
         self.topic = "Output Directory"
         self.btn_string = "Browse"
         self.parent = parent
-        self.pos= pos
+        wx.BoxSizer.__init__(self,wx.HORIZONTAL)
         self.setElements()
 
         
     def setElements(self):    
-        self.t_browse =wx.TextCtrl(self.parent, -1, "", pos=self.pos,size=(150,30))
-        self.b_browse=wx.Button(self.parent,wx.ID_ANY,self.btn_string,(self.pos[0]+150,self.pos[1]),(70,30),wx.BU_EXACTFIT)
+        self.t_browse =wx.TextCtrl(self.parent, -1, "", size=(150,30))
+        self.b_browse=wx.Button(self.parent,-1,self.btn_string,size=wx.Size(70,30))
         self.b_browse.Bind(wx.EVT_BUTTON,self.OnBrowse,self.b_browse)
+        self.Add(self.t_browse,wx.EXPAND)
+        self.Add(self.b_browse,wx.ALIGN_TOP)
         
     def OnBrowse(self,e):
         dir_dlg = wx.DirDialog(self.parent, "Choose a directory:",

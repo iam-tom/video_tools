@@ -1,26 +1,23 @@
+## @package TLM GUI
+#
+# The GUI frontend for the tlm module
 import sys
-
-
 import os
 import wx
 import iwx
 import cStringIO
 from PIL import Image
-
 from tlm import tlm
 from avtools import thumbnailer
 from avtools import frame_extractor
-
 import imgutils
 import time
-
 import utils
-
 import GUIelements
 
 
 
-
+## The class tlmGUI
 class tlmGUI(wx.Panel):
 
 # Member Variables:
@@ -29,18 +26,19 @@ class tlmGUI(wx.Panel):
 # full size ..................... size of original image
 # init_img ...................... initial image, displayed on canvas
 
-
-    def __init__(self, parent,config):
-    
-#//////////////// allocations /////////////////
-
+    ##    
+    #Init Function of GUI
+    # @param self Object pointer
+    # @param parent Parent Object
+    # @param config Parameter Configuration    
+    def __init__(self, parent):
         self.positions = list()
-    
         self.in_path = list()
-        self.size = config["size"]
+       
         self.full_size=tuple()
-        
         self.canvas_scale=float()
+       # #test configuration
+       # self.init_img = "../../src/.data/tlm_init.png"
         self.init_img = ".data/tlm_init.png"
         
         
@@ -56,48 +54,93 @@ class tlmGUI(wx.Panel):
 #        self.zoom_mode = False #default is pan only
 #        self.zoom_mode = True #default is pan only
 #        sel.full_mode  = True #default is pan only        
-        
-        
-#//////////////// graphical elements /////////        
-        p_size=(self.size[0],self.size[1])
 
-        wx.Panel.__init__(self, parent,size=p_size)
-#        button panel
-        b_accept=wx.Button(self,wx.ID_OK,"OK",(0,(self.size[1]*4)/5),(70,30),wx.BU_EXACTFIT)
-        b_accept.Bind(wx.EVT_BUTTON,lambda  evt , config = config: self.OnAccept(evt,config))
+
+
+        self.make_layout(parent)
+        self.set_init_state()      
+        self.make_bindings()
+
+    ##
+    # Establish graphical elements
+    def make_layout(self,parent):
+     
+        size_canvas=wx.Size(900,600)
+
+        # init wx panel
+        wx.Panel.__init__(self, parent)
         
-#        b_browse =wx.TextCtrl(self, -1, "", pos=(100,(self.size[1]*4)/5))
-        self.b_browse = GUIelements.iBrowse(self,(100,(self.size[1]*4)/5))
+
+        # init sizers
+        fgs0=wx.FlexGridSizer(rows=3,cols=1)
+        bs0 = wx.BoxSizer(wx.HORIZONTAL)
+        bs1 = wx.BoxSizer(wx.HORIZONTAL)
+        bs2 = wx.BoxSizer(wx.HORIZONTAL)
         
+        # canvas element
+        self.canvas=iwx.iCanvas(self,size_canvas)
+
+        # button panel for output options
+        # TODO: MAKE iChoice position independent
+        # TODO: do i really want to use this?
+        self.choices_res=GUIelements.iChoice(self,"res")
+        self.choices_fps=GUIelements.iChoice(self,"fps")
         choices_out_mode=["Img Sequence","Video"]
         self.choices_out_mode_lookup=["1","2"]
-        self.choices_out_mode=wx.Choice(self, wx.ID_ANY, pos= (350,(self.size[1]*4)/5), size=(130,30), choices=choices_out_mode)
-      
+        self.choices_out_mode=wx.Choice(self, wx.ID_ANY, size=(130,30), choices=choices_out_mode)
 
+        # put elements in box sizer
+        bs0.Add(self.choices_res)
+        bs0.Add(self.choices_fps)
+        bs0.Add(self.choices_out_mode)
+
+
+        # button panel for process options
         choices_tl_mode=["Pan Only","Zoom&Pan","Full Image"]
         self.choices_tl_mode_lookup=[1,2,3]
-        self.choices_tl_mode=wx.Choice(self, wx.ID_ANY, pos= (700,((self.size[1]*4)/5)-50), size=(130,30), choices=choices_tl_mode)
+        self.choices_tl_mode=wx.Choice(self, wx.ID_ANY,size=(130,30), choices=choices_tl_mode)
+        self.b_reset = wx.Button(self,-1,"Reset")
+        
+        # put element in box sizer
+        bs1.Add(self.choices_tl_mode)
+        bs1.Add(self.b_reset)
+
+        # button panel for path 
+        self.b_accept=wx.Button(self,-1,"OK")
+        self.b_browse = GUIelements.iBrowse(self)
+        
+
+        # put elements in box sizer
+        bs2.Add(self.b_browse)
+        bs2.Add(self.b_accept)
+
+
+        # put elements to top level sizer
+       # fgs0.AddGrowableRow(0,0)
+        fgs0.Add(self.canvas)
+        fgs0.Add(bs0)
+        fgs0.Add(bs1)
+        fgs0.Add(bs2)
+
+        # make layout
+        self.SetSizer(fgs0)
+        self.Layout()
+        self.Fit()
+
+
+    def make_bindings(self):
+        self.b_accept.Bind(wx.EVT_BUTTON, self.OnAccept)
+        self.canvas.Bind(iwx.EVT_POS_sub,self.OnLeftClick)
+        self.b_reset.Bind(wx.EVT_BUTTON,self.OnReset)            
+
        
         #self.choices_resolution_lookup=[self.full_size,(1280,720),(1920,1080),(640,480)]
         #choices_resolution=["Original","1280x720","1920x1080","640x480"] 
         #self.choices_resolution=wx.Choice(self,wx.ID_ANY,pos=(500,(self.size[1]*4)/5),size=(150,30),choices=choices_resolution)
 
-        self.choices_res=GUIelements.iChoice(self,(500,(self.size[1]*4)/5),"res")
-        self.choices_fps=GUIelements.iChoice(self, (700,(self.size[1]*4)/5),"fps")
         #choices_fps=["24fps","25fps","50fps"]
         #self. choices_fps_lookup=[24,25,50]
         #self.choices_fps=wx.Choice(self, wx.ID_ANY, pos= (700,((self.size[1]*4)/5)), size=(130,30), choices=choices_fps)
-        self.setInitState()      
-
-
-        
-        
-#//////////////// PUBSUB /////////
- 
-
- 
- 
- 
  
  
 #///////////CALLBACKS /////////////
@@ -107,11 +150,20 @@ class tlmGUI(wx.Panel):
         self.check_in_mode(self.in_path[0])
                         
         if self.vid_mode == False:
-            self.setNewState(msg[0][0])
+            self.set_state(msg[0][0])
         elif self.vid_mode == True:
             self.get_thumb(self.in_path[0])
 
-            self.setNewState("/tmp/imgGUI/thb.png")
+            self.set_state("/tmp/imgGUI/thb.png")
+
+
+    ##  @brief Generate Thumbnail of Video file
+    def get_thumb(self,in_path):
+        config = {"format":".png","frame_size":"", "i_path":in_path, "o_path":"/tmp/imgGUI/" }
+        t = thumbnailer()
+        t.UpdateConfig(config)
+        t.Run()
+            
 
             
 
@@ -136,12 +188,6 @@ class tlmGUI(wx.Panel):
         if chk == True:
             self.vid_mode = True			
 
-    def get_thumb(self,in_path):
-        config = {"format":".png","frame_size":"", "i_path":in_path, "o_path":"/tmp/imgGUI/" }
-        t = thumbnailer()
-        t.UpdateConfig(config)
-        t.Run()
-            
         
         
     def check_tl_mode(self):
@@ -201,64 +247,25 @@ class tlmGUI(wx.Panel):
     def make_dir(self,path):
         cmd = "mkdir "+path
         os.system(cmd)
+
+    ##
+    # @brief Set GUI to state
+    #
+    # @param[in] imageFile Path to image file
+    def set_state(self,imageFile):   
+        self.img=iwx.iFrame(imageFile)
+        self.canvas.draw(self.img.img())
+        self.make_bindings()
         
-    def setNewState(self,imageFile):   
+
+    ##
+    # @brief Set GUI to initial state
+    def set_init_state(self):
+        # TODO: make id -1 default value for frame
+        self.img=iwx.iFrame(self.init_img)
+        self.canvas.draw(self.img.img())
     
-    
-        
-#     wipe canvas   
-            
-            
 
-    #        CLEAN VERISION
-
-            data_orig = open(imageFile, "rb").read()
-            # convert to a data stream
-            stream_orig = cStringIO.StringIO(data_orig)
-            # convert to a bitmap
-            image =  wx.ImageFromStream( stream_orig )
-            self.full_size=image.GetSize()
-            self.set_canvas_scale(image)
-            image = self.scale_image(image)
-            self.bmp_orig = wx.BitmapFromImage(image)
-
-            
-    #        PULLUTE VERSION
-            data = open(imageFile, "rb").read()
-            # convert to a data stream
-            stream = cStringIO.StringIO(data)
-            # convert to a bitmap
-            image = wx.ImageFromStream( stream )
-            image = self.scale_image(image)
-
-            self.bmp_work = wx.BitmapFromImage(image) 
-            # show the bitmap, (5, 5) are upper left corner coordinates
-            #self.canvas =wx.StaticBitmap(self, -1, bmp, (0, 0))
-            self.canvas.SetBitmap(self.bmp_work)
-            self.canvas.Bind(wx.EVT_LEFT_DOWN,self.OnLeftClick)
-            self.canvas.Bind(wx.EVT_RIGHT_DOWN,self.OnRightClick)            
-
-        
-
-       
-    def setInitState(self):
-        imageFile = self.init_img    
-        
-
-        
-        data = open(imageFile, "rb").read()
-        # convert to a data stream
-        stream = cStringIO.StringIO(data)
-        # convert to a bitmap
-        image = wx.ImageFromStream( stream )
-        image = self.scale_image(image)
-
-        
-
-        bmp = wx.BitmapFromImage(image)
-
-        self.canvas =wx.StaticBitmap(self, -1, bmp, (0, 0))
-    
     def scale_image(self,image):
         o_width = image.GetWidth()
         o_height = image.GetHeight()
@@ -303,28 +310,24 @@ class tlmGUI(wx.Panel):
             q = float(new_height)/float(o_height)
         self.canvas_scale=q   
             
-    def OnAccept(self,e, config):
+##
+# @brief Start processing
+    def OnAccept(self,e):
             tl_mode = self.check_tl_mode() 
-            if tl_mode ==3:
+            if tl_mode ==3: # for mode with full frame
                 self.positions[:]=[]
                 self.positions.append((0,0))
-                self.positions.append(self.full_size)
+                self.positions.append(self.img.size())
                 self.positions.append((0,0))
-                self.positions.append(self.full_size)
-            else:
-                l=list()
-                for point in self.positions:
-                    x=point[0] / self.canvas_scale
-                    y=point[1] / self.canvas_scale 
-                    t=(int(x),int(y))
-                    l.append(t)
-                self.positions=l 
+                self.positions.append(self.img.size())
             
             out_path = self.get_out_dir()
             utils.assert_dir(out_path)        
+
+            # init tlm
             T = tlm()
-            #config ={"res":"","fps":"","box_start":"","box_end":""}
             T.SetIO(self.in_path,out_path)
+
             box0=list()
             box1=list()
             box1.append((self.positions[2][0],(self.positions[2][1])))
@@ -332,13 +335,11 @@ class tlmGUI(wx.Panel):
             box0.append((self.positions[0][0],(self.positions[0][1])))
             box0.append((self.positions[1][0],(self.positions[1][1])))
 
-            #output_res = self.check_resolution()
             output_res = self.choices_res.GetChoice()
             output_fps = self.check_fps()
-
-            config ={"res":output_res,"fps":output_fps,"box_start":box0,"box_end":box1}
             seq_out = True 
             seq_out = self.check_out_mode()
+            config ={"res":output_res,"fps":output_fps,"box_start":box0,"box_end":box1}
                 
             if self.vid_mode ==True:
                 if seq_out ==True:
@@ -359,12 +360,19 @@ class tlmGUI(wx.Panel):
             print "DONE"    
 
 
+    ##
+    # @brief Callback for left click on canvas
+    # @detail Method handles clicked positions, draws on canvas
+    # and saves clicked position
     def OnLeftClick(self, e):
 
+        pos = e.GetVal()
+
         tl_mode = self.check_tl_mode()
-        pos = e.GetPosition()
         dc = wx.MemoryDC() 
-        dc.SelectObject(self.bmp_work)
+        bitmap = wx.BitmapFromImage(self.img.img())
+        dc.SelectObject(bitmap)
+
         self.positions.append(pos)
         if len(self.positions) == 2:
             ul = self.positions[0]
@@ -393,17 +401,18 @@ class tlmGUI(wx.Panel):
             dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
             dc.EndDrawing()
 
-        self.canvas.SetBitmap(self.bmp_work)
+        image=wx.ImageFromBitmap(bitmap)
+#TODO: make this more cleanly - no acces to member variable
+        self.img.img_work_=image
+        self.canvas.draw(self.img.img())
         
-    def OnRightClick(self, e):
+    ##
+    # @brief Reset GUI and configuration
+    def OnReset(self,e):
+        self.img.reset()
 
-
-#        wx.StaticBitmap(self, -1, self.bmp_orig)
-#        reset PULLUTE VERSION to CLEAN VERSION
-        self.canvas.SetBitmap(self.bmp_orig)
+        self.canvas.draw(self.img.img())
         self.positions[:] =[]
-        self.bmp_work = self.bmp_orig
-        print "reset"
         
         
         
