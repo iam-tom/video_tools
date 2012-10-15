@@ -13,8 +13,9 @@ class warpGUI(wx.Panel):
         self.in_path=list()
         self.morphed_path=list()
         self.out_path = "/home/tom/warptest/"
+        tmp=utils.temp_dir_handler()
+        tmp.add_dir("/tmp/warpGUI","pre-clean")
         self.tmp_path= "/tmp/warpGUI/"
-        utils.assert_dir(self.tmp_path)
         self.transformations=list()
         # flag for trafo of current state
         self.trafo_valid=False

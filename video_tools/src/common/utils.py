@@ -20,7 +20,25 @@ import math
 
 
 
-
+class temp_dir_handler():
+    def __init__(self):
+        self.dirs_pers=list()
+        self.dirs_trans=list()
+    def add_dir(self,path,mode="TRANS"):
+        assert_dir(path)
+        if mode is "TRANS":
+            self.dirs_trans.append(path)
+        elif mode is "pre-clean":
+            self.dirs_trans.append(path)
+            self.clean()
+            self.add_dir(path)
+        elif mode is "PERS":
+            self.dirs_pers.append(path)
+    def clean(self):
+        for p in self.dirs_trans:
+            os.system("rm -rf %s"%p)
+            self.dirs_trans[:]=[]
+   
 
 
 class assert_dir():
@@ -29,6 +47,7 @@ class assert_dir():
         if chk == False:
            cmd="mkdir -p "+path
            os.system(cmd)
+
 class tuple_op():
     def __init__(self,t):
         self.tup=t 

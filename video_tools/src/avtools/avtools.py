@@ -190,7 +190,7 @@ class converter ():
             
             if len(self.frame_size)>0:
                 
-                command = ["avconv","-i",i_file,"-strict","experimental","-s",str(self.frame_size),"-r",str(self.fps),"-b:v",self.bv,o_path]
+                command = ["avconv","-i",i_file,"-strict","experimental","-s",str(self.frame_size),"-r",self.fps,"-b:v",self.bv,o_path]
             else:
                 command = ["avconv","-i",i_file,"-strict","experimental","-r",str(self.fps),"-b:v",self.bv,o_path]
                 

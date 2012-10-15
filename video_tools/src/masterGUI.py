@@ -43,10 +43,10 @@ class GUI (wx.Frame):
                
         config["size"] = (sw/2,sh)
         self.page1 = tlmGUI.tlmGUI(self.nb)
-        #self.page3 = wdGUI.wdGUI(self.nb,config)
+        self.page3 = wdGUI.wdGUI(self.nb)
         self.page4 = warpGUI.warpGUI(self.nb) 
         self.nb.AddPage(self.page1, "TLM")
-        #self.nb.AddPage(self.page3,"IMPORT")
+        self.nb.AddPage(self.page3,"IMPORT")
         self.nb.AddPage(self.page4,"WARP")
         self.active_page = self.page1
         

@@ -8,6 +8,8 @@ import iwx
 
 import utils
 
+from threading import Thread
+
 
 #Configure GUI - to import and convert video files
 #__________________________________________________________
@@ -21,70 +23,93 @@ import utils
 
 
 class wdGUI(wx.Panel):
-    def __init__(self, parent, config):
+    def __init__(self, parent):
 #presets
 
         self.WD = wd.wd_cfg()
         
         self.list_paths = list()
         self.list_names = list()
+        self.choices={"codec":["mpeg2","h.264"],"codec_lookup":[".mpeg",".mov"],
+                      "bitrate":["3000kb/s","10.000kb/s"],"bitrate_lookup":["3000K","10000K"],
+                      "scale":["hd720p","hd 1080p"],"scale_lookup":["1280x720","1920x1080"],
+                      "fps":  ["24 fps","25 fps" , "50 fps"],"fps_lookup":["24","25","50"]  }
+    
 
-        codec_preset_display=["-","mpeg2","h.264"]
-        self.codec_preset_intern=[" ",".mpeg",".mov"]
+        self.make_layout(parent)
+        self.make_bindings()
 
-        res_preset_display=["-","hd 720p","hd 1080p"]
-        self.res_preset_intern=[" ","1280x720","1920x1080"]
-
-    	bv_preset_display=["-","3000kb/s","1000kb/s"]
-        self.bv_preset_intern=[" " ,"3000K","10000K"]
-	    
-	    
-#----graphical components
-
-        wx.Panel.__init__(self, parent, size=config["size"])
+    def make_layout(self,parent):
+        wx.Panel.__init__(self, parent)
+        fgs0 =wx.FlexGridSizer(rows=2,cols=2)
+        bs0  =wx.BoxSizer(wx.VERTICAL)
+        bs1  =wx.BoxSizer(wx.VERTICAL)
+        bs2  =wx.BoxSizer(wx.VERTICAL)
 
 
-#//////////////// PUBSUB /////////
- 
+
+        self.b_reset=wx.Button(  self,-1,"Reset",(70,30))
+        self.b_browse=wx.Button( self,-1,"Browse",(70,30))
+        self.b_desc=wx.Button(   self,-1,"View / Edit",(100,30))
+
+
+        space=wx.Size(100,100)
+        self.chkbx = wx.CheckBox(self,wx.ID_ANY,"Convert")
+        self.choice_codec=wx.Choice(self,    wx.ID_ANY, size=(100,30), choices=self.choices["codec"])
+        self.choice_bitrate=wx.Choice(self,  wx.ID_ANY, size=(100,30), choices=self.choices["bitrate"])
+        self.choice_scale=wx.Choice(self,    wx.ID_ANY, size=(100,30), choices=self.choices["scale"])
+        self.choice_fps=wx.Choice(self,      wx.ID_ANY, size=(100,30), choices=self.choices["fps"])
 
         
-#buttons
-        b_process=wx.Button(self,wx.ID_ANY,"Import",(270,480),(70,30),wx.BU_EXACTFIT)
+        self.wd_s_path = iwx.iStaticText(self,-1,"Path:")
+        self.wd_s_name = iwx.iStaticText(self,-1,"Name:")
+        self.wd_s_desc = iwx.iStaticText(self,-1,"Details:")
+        wd_dummy1 = wx.StaticText(self,-1,"_________________________")       
+        self.b_process=wx.Button(self,-1,"Import",(70,30))
 
 
-#checkbox
-        self.chkbx = wx.CheckBox(self,wx.ID_ANY,"Convert",pos=(7,310))
-
-#choice
-	s_codec=wx.StaticText(self,wx.ID_ANY,"Codec",pos=(7,330))	
-        self.choice_codec=wx.Choice(self, wx.ID_ANY, pos= (7,350), size=(70,30), choices=codec_preset_display)
-#	s_codec=wx.StaticText(self,wx.ID_ANY,"Resolution",pos=(7,390))
-#        self.choice_res=wx.Choice(self, wx.ID_ANY, pos= (7,410), size=(70,30), choices=res_preset_display)
-        self.choice_res=GUIelements.iChoice(self,(7,390),"res")
-        s_bv=wx.StaticText(self,wx.ID_ANY,"Video Quality",pos=(7,450))
-        self.choice_bv=wx.Choice(self, wx.ID_ANY, pos= (7,470), size=(70,30), choices=bv_preset_display)
-
-#WD STUFF~~~~~~~~~~~~~~
-        dummy_wd=wx.StaticText(self,wx.ID_ANY,"Working Directory: Browse for existing WD \n  or chose path for new WD.",pos=(7,10))
-
-        wd_b_reset=wx.Button(self,wx.ID_ANY,"Reset",(7,60),(70,30),wx.BU_EXACTFIT)
-        wd_b_browse=wx.Button(self,wx.ID_ANY,"Browse",(150,60),(70,30),wx.BU_EXACTFIT)
-
-	wd_dummy1 = wx.StaticText(self,-1,"_________________________",(7,80))
-	self.wd_s_path = iwx.iStaticText(self,-1,"Path:",(7,110))
-	self.wd_s_name = iwx.iStaticText(self,-1,"Name:",(7,170))
-	self.wd_s_desc = iwx.iStaticText(self,-1,"Details:",(7,230))
-	wd_dummy1 = wx.StaticText(self,-1,"_________________________",(7,290))       
 
 
-        wd_b_desc=wx.Button(self,wx.ID_ANY,"View / Edit",(7,270),(100,30),wx.BU_EXACTFIT)
+        bs0.Add(self.b_browse)
+        bs0.Add(self.b_desc)
+        bs0.Add(self.b_reset)
+
+        bs1.Add(space)
+        bs1.Add(self.chkbx)
+        bs1.Add(self.choice_codec)        
+        bs1.Add(self.choice_bitrate)        
+        bs1.Add(self.choice_scale)        
+        bs1.Add(self.choice_fps)        
+        bs1.Add(self.b_process)
+    
+        bs2.Add(wd_dummy1)
+        bs2.Add(self.wd_s_path)
+        bs2.Add(self.wd_s_name)
+        bs2.Add(self.wd_s_desc)
+
+
+        fgs0.Add(bs0)
+        fgs0.Add(bs2)
+        fgs0.Add(bs1) 
+
+        self.SetSizer(fgs0)
+        self.Layout()
+        self.Fit()
+
+
+
+
+
+
+
 
         self.Show(True)
 
-        self.Bind(wx.EVT_BUTTON, self.OnResetWD,wd_b_reset)
-        self.Bind(wx.EVT_BUTTON, self.OnBrowseWD,wd_b_browse)
-        self.Bind(wx.EVT_BUTTON, self.OnProcess, b_process)
-        self.Bind(wx.EVT_BUTTON, self.OnEditDesc, wd_b_desc)
+    def make_bindings(self):
+        self.Bind(wx.EVT_BUTTON, self.OnResetWD,self.b_reset)
+        self.Bind(wx.EVT_BUTTON, self.OnBrowseWD,self.b_browse)
+        self.Bind(wx.EVT_BUTTON, self.OnProcess, self.b_process)
+        self.Bind(wx.EVT_BUTTON, self.OnEditDesc, self.b_desc)
         
 
 
@@ -95,8 +120,6 @@ class wdGUI(wx.Panel):
         dir_dlg = wx.DirDialog(self, "\Choose a directory:", style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
         if dir_dlg.ShowModal() == wx.ID_OK:
            self.WD.basepath = dir_dlg.GetPath()
-           #self.WDdirname  = dir_dlg.GetPath()
-          # self.WDpath = self.WDdirname
 
 	   self.wd_s_path.AddString("%s" % self.WD.basepath)
         dir_dlg.Destroy()
@@ -136,16 +159,8 @@ class wdGUI(wx.Panel):
 	self.WD.name = ""
 
 
-
             
-    #def wd_CreateProjectConfig(self):
-        
-     #   selfroject_config =[selfroject_path,selfroject_name , "08/08/08","iam.tom","2","24","1280x720"]
 
-
-#~~~~~~~~~~~~~~~~WD STUFF END
-
-#-----callback methods
 
 
     def SetInPath(self,msg):
@@ -181,15 +196,12 @@ class wdGUI(wx.Panel):
         if self.chkbx.IsChecked() == True:
             Converter = avtools.converter()
             do_convert = True
-            av_config={"format":".mov","zeros":3,"i_path":"","o_path":"","frame_size":"vga","fps":50,"bv":"10000K"}
-            av_config["frame_size"]=self.choice_res.GetChoice()
-            av_config["frame_size"]=""# OVERRIDE TO BE FIXED
-            
-            av_config["format"]= self.codec_preset_intern[self.choice_codec.GetCurrentSelection()]
-            av_config["format"]= ".MOV"
-            av_config["bv"] = self.bv_preset_intern[self.choice_bv.GetCurrentSelection()]
+            av_config={"format":".mov","zeros":3,"i_path":"","o_path":"","frame_size":"vga","fps":24,"bv":"10000K"}
 
-      
+            av_config["format"]=self.choices["codec_lookup"][self.choice_codec.GetCurrentSelection()]
+            av_config["bv"]=self.choices["bitrate_lookup"][self.choice_codec.GetCurrentSelection()]
+            av_config["frame_size"]=self.choices["scale_lookup"][self.choice_codec.GetCurrentSelection()]
+            av_config["fps"]=self.choices["fps_lookup"][self.choice_codec.GetCurrentSelection()]
 
             
 
@@ -214,7 +226,7 @@ class wdGUI(wx.Panel):
                 
                 Converter.UpdateConfig(av_config)  
                 print "converting file %i of %i"%(i,len(self.list_paths))
-                Converter.Run()
+                Thread(target=Converter.Run()).start()
 
 
 
