@@ -23,7 +23,7 @@ class warpGUI(wx.Panel):
     #make layout and activate bidnings
         self.make_layout(parent)
         self.set_init_state()
-        self.set_test_state(0,1)
+        #self.set_test_state(0,1)
         self.make_bindings()
 
     def SetInPath(self,msg):
