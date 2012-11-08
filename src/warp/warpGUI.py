@@ -362,7 +362,7 @@ class warpGUI(wx.Panel):
 
     def OnAccept(self,e):
         w=warp.warper()
-        config={"i_path":self.morphed_path,"o_path":"/home/tom/TEST/","warp_frames":50,"o_type":".jpg"}
+        config={"i_path":self.morphed_path,"o_path":"/home/tom/TEST/","warp_frames":100,"o_type":".jpg"}
         w.UpdateConfig(config)
         pairs=len(self.morphed_path)-1
         if pairs > 5 :
@@ -391,3 +391,4 @@ class warpGUI(wx.Panel):
         self.draw_pts(self.f0,self.over0)
         self.draw_pts(self.f1,self.over1)
             
+
