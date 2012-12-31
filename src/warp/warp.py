@@ -38,6 +38,9 @@ class warper:
        #     out_file_curr = out_file+utils.zero_str(4,im_ctr)+self.o_type
        #     im0.save(out_file_curr)
        #     im_ctr +=1
+        transition=self.warp_frames/2        
+        transition_start=self.warp_frames/4
+        transition_end=self.warp_frames-self.warp_frames/4
         
         for level in range(int(self.warp_frames)+1):
             out_file_curr = out_file+utils.zero_str(4,im_ctr)+self.o_type
@@ -46,8 +49,19 @@ class warper:
             #elif level>self.warp_frames-10:
             #    im1.save(out_file_curr)    
             #else:
-            alpha = float(level)/float(self.warp_frames)
+
+
+            if level<transition_start:
+              alpha=0
+            elif level>transition_end:
+              alpha=1
+            else:
+              alpha = float(level-transition_start)/float(self.warp_frames+1-transition)
+
             im_new=Image.blend(im0,im1,alpha)
+            ###### TODO HACK FOR 2000x1333 image
+            im_new=im_new.crop((40,120,1960,1200))
+            #im_new=im_new.resize((1920,1080),Image.BILINEAR)
             im_new.save(out_file_curr)
             im_ctr +=1
        # for level in range(20):

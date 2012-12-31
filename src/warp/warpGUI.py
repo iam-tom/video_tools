@@ -29,7 +29,7 @@ class warpGUI(wx.Panel):
     def SetInPath(self,msg):
         self.in_path = msg[0]
         self.set_state(0,1)
-        self.nav.SetSteps(len(self.in_path))
+        self.nav.SetSteps(len(self.in_path)-2)
         self.make_bindings()
     def make_layout(self,parent):
     # layout ---------------------------------------
@@ -101,8 +101,8 @@ class warpGUI(wx.Panel):
         bs12.Add(self.button_down12, wx.ALIGN_LEFT ,0)
 
     ###### LAYOUT Bottom PANEL 
-        self.button_exe    =wx.Button(self,-1,"PROCESS")
-        self.button_down13   =wx.Button(self,-1,"--")
+        self.button_exe    =wx.Button(self,-1,"trafo")
+        self.button_down13   =wx.Button(self,-1,"PROCESS")
         
 
     ##### LAYOUT NAVPANEL
@@ -339,16 +339,28 @@ class warpGUI(wx.Panel):
 
 
     def OnExe(self,e):
+        self.MorphCurrentFrames()
+
+    def MorphCurrentFrames(self):
+        print "-->morphing pair"
         m=warp.morpher()
         m.SetInputFrames(self.f0,self.f1)
         m.Run(trafo_only=True)
-        self.transformations.append(m.GetTrafo())
+        if self.f0.id()>(len(self.transformations)-1):
+          print "appending trafo"
+          self.transformations.append(m.GetTrafo())
+          append= True
+        else:
+          print "updating trafo"
+          self.transformations[self.f0.id()]=m.GetTrafo()
+          append= False
     # save init_frame
         if self.f0.id()==0:
             m.Run()
             o_file=self.tmp_path+"imgm"+str(self.f0.id())+".jpg"
             self.f0.SaveImg(o_file)
-            self.morphed_path.append(o_file)
+            if append == True:
+                self.morphed_path.append(o_file)
         else:
             for i in range(self.f1.id()):
                 if i ==0:
@@ -358,11 +370,12 @@ class warpGUI(wx.Panel):
                     m.Run(T)
         o_file=self.tmp_path+"imgm"+str(self.f1.id())+".jpg"
         m.SaveImgM(o_file)
-        self.morphed_path.append(o_file)
+        if append == True:
+            self.morphed_path.append(o_file)
 
     def OnAccept(self,e):
         w=warp.warper()
-        config={"i_path":self.morphed_path,"o_path":"/home/tom/TEST/","warp_frames":100,"o_type":".jpg"}
+        config={"i_path":self.morphed_path,"o_path":"/home/tom/TEST/","warp_frames":50,"o_type":".jpg"}
         w.UpdateConfig(config)
         pairs=len(self.morphed_path)-1
         if pairs > 5 :
@@ -371,7 +384,7 @@ class warpGUI(wx.Panel):
             w.Run_parallel(num_proc=2)
         else:
             w.Run()
-    
+        print"-->done warping" 
     def CleanTmp(self,e):
         os.system("rm -rf /tmp/warpGUI/*")
         os.system("rm -rf /tmp/frames/*")
@@ -381,14 +394,11 @@ class warpGUI(wx.Panel):
         self.trafo_valid = False
         l1=len(self.f0.pts())
         l2=len(self.f1.pts())
-        print "LENGTHS"
-        print l1
-        print l2
 
         if l1==l2 and l1>=3 and l2>=3:
             self.trafo_valid = True
-            print "THIS STATE IS VALID"
         self.draw_pts(self.f0,self.over0)
         self.draw_pts(self.f1,self.over1)
-            
+        if self.trafo_valid == True:
+          self.MorphCurrentFrames()
 
