@@ -58,7 +58,8 @@ class warpGUI(wx.Panel):
         
         bs1111=wx.BoxSizer(wx.HORIZONTAL)
         
-        bs1111.Add(wx.Button(self,-1,"BUT!"),wx.EXPAND)
+        self.ResetF0= wx.Button(self,-1,"Reset Frame")
+        bs1111.Add(self.ResetF0,wx.EXPAND)
         bs1111.Add(wx.Button(self,-1,"BUT!"),wx.EXPAND)
 
         self.list11=wx.ListBox(self,-1,size=(200,170))        
@@ -84,7 +85,7 @@ class warpGUI(wx.Panel):
         
         bs1211=wx.BoxSizer(wx.HORIZONTAL)
         
-        bs1211.Add(wx.Button(self,-1,"BUT!"),wx.EXPAND)
+        bs1211.Add(wx.Button(self,-1,"Reset Frame"),wx.EXPAND)
         bs1211.Add(wx.Button(self,-1,"BUT!"),wx.EXPAND)
 
         self.list12=wx.ListBox(self,-1,size=(200,170))        
@@ -100,10 +101,10 @@ class warpGUI(wx.Panel):
         bs12.Add(bs121           , wx.ALIGN_TOP ,0)
         bs12.Add(self.button_down12, wx.ALIGN_LEFT ,0)
 
-    ###### LAYOUT Bottom PANEL 
-        self.button_exe    =wx.Button(self,-1,"trafo")
-        self.button_down13   =wx.Button(self,-1,"PROCESS")
-        
+    ###### LAYOUT Bottom PANEL
+        self.button_exe    =wx.Button(self,-1,"recalculate Trafo")
+        self.button_down13   =wx.Button(self,-1,"Process")
+
 
     ##### LAYOUT NAVPANEL
         bs_nav=wx.BoxSizer(wx.HORIZONTAL)
@@ -111,7 +112,7 @@ class warpGUI(wx.Panel):
         bs_nav.Add(self.nav  ,wx.EXPAND)
         bs_nav.Add(self.button_exe  ,wx.EXPAND)
         bs_nav.Add(self.button_down13,wx.EXPAND)
-        
+
     ###### MAKE LAYOUT
 
         bs1.Add(bs11,1,wx.ALIGN_LEFT) 
@@ -139,14 +140,20 @@ class warpGUI(wx.Panel):
         self.button_down12.Bind(wx.EVT_BUTTON, self.OnFrameDown)
         self.nav.forward.Bind(iwx.EVT_INC_sub,self.OnFrameSwitch)
         self.nav.back.Bind(iwx.EVT_INC_sub,self.OnFrameSwitch)
-        
+
         # bindings for processing
         self.button_exe.Bind(wx.EVT_BUTTON, self.OnExe)
         self.button_down13.Bind(wx.EVT_BUTTON,self.OnAccept)
 
-    #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
+        # 
+        self.ResetF0.Bind(wx.EVT_BUTTON,lambda e, frame =self.f0:self.OnResetFrame(e, self.f0))
 
+    #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+    def OnResetFrame(self,e,frame):
+        frame.reset_hard()
+        self.trafo_valid_check()
 
     def ZoomCallback(self,e,frame,canvas):
         pos=e.GetVal()
@@ -171,7 +178,7 @@ class warpGUI(wx.Panel):
     ##
     # @brief draw points of frame
     def draw_pts(self,frame,canvas):
-        
+ 
         if self.trafo_valid == True:
             color="green"
         else:
@@ -384,7 +391,6 @@ class warpGUI(wx.Panel):
             w.Run_parallel(num_proc=2)
         else:
             w.Run()
-        print"-->done warping" 
     def CleanTmp(self,e):
         os.system("rm -rf /tmp/warpGUI/*")
         os.system("rm -rf /tmp/frames/*")
