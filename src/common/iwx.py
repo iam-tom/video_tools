@@ -317,8 +317,8 @@ class iFrame(wx.StaticBitmap):
         
     def reset_hard(self):
     #Warning use with caution - log is being deleted - otherwise use reset
-        self.img_work_=img.orig_.Copy()
-        self.pts=list()
+        self.img_work_=self.img_orig_.Copy()
+        self.pts_=list()
         self.save_log()
 
     def reset(self):

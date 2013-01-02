@@ -29,7 +29,7 @@ class warpGUI(wx.Panel):
     def SetInPath(self,msg):
         self.in_path = msg[0]
         self.set_state(0,1)
-        self.nav.SetSteps(len(self.in_path))
+        self.nav.SetSteps(len(self.in_path)-2)
         self.make_bindings()
     def make_layout(self,parent):
     # layout ---------------------------------------
@@ -58,7 +58,8 @@ class warpGUI(wx.Panel):
         
         bs1111=wx.BoxSizer(wx.HORIZONTAL)
         
-        bs1111.Add(wx.Button(self,-1,"BUT!"),wx.EXPAND)
+        self.ResetF0= wx.Button(self,-1,"Reset Frame")
+        bs1111.Add(self.ResetF0,wx.EXPAND)
         bs1111.Add(wx.Button(self,-1,"BUT!"),wx.EXPAND)
 
         self.list11=wx.ListBox(self,-1,size=(200,170))        
@@ -84,7 +85,7 @@ class warpGUI(wx.Panel):
         
         bs1211=wx.BoxSizer(wx.HORIZONTAL)
         
-        bs1211.Add(wx.Button(self,-1,"BUT!"),wx.EXPAND)
+        bs1211.Add(wx.Button(self,-1,"Reset Frame"),wx.EXPAND)
         bs1211.Add(wx.Button(self,-1,"BUT!"),wx.EXPAND)
 
         self.list12=wx.ListBox(self,-1,size=(200,170))        
@@ -100,10 +101,10 @@ class warpGUI(wx.Panel):
         bs12.Add(bs121           , wx.ALIGN_TOP ,0)
         bs12.Add(self.button_down12, wx.ALIGN_LEFT ,0)
 
-    ###### LAYOUT Bottom PANEL 
-        self.button_exe    =wx.Button(self,-1,"PROCESS")
-        self.button_down13   =wx.Button(self,-1,"--")
-        
+    ###### LAYOUT Bottom PANEL
+        self.button_exe    =wx.Button(self,-1,"recalculate Trafo")
+        self.button_down13   =wx.Button(self,-1,"Process")
+
 
     ##### LAYOUT NAVPANEL
         bs_nav=wx.BoxSizer(wx.HORIZONTAL)
@@ -111,7 +112,7 @@ class warpGUI(wx.Panel):
         bs_nav.Add(self.nav  ,wx.EXPAND)
         bs_nav.Add(self.button_exe  ,wx.EXPAND)
         bs_nav.Add(self.button_down13,wx.EXPAND)
-        
+
     ###### MAKE LAYOUT
 
         bs1.Add(bs11,1,wx.ALIGN_LEFT) 
@@ -139,14 +140,20 @@ class warpGUI(wx.Panel):
         self.button_down12.Bind(wx.EVT_BUTTON, self.OnFrameDown)
         self.nav.forward.Bind(iwx.EVT_INC_sub,self.OnFrameSwitch)
         self.nav.back.Bind(iwx.EVT_INC_sub,self.OnFrameSwitch)
-        
+
         # bindings for processing
         self.button_exe.Bind(wx.EVT_BUTTON, self.OnExe)
         self.button_down13.Bind(wx.EVT_BUTTON,self.OnAccept)
 
-    #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
+        # 
+        self.ResetF0.Bind(wx.EVT_BUTTON,lambda e, frame =self.f0:self.OnResetFrame(e, self.f0))
 
+    #~~~~~~~Functionality~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+    def OnResetFrame(self,e,frame):
+        frame.reset_hard()
+        self.trafo_valid_check()
 
     def ZoomCallback(self,e,frame,canvas):
         pos=e.GetVal()
@@ -171,7 +178,7 @@ class warpGUI(wx.Panel):
     ##
     # @brief draw points of frame
     def draw_pts(self,frame,canvas):
-        
+ 
         if self.trafo_valid == True:
             color="green"
         else:
@@ -339,16 +346,28 @@ class warpGUI(wx.Panel):
 
 
     def OnExe(self,e):
+        self.MorphCurrentFrames()
+
+    def MorphCurrentFrames(self):
+        print "-->morphing pair"
         m=warp.morpher()
         m.SetInputFrames(self.f0,self.f1)
         m.Run(trafo_only=True)
-        self.transformations.append(m.GetTrafo())
+        if self.f0.id()>(len(self.transformations)-1):
+          print "appending trafo"
+          self.transformations.append(m.GetTrafo())
+          append= True
+        else:
+          print "updating trafo"
+          self.transformations[self.f0.id()]=m.GetTrafo()
+          append= False
     # save init_frame
         if self.f0.id()==0:
             m.Run()
             o_file=self.tmp_path+"imgm"+str(self.f0.id())+".jpg"
             self.f0.SaveImg(o_file)
-            self.morphed_path.append(o_file)
+            if append == True:
+                self.morphed_path.append(o_file)
         else:
             for i in range(self.f1.id()):
                 if i ==0:
@@ -358,11 +377,12 @@ class warpGUI(wx.Panel):
                     m.Run(T)
         o_file=self.tmp_path+"imgm"+str(self.f1.id())+".jpg"
         m.SaveImgM(o_file)
-        self.morphed_path.append(o_file)
+        if append == True:
+            self.morphed_path.append(o_file)
 
     def OnAccept(self,e):
         w=warp.warper()
-        config={"i_path":self.morphed_path,"o_path":"/home/tom/TEST/","warp_frames":100,"o_type":".jpg"}
+        config={"i_path":self.morphed_path,"o_path":"/home/tom/TEST/","warp_frames":50,"o_type":".jpg"}
         w.UpdateConfig(config)
         pairs=len(self.morphed_path)-1
         if pairs > 5 :
@@ -371,7 +391,6 @@ class warpGUI(wx.Panel):
             w.Run_parallel(num_proc=2)
         else:
             w.Run()
-    
     def CleanTmp(self,e):
         os.system("rm -rf /tmp/warpGUI/*")
         os.system("rm -rf /tmp/frames/*")
@@ -381,14 +400,11 @@ class warpGUI(wx.Panel):
         self.trafo_valid = False
         l1=len(self.f0.pts())
         l2=len(self.f1.pts())
-        print "LENGTHS"
-        print l1
-        print l2
 
         if l1==l2 and l1>=3 and l2>=3:
             self.trafo_valid = True
-            print "THIS STATE IS VALID"
         self.draw_pts(self.f0,self.over0)
         self.draw_pts(self.f1,self.over1)
-            
+        if self.trafo_valid == True:
+          self.MorphCurrentFrames()
 
