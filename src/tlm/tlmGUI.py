@@ -50,6 +50,7 @@ class tlmGUI(wx.Panel):
 #    1 - pan only default
 #    2 - pan&zoom
 #    3 - full
+#    4 - 16/10 (1280x720)
         tl_mode = 1
 #        self.zoom_mode = False #default is pan only
 #        self.zoom_mode = True #default is pan only
@@ -96,8 +97,8 @@ class tlmGUI(wx.Panel):
 
 
         # button panel for process options
-        choices_tl_mode=["Pan Only","Zoom&Pan","Full Image"]
-        self.choices_tl_mode_lookup=[1,2,3]
+        choices_tl_mode=["Pan Only","Zoom&Pan","Full Image","16:9"]
+        self.choices_tl_mode_lookup=[1,2,3,4]
         self.choices_tl_mode=wx.Choice(self, wx.ID_ANY,size=(130,30), choices=choices_tl_mode)
         self.b_reset = wx.Button(self,-1,"Reset")
         
@@ -198,6 +199,8 @@ class tlmGUI(wx.Panel):
             tl_mode=self.choices_tl_mode_lookup[1]
         elif chk ==2:
             tl_mode=self.choices_tl_mode_lookup[2]
+        elif chk ==3:
+            tl_mode=self.choices_tl_mode_lookup[3]
         print "selection mode is %d"%tl_mode     
         return tl_mode 
     def check_fps(self):
@@ -374,7 +377,21 @@ class tlmGUI(wx.Panel):
         dc.SelectObject(bitmap)
 
         self.positions.append(pos)
-        if len(self.positions) == 2:
+        if len(self.positions ) ==2 and tl_mode == 4:
+            ul = self.positions[0]
+            temp= self.positions[1]
+            x_margin=self.positions[1][0]-self.positions[0][0]
+            y_offset=int((float(x_margin)/16) *9)
+            dr = wx.Point(x=self.positions[1][0],y=self.positions[0][1]+y_offset)
+            dc.BeginDrawing()
+            dc.SetPen(wx.Pen("red",style=wx.SOLID))
+            dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
+            dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
+            dc.EndDrawing()
+            self.positions[-1]=dr
+        
+
+        elif len(self.positions) == 2:
             ul = self.positions[0]
             dr = self.positions[1]
             dc.BeginDrawing()
@@ -382,6 +399,7 @@ class tlmGUI(wx.Panel):
             dc.SetBrush(wx.Brush("red", wx.TRANSPARENT))
             dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
             dc.EndDrawing()
+
         elif len(self.positions) == 3 and tl_mode == 1:
             dim_box1=(self.positions[1][0]- self.positions[0][0],self.positions[1][1]- self.positions[0][1])
             ul = self.positions[2]
@@ -400,6 +418,18 @@ class tlmGUI(wx.Panel):
             dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
             dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
             dc.EndDrawing()
+
+        elif len(self.positions ) ==4 and tl_mode == 4:
+            ul = self.positions[2]
+            x_margin=self.positions[3][0]-self.positions[2][0]
+            y_offset=int((float(x_margin)/16) *9)
+            dr = wx.Point(x=self.positions[3][0],y=self.positions[2][1]+y_offset)
+            dc.BeginDrawing()
+            dc.SetPen(wx.Pen("blue",style=wx.SOLID))
+            dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
+            dc.DrawRectangle(ul[0],ul[1],dr[0]-ul[0],dr[1]-ul[1])
+            dc.EndDrawing()
+            self.positions[-1]=dr
 
         image=wx.ImageFromBitmap(bitmap)
 #TODO: make this more cleanly - no acces to member variable
