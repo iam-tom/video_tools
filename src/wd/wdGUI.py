@@ -54,7 +54,7 @@ class wdGUI(wx.Panel):
 
 
         space=wx.Size(100,100)
-        self.chkbx = wx.CheckBox(self,wx.ID_ANY,"Convert")
+        self.chkbx = wx.CheckBox(self,wx.ID_ANY,"Convert video files")
         self.choice_codec=wx.Choice(self,    wx.ID_ANY, size=(100,30), choices=self.choices["codec"])
         self.choice_bitrate=wx.Choice(self,  wx.ID_ANY, size=(100,30), choices=self.choices["bitrate"])
         self.choice_scale=wx.Choice(self,    wx.ID_ANY, size=(100,30), choices=self.choices["scale"])

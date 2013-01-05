@@ -50,10 +50,6 @@ class Project_Creator:
                 continue
             else:                        
                 WD.set_attribute(tag,line)
-            
-                    
-                    
-                    
 
     def CreateNewProject(self,WD):         
         #check if old WD
@@ -78,7 +74,6 @@ class Project_Creator:
 
             elif WD.old_wd == False :
                 print "creating new wd"
-                
             # establish new working directory
             self.NewDir(WD.basepath)
 
@@ -92,6 +87,7 @@ class Project_Creator:
             self.NewDir("video")
             self.NewDir("audio")
             self.NewDir("misc")
+            self.NewDir("photo")
             os.chdir("video")
             self.NewDir('conv')
             self.NewDir('raw')
