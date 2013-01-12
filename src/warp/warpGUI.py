@@ -8,8 +8,12 @@ import os
 import warp
 
 class warpGUI(wx.Panel):
-    def __init__(self,parent):
+    def __init__(self,parent,size):
     #default vaules-----------------------------------------------------
+
+    #TODO: This layout is specifically for images with 3/2 image ratio:w
+        self.input_image_ratio = 1.5 # = 3/2
+
         self.in_path=list()
         self.morphed_path=list()
         self.out_path = "/home/tom/warptest/"
@@ -21,7 +25,7 @@ class warpGUI(wx.Panel):
         self.trafo_valid=False
 
     #make layout and activate bidnings
-        self.make_layout(parent)
+        self.make_layout(parent,size)
         self.set_init_state()
         #self.set_test_state(0,1)
         self.make_bindings()
@@ -31,10 +35,18 @@ class warpGUI(wx.Panel):
         self.set_state(0,1)
         self.nav.SetSteps(len(self.in_path)-2)
         self.make_bindings()
-    def make_layout(self,parent):
+    def make_layout(self,parent,fsize):
     # layout ---------------------------------------
-        size_over=wx.Size(600,400)
-        size_zoom=wx.Size(200,200)
+        
+        over_height=fsize.height*0.4
+        over_width=over_height*self.input_image_ratio
+
+        zoom_width=over_width*0.25
+        zoom_height=zoom_width
+
+
+        size_over=wx.Size(over_width,over_height)
+        size_zoom=wx.Size(zoom_width,zoom_height)
 
     #parent panel p1  
         wx.Panel.__init__(self,parent)

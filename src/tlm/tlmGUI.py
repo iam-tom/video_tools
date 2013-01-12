@@ -31,7 +31,11 @@ class tlmGUI(wx.Panel):
     # @param self Object pointer
     # @param parent Parent Object
     # @param config Parameter Configuration    
-    def __init__(self, parent):
+    def __init__(self, parent,size):
+
+    #TODO: This layout is specifically for images with 3/2 image ratio:w
+        self.input_image_ratio = 1.5 # = 3/2
+
         self.positions = list()
         self.in_path = list()
        
@@ -58,15 +62,17 @@ class tlmGUI(wx.Panel):
 
 
 
-        self.make_layout(parent)
+        self.make_layout(parent,size)
         self.set_init_state()      
         self.make_bindings()
 
     ##
     # Establish graphical elements
-    def make_layout(self,parent):
+    def make_layout(self,parent,fsize):
      
-        size_canvas=wx.Size(900,600)
+        parent.GetSize()
+        size_canvas=wx.Size(fsize.width,fsize.width*(1/self.input_image_ratio))
+        #size_canvas=wx.Size(900,600)
 
         # init wx panel
         wx.Panel.__init__(self, parent)

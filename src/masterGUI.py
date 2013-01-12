@@ -22,11 +22,9 @@ class GUI (wx.Frame):
         x_pos=ss_string.find('x')
         sw = int(ss_string[0:(x_pos)])
         sh = int(ss_string[x_pos+1:len(ss_string)])
-        
-        
-        
-        
-        
+
+        sw=800
+        sh=600
         self.f = wx.Frame(None, title=title, size=(sw,sh) )
         
         splitter = wx.SplitterWindow(self.f,-1)
@@ -36,15 +34,16 @@ class GUI (wx.Frame):
         
         splitter.SplitVertically(self.p1,self.p2)
         self.nb = wx.Notebook(self.p1)     
-        
 
 
-        
-               
+
+
+
         config["size"] = (sw/2,sh)
-        self.page1 = tlmGUI.tlmGUI(self.nb)
+        page_size = wx.Size(sw/2,sh)
+        self.page1 = tlmGUI.tlmGUI(self.nb,page_size)
         self.page3 = wdGUI.wdGUI(self.nb)
-        self.page4 = warpGUI.warpGUI(self.nb) 
+        self.page4 = warpGUI.warpGUI(self.nb,page_size) 
         self.nb.AddPage(self.page1, "TLM")
         self.nb.AddPage(self.page3,"IMPORT")
         self.nb.AddPage(self.page4,"WARP")
