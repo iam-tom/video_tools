@@ -23,8 +23,6 @@ class GUI (wx.Frame):
         sw = int(ss_string[0:(x_pos)])
         sh = int(ss_string[x_pos+1:len(ss_string)])
 
-        sw=800
-        sh=600
         self.f = wx.Frame(None, title=title, size=(sw,sh) )
         
         splitter = wx.SplitterWindow(self.f,-1)
@@ -57,9 +55,14 @@ class GUI (wx.Frame):
 #        graphical elements
 
         self.list = GUIelements.imgList(self.p2,(200,500))
+      
 
+        ## TODO IMG MANAGEMENT
         ok_b = wx.Button(self.p2,wx.ID_OK,"OK",(10,550),(80,80),wx.BU_EXACTFIT)
         ok_b.Bind(wx.EVT_BUTTON, self.OnOk)
+
+        bg_img=wx.Image(".data/background.png",wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        wx.StaticBitmap(self.p2,-1,bg_img,(0,0))
         
         
         
@@ -112,7 +115,7 @@ class GUI (wx.Frame):
 
 if __name__ == '__main__':
     app = wx.App(False)
-    title="IMG GUI"
+    title="Video Tools"
     size=(1920,1080)
     size2=(1280,720)
     in_path = "/host/MEDIA/photography/2012-04-20 SPAIN/sunrise/lapse0/"
