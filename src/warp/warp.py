@@ -181,7 +181,7 @@ class morpher():
 # @param T transformation matrix
 # @param out_path Output path where results are stored
 def process_sequence(in_path,o_path,T): 
-    tmp_path="/tmp/frames"
+    tmp_path=utils.folder_back+utils.folder_back+"tmp"+utils.delimiter+"frames"
     o_type=".jpg"
     warp_frames=100
     utils.assert_dir(tmp_path)

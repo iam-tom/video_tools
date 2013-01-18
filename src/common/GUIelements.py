@@ -6,6 +6,7 @@ import iwx
 from  avtools import thumbnailer
 import cStringIO
 import imgutils
+import utils
 class iNavpanel(wx.Panel):
     def __init__(self,parent,steps):
         #default values
@@ -63,7 +64,7 @@ class iNavpanel(wx.Panel):
         self.publishDirection(self.back,-1)
 
     def updateTxt(self):
-        ctr_str=" "+ str(self.ctr)+" / "+str(self.steps)
+        ctr_str=" "+ str(self.ctr)+utils.delimiter+str(self.steps)
         self.txt.SetValue(ctr_str)
 
     def modifyCtr(self,val):    
@@ -171,9 +172,9 @@ class imgList (iwx.iList):
         return out_list
                               
     def prev_init_state(self):
-        self.config = {"format":".png","frame_size":"qvga", "i_path":"", "o_path":"/tmp/" }
+        self.config = {"format":".png","frame_size":"qvga", "i_path":"", "o_path":utils.folder_back+utils.folder_back+"tmp" }
 
-        bmp  = self.get_bmp(".data/prev_init.png")
+        bmp  = self.get_bmp("data"+utils.delimiter+"prev_init.png")
         self.canvas =wx.StaticBitmap(self.prev_config["parent"], -1, bmp,self.prev_config["pos"] )    
 
     def get_bmp(self,path):
@@ -198,9 +199,7 @@ class imgList (iwx.iList):
         self.T.UpdateConfig(self.config)
         self.T.Run()
         
-        bmp = self.get_bmp("/tmp/thb"+self.config["format"])
-       
-        self.canvas.SetBitmap( bmp)
+        bmp = self.get_bmp(utils.folder_back+utils.folder_back+ self.canvas.SetBitmap(bmp))
         
     def OnReset(self,e):
         iwx.iList.OnReset(self,e)

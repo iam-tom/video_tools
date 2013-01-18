@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+import sys
 import wx
 import imgutils
 import cStringIO
@@ -278,7 +278,6 @@ class iEvent(wx.PyCommandEvent):
         
         
     
-        
 class iFrame(wx.StaticBitmap):
 #//////////////////////<<<INIT////////////////////////////////////////////
     def __init__(self,path,id=-1):
@@ -288,7 +287,7 @@ class iFrame(wx.StaticBitmap):
         self.id_=id
         self.size_=self.img_orig_.GetSize()
         # make sure temporary directory exists (change to database)
-        self.tmpdir="/tmp/frames/"
+        self.tmpdir=".."+utils.delimiter+".."+utils.delimiter+"tmp"+utils.delimiter+"frames"
         utils.assert_dir(self.tmpdir)
         self.check_log()
         

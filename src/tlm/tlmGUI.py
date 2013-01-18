@@ -42,8 +42,7 @@ class tlmGUI(wx.Panel):
         self.full_size=tuple()
         self.canvas_scale=float()
        # #test configuration
-       # self.init_img = "../../src/.data/tlm_init.png"
-        self.init_img = ".data/tlm_init.png"
+        self.init_img = "data"+utils.delimiter+"tlm_init.png"
         
         
         self.vid_mode = False # default is im_seq mode
@@ -161,12 +160,12 @@ class tlmGUI(wx.Panel):
         elif self.vid_mode == True:
             self.get_thumb(self.in_path[0])
 
-            self.set_state("/tmp/imgGUI/thb.png")
+            self.set_state(utils.folder_back+utils.folder_back+"tmp"+utils.delimiter+"imgGUI"+utils.delimiter+"thb.png")
 
 
     ##  @brief Generate Thumbnail of Video file
     def get_thumb(self,in_path):
-        config = {"format":".png","frame_size":"", "i_path":in_path, "o_path":"/tmp/imgGUI/" }
+        config = {"format":".png","frame_size":"", "i_path":in_path, "o_path":utils.folder_back+utils.folder_back+"tmp"+utils.delimiter+"imgGUI"+utils.delimiter+utils.delimiter }
         t = thumbnailer()
         t.UpdateConfig(config)
         t.Run()
@@ -244,9 +243,9 @@ class tlmGUI(wx.Panel):
     def get_out_dir(self):
         out_path = self.b_browse.GetData()
         utils.assert_dir(out_path)
-        slash = out_path.rfind("/")
+        slash = out_path.rfind(utils.delimiter)
         if (len(out_path)-slash) >1:
-            out_path+="/"
+            out_path+=utils.delimiter
 
        # chk = os.path.isdir(out_path)
        # if chk == False:

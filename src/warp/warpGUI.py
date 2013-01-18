@@ -16,10 +16,10 @@ class warpGUI(wx.Panel):
 
         self.in_path=list()
         self.morphed_path=list()
-        self.out_path = "/home/tom/warptest/"
+        #self.out_path = "/home/tom/warptest/"
         tmp=utils.temp_dir_handler()
-        tmp.add_dir("/tmp/warpGUI","pre-clean")
-        self.tmp_path= "/tmp/warpGUI/"
+        self.tmp_path=utils.folder_back+utils.folder_back+ "tmp"+utils.delimiter+"warpGUI"
+        tmp.add_dir(self.tmp_path,"pre-clean")
         self.transformations=list()
         # flag for trafo of current state
         self.trafo_valid=False
@@ -290,28 +290,10 @@ class warpGUI(wx.Panel):
         # update bindings!
         self.make_bindings()
     
-    def set_test_state(self,id0,id1):
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9942.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9943.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9944.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9954.JPG")
-        self.in_path.append("/media/Data/MEDIA/photography/2012-08-30-Berlin/100CANON/IMG_9955.JPG")
-
-        self.f0=iwx.iFrame(self.in_path[id0],id0)
-        self.f1=iwx.iFrame(self.in_path[id1],id1)
-
-        self.over0.draw(self.f0.img())
-        self.set_zoom(self.f0,self.zoom0,wx.Point(1000,1000))
-
-        self.over1.draw(self.f1.img())
-        self.set_zoom(self.f1,self.zoom1,wx.Point(1000,1000))
-        
-        #update navbar
-        self.nav.SetSteps(len(self.in_path)-1)
     def set_init_state(self):
 
-        init_img=".data/warp_init.png"
-        init_img_zoom=".data/warp_zoom.png"
+        init_img="data"+utils.delimiter+"warp_init.png"
+        init_img_zoom="data"+utils.delimiter+"warp_zoom.png"
         self.f0=iwx.iFrame(init_img,-1)
         self.f1=iwx.iFrame(init_img,-1)
 
@@ -404,8 +386,8 @@ class warpGUI(wx.Panel):
         else:
             w.Run()
     def CleanTmp(self,e):
-        os.system("rm -rf /tmp/warpGUI/*")
-        os.system("rm -rf /tmp/frames/*")
+        os.system("rm -rf "+self.tmp_path+utils.delimiter+"*" )
+        os.system("rm -rf "+utils.folder_back+utils.folder_back+"tmp"+utils.delimiter+"frames"+utils.delimiter+"*")
 
 
     def trafo_valid_check(self):

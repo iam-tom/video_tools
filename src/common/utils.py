@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 #
 #
@@ -9,16 +8,22 @@
 # -- assert_dir(path)...........checks if dir exists under path and establishes
 #                                it if necessary.
 #____________________________________________________________________
-# TODO:
-#
-#
-#
-#
 
+import sys
 import os
 import math
 
 
+# defince global platform specific variables
+if(sys.platform.find("linux2") ==0):
+    delimiter = "/"
+    folder_back = "../"
+    print delimiter
+elif(sys.platform.find("win32") == 0 or sys.platform.find("win64") == 0):
+    delimiter = " \\"
+    folder_back = "..\\"
+else:
+    print "platform not supported"
 
 class temp_dir_handler():
     def __init__(self):

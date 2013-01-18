@@ -12,6 +12,7 @@ import wdGUI
 import warpGUI
 
 from waitbar import iWaitbar
+
 class GUI (wx.Frame):
 
     def __init__(self,title,config):
@@ -61,7 +62,7 @@ class GUI (wx.Frame):
         ok_b = wx.Button(self.p2,wx.ID_OK,"OK",(10,550),(80,80),wx.BU_EXACTFIT)
         ok_b.Bind(wx.EVT_BUTTON, self.OnOk)
 
-        bg_img=wx.Image(".data/background.png",wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        bg_img=wx.Image("data/background.png",wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         wx.StaticBitmap(self.p2,-1,bg_img,(0,0))
         
         

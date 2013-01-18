@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+import utils
 class Project_Creator:
 #
 # Layout for iProject:
@@ -59,13 +59,13 @@ class Project_Creator:
             elif WD.old_wd ==True and  not WD.name in WD.basepath :
                 print "renaming.."
                 os.chdir(WD.basepath)
-                os.chdir("../")
+                os.chdir(utils.folder_back)
                 os.rename(WD.basepath, WD.name)
             # make WD consistent
                 a= WD.basepath
                 counter = 0
-                while a.find("/") <> -1:
-                    b=a.find("/")
+                while a.find(utils.delimiter) <> -1:
+                    b=a.find(utils.delimiter)
                     a=a[b+1:len(a)]
                     counter = counter+(b+1)
                 WD.basepath = WD.basepath[0:counter]+WD.name
@@ -91,7 +91,7 @@ class Project_Creator:
             os.chdir("video")
             self.NewDir('conv')
             self.NewDir('raw')
-            os.chdir("../../post")
+            os.chdir(utils.folder_back+utils.folder_back+"post")
             self.NewDir("org")
             self.NewDir('render')
             os.chdir("render")

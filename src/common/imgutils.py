@@ -1,9 +1,9 @@
-#!/usr/bin/env python
 
 import itertools
 import re
 import PIL
 import wx
+import utils
 
 class seq_compressor():
 #class to compress the namestrings of image sequences
@@ -20,7 +20,6 @@ class seq_compressor():
         self.mapping=dict()
         self.last_index=0
 # This algorithm only works if DATA is sorted.
-#DATA = ["home/image_00101.png", "home/image_00102.png", "home/image_00103.png"]
     def get_groups(self):
         
         self. groups = [self.collapse_group(tuple(group)) \
@@ -38,7 +37,7 @@ class seq_compressor():
     def extract_number(self,name):
          
 
-         slash=name.rfind("/")
+         slash=name.rfind(utils.delimiter)
          dot = name.rfind(".")
          if dot >-1 and slash >-1: 
             skeleton =name[slash:dot]
@@ -65,7 +64,7 @@ class seq_compressor():
              length = len(str(int(last)))
              dot = group[0][1].rfind(".")
               
-             slash = group[0][1].rfind("/")
+             slash = group[0][1].rfind(utils.delimiter)
              
              # Now we have the length of the variable part of the names,
              # the rest is only formatting.

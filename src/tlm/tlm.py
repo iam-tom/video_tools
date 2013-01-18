@@ -370,7 +370,7 @@ if __name__ == '__main__':
     frame_size = (50,50)
     output_size = (20,20)
     #in_path = "/host/MEDIA/photography/2012-04-20 SPAIN/sunrise/raw_lapses/lapse_0/"
-    o = "/home/tom/lapse1"
+    #o = "/home/tom/lapse1"
     
 
     TLM = tlm(in_path,o)

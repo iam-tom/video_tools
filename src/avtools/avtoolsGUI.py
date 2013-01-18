@@ -156,10 +156,10 @@ class avtoolsGUI(wx.Panel):
             i_fileXXX = i_file[:offset]+"%"+zeros+"d"+i_format
 
         if os.name=="posix":
-             process_string = "avconv " + " -r "+fps +" -i " + i_fileXXX +" "+ o_dir +"/"+ o_file
+             process_string = "avconv " + " -r "+fps +" -i " + i_fileXXX +" "+ o_dir +utils.delimiter+ o_file
              os.system(process_string)
         if os.name=="nt":
-             process_string = "avconv " + " -r "+fps +" -i " + i_fileXXX +" "+ o_dir +"\\"+ o_file
+             process_string = "avconv " + " -r "+fps +" -i " + i_fileXXX +" "+ o_dir +utils.delimiter+ o_file
              os.system("cd C:\MEDIA\videography\ffmpeg\bin")
 	     os.system(process_string)
         
