@@ -56,7 +56,7 @@ class temp_dir_handler():
             self.dirs_pers.append(path)
     def clean(self):
         for p in self.dirs_trans:
-            os.system("rm -rf %s"%p)
+            os.remove(p)
             self.dirs_trans[:]=[]
    
 

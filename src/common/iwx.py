@@ -293,7 +293,7 @@ class iFrame(wx.StaticBitmap):
         
 #//////////////////////<<<METHODS///////////////////////////////////////
     def check_log(self):
-        log_str=self.tmpdir+"frame_log"+str(self.id_)
+        log_str=os.path.join(self.tmpdir,"frame_log"+str(self.id_))
         if os.path.isfile(log_str)==True:
             f=open(log_str,"r")
             for line in f:
@@ -309,7 +309,7 @@ class iFrame(wx.StaticBitmap):
     ##
     # Save log file with points of frame    
     def save_log(self):
-        frame_str=self.tmpdir+"frame_log"+str(self.id_)
+        frame_str=os.path.join(self.tmpdir,"frame_log"+str(self.id_))
         f=open(frame_str,"w")
         for pt in self.pts_:
             f.write("%s\n"%str(pt))

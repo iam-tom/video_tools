@@ -8,6 +8,7 @@ from threading import Thread
 from waitbar import iWaitbar
 from multiprocessing import Process
 import sys
+import shutil
 class tlm (Thread):
 
 
@@ -280,7 +281,7 @@ class tlm (Thread):
                 
                 
     def stream(self,i_dir,fps,out_dir):
-        config_s={"format":".mov","zeros":5,"i_path":i_dir,"o_path":out_dir,"fps":25}
+        config_s={"format":".mov","zeros":5,"i_path":i_dir,"o_path":out_dir,"fps":fps}
         stream = avtools.streamer()
         stream.UpdateConfig(config_s)
         
@@ -289,8 +290,7 @@ class tlm (Thread):
 
 
     def clean_temp(self,path):
-        cmd = "rm "+path+"*"
-        os.system(cmd)      
+        shutil.rmtree(path)
    
 
 #/////////old API//////////////        
