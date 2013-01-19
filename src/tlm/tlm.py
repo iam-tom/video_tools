@@ -7,6 +7,7 @@ import utils
 from threading import Thread
 from waitbar import iWaitbar
 from multiprocessing import Process
+import sys
 class tlm (Thread):
 
 
@@ -96,7 +97,7 @@ class tlm (Thread):
         self.ul_1=self.box1[0]
         self.dr_1=self.box1[1]            
 
-        self.temp_path_crop = "/tmp/tlm_crops/"  
+        self.temp_path_crop = os.path.join("..","tmp","tlm_crops" +utils.delimiter)
         self.flag="Seq2Vid"
         self.start()
 ##       self. process
@@ -119,7 +120,7 @@ class tlm (Thread):
         self.dr_0=self.box0[1]        
         self.ul_1=self.box1[0]
         self.dr_1=self.box1[1]             
-        self.temp_path = "/tmp/tlm_frames/"
+        self.temp_path = os.path.join("..","tmp","tlm_frames"+utils.delimiter)
         self.flag="Vid2Seq"
         self.start()
 ##        process
@@ -144,8 +145,8 @@ class tlm (Thread):
         self.dr_0=self.box0[1]        
         self.ul_1=self.box1[0]
         self.dr_1=self.box1[1]       
-        self.temp_path_full = "/tmp/tlm_frames/"
-        self.temp_path_crop = "/tmp/tlm_crops/"  
+        self.temp_path_full = os.path.join("..","tmp","tlm_frames"+utils.delimiter)
+        self.temp_path_crop = os.path.join("..","tmp","tlm_crops" +utils.delimiter)
         self.flag="Vid2Vid"
         self.start()
 ##        process
@@ -175,7 +176,11 @@ class tlm (Thread):
                 #self.pb.SetValue(30)
                 tmp_files =  self.files_from_dir(self.temp_path_full)
                 self.compute_boxes(tmp_files,self.ul_0,self.dr_0,self.ul_1,self.dr_1)
-                self.crop_scale_save(tmp_files,self.frame_size,self.temp_path_crop)
+                if(sys.platform.find("win32")==0):
+                    self.crop_scale_saveSINGLECORE(tmp_files,self.frame_size,self.temp_path_crop)
+                elif(sys.platform.find("linux2")==0):
+                    self.crop_scale_save(tmp_files,self.frame_size,self.temp_path_crop)
+
                 #self.pb.Increment(40)
                 
                 self.stream(self.temp_path_crop,self.fps,self.out_dir)   
@@ -187,7 +192,10 @@ class tlm (Thread):
             #        process
             self.compute_boxes(self.in_files,self.ul_0,self.dr_0,self.ul_1,self.dr_1)
             
-            self.crop_scale_save(self.in_files,self.frame_size,self.out_dir)
+            if(sys.platform.find("win32")==0):
+                self.crop_scale_saveSINGLECORE(self.in_files,self.frame_size,self.out_dir)
+            elif(sys.platform.find("linux2")==0):
+                self.crop_scale_save(self.in_files,self.frame_size,self.out_dir)
         
         
         if self.flag is "Vid2Seq":
@@ -200,7 +208,10 @@ class tlm (Thread):
                  
                  tmp_files =  self.files_from_dir(self.temp_path)
                  self.compute_boxes(tmp_files,self.ul_0,self.dr_0,self.ul_1,self.dr_1)
-                 self.crop_scale_save(tmp_files,self.frame_size,self.out_dir)  
+                 if(sys.platform.find("win32")==0):
+                     self.crop_scale_saveSINGLECORE(tmp_files,self.frame_size,self.out_dir)
+                 elif(sys.platform.find("linux2")==0):
+                     self.crop_scale_save(tmp_files,self.frame_size,self.out_dir)
              
              self.clean_temp(self.temp_path)
         if self.flag is "Seq2Vid": 
@@ -208,7 +219,10 @@ class tlm (Thread):
 
  
             self.compute_boxes(self.in_files,self.ul_0,self.dr_0,self.ul_1,self.dr_1)
-            self.crop_scale_save(self.in_files,self.frame_size,self.temp_path_crop)
+            if(sys.platform.find("win32")==0):
+                self.crop_scale_saveSINGLECORE(self.in_files,self.frame_size,self.temp_path_crop)
+            elif(sys.platform.find("linux2")==0):
+                self.crop_scale_save(self.in_files,self.frame_size,self.temp_path_crop)
             self.stream(self.temp_path_crop,self.fps,self.out_dir)  
 
             self.clean_temp(self.temp_path_crop)    
@@ -307,6 +321,19 @@ class tlm (Thread):
             step += 1
 
         
+    def crop_scale_saveSINGLECORE(self,files,o_size,o_path):
+        
+        utils.assert_dir(o_path)
+        #chk = os.path.isdir(o_path)
+        #if chk == False:
+        #    cmd = "mkdir -p  "+o_path
+        #    os.system("cmd")
+
+        splitter=utils.split_seq(files,4)
+        split_indices=splitter.get_indices()
+        print "processing single core"
+        self.css_parallel(files,o_size,o_path,0)
+        
     def crop_scale_save(self,files,o_size,o_path):
         
         utils.assert_dir(o_path)
@@ -317,6 +344,7 @@ class tlm (Thread):
 
         splitter=utils.split_seq(files,4)
         split_indices=splitter.get_indices()
+        print "processing multi core"
         print split_indices
         p1=Process(target=self.css_parallel,args=(files[0:split_indices[1]]          ,o_size,o_path,0))
         p2=Process(target=self.css_parallel,args=(files[split_indices[1]:split_indices[3]],o_size,o_path,split_indices[1]))
@@ -351,6 +379,7 @@ class tlm (Thread):
             img = img.resize(o_size,self.flags["filter"])
             number_str=utils.zero_str(5,i)
             o_file = o_path+"img_"+number_str+".jpg"
+            print o_file
             img.save(o_file)
             i = i+1
 #////////////////////////////////////

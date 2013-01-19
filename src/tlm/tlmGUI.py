@@ -42,8 +42,7 @@ class tlmGUI(wx.Panel):
         self.full_size=tuple()
         self.canvas_scale=float()
        # #test configuration
-        self.init_img = "data"+utils.delimiter+"tlm_init.png"
-        
+        self.init_img =os.path.join("data","tlm_init.png")
         
         self.vid_mode = False # default is im_seq mode
 #       self.vid_mode  = True # default is vid mode
@@ -160,12 +159,12 @@ class tlmGUI(wx.Panel):
         elif self.vid_mode == True:
             self.get_thumb(self.in_path[0])
 
-            self.set_state(utils.folder_back+utils.folder_back+"tmp"+utils.delimiter+"imgGUI"+utils.delimiter+"thb.png")
+            self.set_state(os.path.join("..","tmp","imgGUI","thb.png"))
 
 
     ##  @brief Generate Thumbnail of Video file
     def get_thumb(self,in_path):
-        config = {"format":".png","frame_size":"", "i_path":in_path, "o_path":utils.folder_back+utils.folder_back+"tmp"+utils.delimiter+"imgGUI"+utils.delimiter+utils.delimiter }
+        config = {"format":".png","frame_size":"", "i_path":in_path, "o_path":os.path.join("..","tmp","imgGUI")+utils.delimiter+utils.delimiter }
         t = thumbnailer()
         t.UpdateConfig(config)
         t.Run()

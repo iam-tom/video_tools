@@ -12,6 +12,7 @@ import wdGUI
 import warpGUI
 
 from waitbar import iWaitbar
+import sys
 
 class GUI (wx.Frame):
 
@@ -19,10 +20,12 @@ class GUI (wx.Frame):
     
     
     #        calculate screen size etc
-        ss_string = subprocess.Popen('xrandr | grep "\*" | cut -d" " -f4',shell=True,stdout=subprocess.PIPE).communicate()[0]
-        x_pos=ss_string.find('x')
-        sw = int(ss_string[0:(x_pos)])
-        sh = int(ss_string[x_pos+1:len(ss_string)])
+        #ss_string = subprocess.Popen('xrandr | grep "\*" | cut -d" " -f4',shell=True,stdout=subprocess.PIPE).communicate()[0]
+        #x_pos=ss_string.find('x')
+        #sw = int(ss_string[0:(x_pos)])
+        #sh = int(ss_string[x_pos+1:len(ss_string)])
+        sh=1080
+        sw=1920
 
         self.f = wx.Frame(None, title=title, size=(sw,sh) )
         
@@ -62,8 +65,8 @@ class GUI (wx.Frame):
         ok_b = wx.Button(self.p2,wx.ID_OK,"OK",(10,550),(80,80),wx.BU_EXACTFIT)
         ok_b.Bind(wx.EVT_BUTTON, self.OnOk)
 
-        bg_img=wx.Image("data/background.png",wx.BITMAP_TYPE_ANY).ConvertToBitmap()
-        wx.StaticBitmap(self.p2,-1,bg_img,(0,0))
+        #bg_img=wx.Image("data/background.png",wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        #wx.StaticBitmap(self.p2,-1,bg_img,(0,0))
         
         
         

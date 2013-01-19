@@ -19,6 +19,8 @@ class thumbnailer():
     # @param self object pointer
     def __init__(self):
 #//////////// Allocations ////////////////////
+        # get environment info
+        self.env=utils.env()
 
         ## output format
         self.format = ".png"
@@ -53,9 +55,9 @@ class thumbnailer():
         utils.assert_dir(self.o_path)   
 
         if len(self.frame_size)>0:
-            command = ["avconv","-i",self.i_path,"-vframes","1","-s",str(self.frame_size),"-y",o_path]
+            command = [self.env.bin_avconv,"-i",self.i_path,"-vframes","1","-s",str(self.frame_size),"-y",o_path]
         else:
-            command = ["avconv","-i",self.i_path,"-vframes","1","-y",o_path]
+            command = [self.env.bin_avconv,"-i",self.i_path,"-vframes","1","-y",o_path]
 
         subprocess.call(command)
     
@@ -75,6 +77,8 @@ class frame_extractor ():
 
 
 #/////////////// Allocations and default vaules //////////////
+        # get environment info
+        self.env=utils.env()
         ## output format
         self.format = ".png"
         ## number of leading zeros for frame naming
@@ -119,10 +123,10 @@ class frame_extractor ():
         self.o_path = self.o_dir+mov_name+"%"+str(self.leading_zeros)+"d"+self.format
         utils.assert_dir(self.o_dir)
         if len(self.frame_size)>0:
-            command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-s",self.frame_size,"-v","-10","-y",self.o_path]
+            command = [self.env.bin_avconv,"-i",self.i_path[0],"-r",str(self.fps),"-s",self.frame_size,"-v","-10","-y",self.o_path]
         else:
            
-            command = ["avconv","-i",self.i_path[0],"-r",str(self.fps),"-y",self.o_path]
+            command = [self.env.bin_avconv,"-i",self.i_path[0],"-r",str(self.fps),"-y",self.o_path]
             print command
             subprocess.call(command)            
         
@@ -141,6 +145,8 @@ class converter ():
     # @param self object pointer
     def __init__(self):
 #/////////////// Allocations and default vaules //////////////
+        # get environment info
+        self.env=utils.env()
         ## output format
         self.format = ".mov"
         ## input path
@@ -188,9 +194,9 @@ class converter ():
             
             if len(self.frame_size)>0:
                 
-                command = ["avconv","-i",i_file,"-strict","experimental","-s",str(self.frame_size),"-r",self.fps,"-b:v",self.bv,o_path]
+                command = [self.env.bin_avconv,"-i",i_file,"-strict","experimental","-s",str(self.frame_size),"-r",self.fps,"-b:v",self.bv,o_path]
             else:
-                command = ["avconv","-i",i_file,"-strict","experimental","-r",str(self.fps),"-b:v",self.bv,o_path]
+                command = [self.env.bin_avconv,"-i",i_file,"-strict","experimental","-r",str(self.fps),"-b:v",self.bv,o_path]
                 
             subprocess.call(command)       
         
@@ -211,6 +217,8 @@ class streamer ():
     # @param self object pointer
     def __init__(self):
 #/////////////// Allocations and default vaules //////////////
+        # get environment info
+        self.env=utils.env()
         ## input format
         self.format = ".mov"
         ## input paths
@@ -264,9 +272,9 @@ class streamer ():
         o_path = self.o_path+i_name+"_stream"+self.format
         
         if len(self.frame_size)>0:
-            command = ["avconv","-r",str(self.fps),"-i",i_path,"-s",self.frame_size,"-b:v","10000K","-r",str(self.fps),o_path]
+            command = [self.env.bin_avconv,"-r",str(self.fps),"-i",i_path,"-s",self.frame_size,"-b:v","10000K","-r",str(self.fps),o_path]
         else:
-            command = ["avconv","-r",str(self.fps),"-i",i_path,"-b:v","10000K","-r",str(self.fps),o_path]
+            command = [self.env.bin_avconv,"-r",str(self.fps),"-i",i_path,"-b:v","10000K","-r",str(self.fps),o_path]
         subprocess.call(command)       
         
     

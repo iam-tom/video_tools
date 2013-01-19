@@ -287,7 +287,7 @@ class iFrame(wx.StaticBitmap):
         self.id_=id
         self.size_=self.img_orig_.GetSize()
         # make sure temporary directory exists (change to database)
-        self.tmpdir=".."+utils.delimiter+".."+utils.delimiter+"tmp"+utils.delimiter+"frames"
+        self.tmpdir=os.path.join("..","tmp","frames")
         utils.assert_dir(self.tmpdir)
         self.check_log()
         

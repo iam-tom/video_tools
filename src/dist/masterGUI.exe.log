@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "masterGUI.py", line 2, in <module>
+  File "project_config.pyo", line 29, in __init__
+IOError: [Errno 2] No such file or directory: 'paths'
+Traceback (most recent call last):
+  File "masterGUI.py", line 2, in <module>
+  File "project_config.pyo", line 29, in __init__
+IOError: [Errno 2] No such file or directory: 'paths'
+Traceback (most recent call last):
+  File "masterGUI.py", line 2, in <module>
+  File "project_config.pyo", line 29, in __init__
+IOError: [Errno 2] No such file or directory: 'paths'

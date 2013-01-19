@@ -14,13 +14,28 @@ import os
 import math
 
 
+class env():
+    def __init__(self,cfg_file="TBD"):
+        # external binaries, whose paths can be set
+        self.bin_avconv=str()
+        env=sys.platform
+        if(env.find("linux2")==0):
+            self.bin_avconv="avconv"
+
+        elif(env.find("win32")==0):
+            self.bin_avconv="C:\\avconv\\libav-win64-20130101\\usr\\bin\\avconv.exe"
+            print self.bin_avconv
+        #self.read_cfg(cfg_file)
+
+
+
 # defince global platform specific variables
 if(sys.platform.find("linux2") ==0):
     delimiter = "/"
     folder_back = "../"
     print delimiter
 elif(sys.platform.find("win32") == 0 or sys.platform.find("win64") == 0):
-    delimiter = " \\"
+    delimiter = "\\"
     folder_back = "..\\"
 else:
     print "platform not supported"

@@ -18,7 +18,7 @@ class warpGUI(wx.Panel):
         self.morphed_path=list()
         #self.out_path = "/home/tom/warptest/"
         tmp=utils.temp_dir_handler()
-        self.tmp_path=utils.folder_back+utils.folder_back+ "tmp"+utils.delimiter+"warpGUI"
+        self.tmp_path=os.path.join("..","tmp","warpGUI")
         tmp.add_dir(self.tmp_path,"pre-clean")
         self.transformations=list()
         # flag for trafo of current state
@@ -292,8 +292,8 @@ class warpGUI(wx.Panel):
     
     def set_init_state(self):
 
-        init_img="data"+utils.delimiter+"warp_init.png"
-        init_img_zoom="data"+utils.delimiter+"warp_zoom.png"
+        init_img=      os.path.join( "data","warp_init.png")
+        init_img_zoom= os.path.join( "data","warp_zoom.png")
         self.f0=iwx.iFrame(init_img,-1)
         self.f1=iwx.iFrame(init_img,-1)
 
@@ -386,8 +386,8 @@ class warpGUI(wx.Panel):
         else:
             w.Run()
     def CleanTmp(self,e):
-        os.system("rm -rf "+self.tmp_path+utils.delimiter+"*" )
-        os.system("rm -rf "+utils.folder_back+utils.folder_back+"tmp"+utils.delimiter+"frames"+utils.delimiter+"*")
+        os.system("rm -rf "+os.path.join(self.tmp_path,"*" ))
+        os.system("rm -rf "+os.path.join("..","tmp","frames","*"))
 
 
     def trafo_valid_check(self):

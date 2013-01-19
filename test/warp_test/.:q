@@ -1,5 +1,0 @@
-# Paths to be added to sys.path in order to enable convenient importing
-/home/tom/video_tools/thirdparty
-/home/tom/video_tools/src/common
-/home/tom/video_tools/src/warp
-/home/tom/video_tools/src/avtools

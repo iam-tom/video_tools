@@ -137,7 +137,7 @@ class wdGUI(wx.Panel):
             dlg.SetValue("%s" % self.WD.name)
             if dlg.ShowModal() == wx.ID_OK:
                 self.WD.name = dlg.GetValue()
-                self.WD.basepath = self.WD.basepath +utils.delimiter +self.WD.name+utils.delimiter
+                self.WD.basepath = os.path.join(self.WD.basepath ,self.WD.name)+utils.delimiter
 
                 dlg.Destroy()
         self.setGUItoWD(self.WD)
@@ -239,15 +239,15 @@ class wdGUI(wx.Panel):
 
 #AvconvString()
     def AvconvString(self,input_name,WD,config):
-        config["o_path"] = WD+utils.delimiter+"files"+utils.delimiter+"video"+utils.delimiter+"conv"
+        config["o_path"] = os.path.join(WD,"files","video","conv")
         config["i_path"] = list()
-        config["i_path"].append(WD+utils.delimiter+"files"+utils.delimiter+"video"+ utils.delimiter+"raw"+utils.delimiter+input_name) 
+        config["i_path"].append(os.path.join(WD,"files","video","raw",input_name)) 
         
 
        	    
 #CpString()
     def CpString(self,input_name,input_path,WD):
-        cps="cp "+input_path+" "+WD+"files"+utils.delimiter+"video"+utils.delimiter+"raw"+utils.delimiter
+        cps="cp "+input_path," "+os.path.join(WD,"files","video","raw")+utils.delimiter
         return cps
 
 
