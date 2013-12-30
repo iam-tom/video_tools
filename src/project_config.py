@@ -48,6 +48,8 @@ class path_config():
                 sys.path.append(p)
             else:
                 print "ERROR: Could not append %s to sys.path - no valid directory." % p
+        root_path=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"thirdparty")
+        sys.path.append(root_path)
 
     def show(self):
         print sys.path
